@@ -4,7 +4,6 @@
 using System.IO;
 using System.Text;
 using Renci.SshNet;
-using Renci.SshNet.Sftp;
 
 namespace MySync.Client.Core
 {

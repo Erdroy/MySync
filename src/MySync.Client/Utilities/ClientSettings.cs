@@ -1,0 +1,50 @@
+﻿// MySync © 2016 Damian 'Erdroy' Korczowski
+// under GPL-3.0 license
+
+using System.IO;
+using Newtonsoft.Json;
+
+namespace MySync.Client.Utilities
+{
+    public class ClientSettings
+    {
+        public static ClientSettings Instance;
+
+        public string Host { get; set; }
+
+        public string Password { get; set; }
+
+        public string MainDirectory { get; set; }
+
+        public ClientSettings()
+        {
+            MainDirectory = "/home/mysync";
+        }
+
+        public static void Load()
+        {
+            if (!File.Exists("config.json"))
+            {
+                var settings = new ClientSettings();
+                settings.Save();
+                Instance = settings;
+            }
+
+            var json = File.ReadAllText("config.json");
+            Instance = JsonConvert.DeserializeObject<ClientSettings>(json, new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented
+            });
+        }
+
+        public void Save()
+        {
+            var json = JsonConvert.SerializeObject(this, new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented
+            });
+
+            File.WriteAllText("config.json", json);
+        }
+    }
+}

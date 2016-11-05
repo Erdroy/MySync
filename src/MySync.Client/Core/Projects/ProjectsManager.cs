@@ -9,34 +9,35 @@ namespace MySync.Client.Core.Projects
     {
         private static ProjectsManager _instance;
 
+        public static SFtpClient Client;
+
         internal void Initialize()
         {
             // load projects info
+            Client = new SFtpClient(ClientSettings.Instance.Password, ClientSettings.Instance.Host);
         }
 
         /// <summary>
         /// Creates new project
         /// </summary>
-        /// <param name="client">SFTP client of the target machine.</param>
         /// <param name="projectName">The project name</param>
         /// <exception cref="MySyncException">Handles all exceptions.</exception>
-        public Project CreateProject(SFtpClient client, string projectName)
+        public Project CreateProject(string projectName)
         {
             // send request to the server - to create new project
-            return new Project(client, projectName);
+            return new Project(Client, projectName);
         }
 
         /// <summary>
         /// Opens local working copy of project with given name
         /// </summary>
-        /// <param name="client">SFTP client of the target machine.</param>
         /// <param name="projectName">The project name.</param>
         /// <returns>The opened project, null when failed</returns>
         /// <exception cref="MySyncException">Handles all exceptions.</exception>
-        public Project OpenProject(SFtpClient client, string projectName)
+        public Project OpenProject(string projectName)
         {
             // try open project
-            return new Project(client, "");
+            return new Project(Client, "");
         }
 
         /// <summary>

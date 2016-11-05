@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// MySync © 2016 Damian 'Erdroy' Korczowski
+// under GPL-3.0 license
+
+using System;
 using System.Windows.Forms;
 
 namespace MySync.Client.UI
@@ -15,6 +11,15 @@ namespace MySync.Client.UI
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void MainWindow_Load(object sender, EventArgs e)
+        {
+            var menu = new Menu();
+            Controls.Add(menu);
+
+            menu.Dock = DockStyle.Left;
+            menu.Width = 250;
         }
     }
 }
