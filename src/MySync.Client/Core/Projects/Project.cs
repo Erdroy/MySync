@@ -1,6 +1,8 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using MySync.Client.Utilities;
+
 namespace MySync.Client.Core.Projects
 {
     /// <summary>
@@ -8,7 +10,7 @@ namespace MySync.Client.Core.Projects
     /// </summary>
     public class Project
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public string RemoteDirectory { get; set; }
 
@@ -20,6 +22,9 @@ namespace MySync.Client.Core.Projects
         internal Project(SFtpClient client, string name)
         {
             Name = name;
+
+            RemoteDirectory = ClientSettings.Instance.MainDirectory + "/projects/" + Name;
+
             FileSystem = new FileSystem();
 
             FileSystem.Open(client);
@@ -33,8 +38,7 @@ namespace MySync.Client.Core.Projects
         public bool IsLocked()
         {
             var data = FileSystem.Client.Execute("cat " + RemoteDirectory + "/lockfile");
-
-            return false;
+            return data[0] == '1';
         }
     }
 }

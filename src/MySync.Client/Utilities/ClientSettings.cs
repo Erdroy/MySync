@@ -1,13 +1,21 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
 namespace MySync.Client.Utilities
 {
+
     public class ClientSettings
     {
+        public class OpenedProject
+        {
+            public string Name;
+            public string LocalDir;
+        }
+
         public static ClientSettings Instance;
 
         public string Host { get; set; }
@@ -15,6 +23,8 @@ namespace MySync.Client.Utilities
         public string Password { get; set; }
 
         public string MainDirectory { get; set; }
+
+        public OpenedProject[] OpenedProjects;
 
         public ClientSettings()
         {

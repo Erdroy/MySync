@@ -1,11 +1,13 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using MySync.Client.Core.Projects;
+using MySync.Client.Utilities;
 
 namespace MySync.Client.UI
 {
@@ -17,7 +19,7 @@ namespace MySync.Client.UI
         private Point _clickPos;
 
         public List<string> Options = new List<string>();
-        public List<string> Projects = new List<string>();
+        public List<Project> Projects = new List<Project>();
 
         public Menu()
         {
@@ -34,6 +36,19 @@ namespace MySync.Client.UI
             Options.Add("Open project");
             Options.Add("Options");
             
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            // load projects
+            foreach (var projectToOpen in ClientSettings.Instance.OpenedProjects)
+            {
+                var project = ProjectsManager.Instance.OpenProject(projectToOpen.Name, projectToOpen.LocalDir);
+
+                Projects.Add(project);
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -87,13 +102,13 @@ namespace MySync.Client.UI
 
             foreach (var project in Projects)
             {
-                var stringSize = gfx.MeasureString(project, _font);
+                var stringSize = gfx.MeasureString(project.Name, _font);
                 var cliprect = new RectangleF(10, offset, stringSize.Width, stringSize.Height);
 
                 if (cliprect.IntersectsWith(cursor))
                 {
                     gfx.FillRectangle(Brushes.Chartreuse, new Rectangle(10, offset, 4, 25));
-                    gfx.DrawString(project, _font, Brushes.Azure, 15, offset);
+                    gfx.DrawString(project.Name, _font, Brushes.Azure, 15, offset);
 
                     if (cliprect.IntersectsWith(new Rectangle(_clickPos, new Size(1, 1))))
                     {
@@ -103,7 +118,7 @@ namespace MySync.Client.UI
                 else
                 {
                     gfx.FillRectangle(Brushes.Crimson, new Rectangle(10, offset, 4, 25));
-                    gfx.DrawString(project, _font, Brushes.Azure, 15, offset);
+                    gfx.DrawString(project.Name, _font, Brushes.Azure, 15, offset);
                 }
 
                 offset += 30;
@@ -141,10 +156,21 @@ namespace MySync.Client.UI
                     {
                         var project = ProjectsManager.Instance.OpenProject(NewProject.ProjectName, outputFolder.SelectedPath);
 
-                        // TODO: Save opened project
+                        Projects.Add(project);
+                        OnProjectClicked(project);
 
-                        var a = project.IsLocked();
-                        var b = project.IsUpToDate();
+                        // save opened projects
+                        ClientSettings.Instance.OpenedProjects = new ClientSettings.OpenedProject[Projects.Count];
+
+                        for (var i = 0; i < Projects.Count; i++)
+                        {
+                            ClientSettings.Instance.OpenedProjects[i] = new ClientSettings.OpenedProject
+                            {
+                                Name = Projects[i].Name,
+                                LocalDir = Projects[i].LocalDirectory
+                            };
+                        }
+                        ClientSettings.Instance.Save();
 
                         return;
                     }
@@ -162,9 +188,10 @@ namespace MySync.Client.UI
             }
         }
 
-        private void OnProjectClicked(string clicked)
+        private void OnProjectClicked(Project project)
         {
-
+            // TODO: Select opened project
+            // TODO: Project view UI
         }
     }
 }
