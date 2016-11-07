@@ -11,7 +11,7 @@ namespace MySync.Client
 {
     internal static class Program
     {
-        [MTAThread]
+        [STAThread]
         private static void Main()
         {
             Application.EnableVisualStyles();

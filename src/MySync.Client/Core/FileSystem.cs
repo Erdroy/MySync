@@ -18,6 +18,11 @@ namespace MySync.Client.Core
         {
             Client.Close();
         }
+
+        public void BuildLocalFilemap()
+        {
+            
+        }
         
         public string[] GetChangedFiles()
         {

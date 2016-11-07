@@ -9,7 +9,11 @@ namespace MySync.Client.Core.Projects
     public class Project
     {
         public string Name { get; private set; }
-        
+
+        public string RemoteDirectory { get; set; }
+
+        public string LocalDirectory { get; set; }
+
         public FileSystem FileSystem { get; }
 
         // hide the constructor
@@ -19,6 +23,18 @@ namespace MySync.Client.Core.Projects
             FileSystem = new FileSystem();
 
             FileSystem.Open(client);
+        }
+
+        public bool IsUpToDate()
+        {
+            return true;
+        }
+
+        public bool IsLocked()
+        {
+            var data = FileSystem.Client.Execute("cat " + RemoteDirectory + "/lockfile");
+
+            return false;
         }
     }
 }

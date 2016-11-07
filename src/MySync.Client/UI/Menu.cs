@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using MySync.Client.Core.Projects;
 
 namespace MySync.Client.UI
 {
@@ -30,6 +31,7 @@ namespace MySync.Client.UI
             _fontAlt = new Font(new FontFamily("Calibri"), 32.0f);
 
             Options.Add("New project");
+            Options.Add("Open project");
             Options.Add("Options");
             
         }
@@ -125,10 +127,38 @@ namespace MySync.Client.UI
             if (clicked == Options[0])
             {
                 // new project
+                if (NewProject.CreateNew() == DialogResult.OK)
+                {
+                    ProjectsManager.Instance.CreateProject(NewProject.ProjectName); // create project
+
+                    // select the local project dir and open the project
+                    var outputFolder = new FolderBrowserDialog
+                    {
+                        Description = @"Select where the project should be stored on local machine."
+                    };
+
+                    if (outputFolder.ShowDialog() == DialogResult.OK)
+                    {
+                        var project = ProjectsManager.Instance.OpenProject(NewProject.ProjectName, outputFolder.SelectedPath);
+
+                        // TODO: Save opened project
+
+                        var a = project.IsLocked();
+                        var b = project.IsUpToDate();
+
+                        return;
+                    }
+                }
             }
             if (clicked == Options[1])
             {
+                // open project
+                // TODO: Open project
+            }
+            if (clicked == Options[2])
+            {
                 // options
+                // TODO: Options
             }
         }
 
