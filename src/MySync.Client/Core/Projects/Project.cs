@@ -19,14 +19,20 @@ namespace MySync.Client.Core.Projects
         public FileSystem FileSystem { get; }
 
         // hide the constructor
-        internal Project(SFtpClient client, string name)
+        internal Project(SFtpClient client, string name, string localdir, string remotedir)
         {
             Name = name;
+            LocalDirectory = localdir;
+            RemoteDirectory = remotedir;
 
             RemoteDirectory = ClientSettings.Instance.MainDirectory + "/projects/" + Name;
 
-            FileSystem = new FileSystem();
+            FileSystem = new FileSystem
+            {
+                Project = this
+            };
 
+            FileSystem.BuildFilemap();
             FileSystem.Open(client);
         }
 

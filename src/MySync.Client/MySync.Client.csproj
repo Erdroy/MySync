@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\FileMapping.cs" />
     <Compile Include="Core\FileSystem.cs" />
     <Compile Include="Core\Projects\Project.cs" />
     <Compile Include="Core\Projects\ProjectsManager.cs" />

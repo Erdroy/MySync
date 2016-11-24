@@ -87,11 +87,7 @@ namespace MySync.Client.Core.Projects
 
 
             // try open project
-            return new Project(Client, projectName)
-            {
-                RemoteDirectory = projectDir,
-                LocalDirectory = localDirectory
-            };
+            return new Project(Client, projectName, localDirectory, projectDir);
         }
 
         /// <summary>
