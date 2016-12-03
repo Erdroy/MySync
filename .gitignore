@@ -2,3 +2,4 @@ src/MySync.Client/obj/
 src/MySync.Client/.vs/
 src/MySync.Client/bin/
 bin/
+src/MySync.Client/packages/
