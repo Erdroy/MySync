@@ -36,6 +36,18 @@ namespace MySync.Client.Core.Projects
             FileSystem.Open(client);
         }
 
+        public void Lock()
+        {
+            // lock
+            FileSystem.Client.Execute("echo 1 >" + RemoteDirectory + "/lockfile");
+        }
+
+        public void Unlock()
+        {
+            // unlock
+            FileSystem.Client.Execute("echo 0 >" + RemoteDirectory + "/lockfile");
+        }
+
         public bool IsUpToDate()
         {
             return true;
@@ -45,6 +57,43 @@ namespace MySync.Client.Core.Projects
         {
             var data = FileSystem.Client.Execute("cat " + RemoteDirectory + "/lockfile");
             return data[0] == '1';
+        }
+
+        public void LockFile(string file)
+        {
+            // lock file
+            // this will be in the future
+        }
+
+        public void UnlockFile(string file)
+        {
+            // unlock file
+            // this will be in the future
+        }
+
+        public void AddChanges(string file)
+        {
+            // add file to commit
+        }
+
+        public void RemoveChanges(string file)
+        {
+            // remove file from commit
+        }
+
+        public void Discard(string file)
+        {
+            // download the file from the server
+        }
+
+        public void Push(string message)
+        {
+            // send the current commit
+        }
+
+        public void Pull()
+        {
+
         }
     }
 }

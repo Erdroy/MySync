@@ -51,47 +51,29 @@ namespace MySync.Client.Core
             _fileSystemWatcher.Renamed += FileSystemWatcher_Renamed;
             _fileSystemWatcher.Deleted += FileSystemWatcher_Deleted;
         }
-
-        public void LockFile(string file)
+        
+        public FileMapping GetRemoteMapping()
         {
-            // lock file
-            // this will be in the future
+            // download from the server
+            // load from json
+            // return
+
+            var remoteFilemapOut = Project.LocalDirectory + "\\remoteFileMap.json";
+            Client.DownloadFile(remoteFilemapOut, Project.RemoteDirectory + "/filemap");
+
+            var remoteMapping = FileMapping.FromJson(remoteFilemapOut);
+            var localMapping = Mapping.ToJson();
+
+            var changedFiles = FileMapping.GetChangedFiles(Mapping, remoteMapping);
+            var newFiles = FileMapping.GetNewFiles(Mapping, remoteMapping);
+            var deletedFiles = FileMapping.GetDeletedFiles(Mapping, remoteMapping);
+
+            return null;
         }
 
-        public void UnlockFile(string file)
+        public FileMapping GetLocalMapping()
         {
-            // unlock file
-            // this will be in the future
-        }
-
-        public void AddChanges(string file)
-        {
-            // add file to commit
-        }
-
-        public void RemoveChanges(string file)
-        {
-            // remove file from commit
-        }
-
-        public void Discard(string file)
-        {
-            // download the file from the server
-        }
-
-        public void Push(string message)
-        {
-            // send the current commit
-        }
-
-        public void Pull()
-        {
-            
-        }
-
-        public void LockProject()
-        {
-
+            return Mapping;
         }
 
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)

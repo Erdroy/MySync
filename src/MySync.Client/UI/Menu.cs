@@ -180,6 +180,8 @@ namespace MySync.Client.UI
             {
                 // open project
                 // TODO: Open project
+
+                Projects[0].FileSystem.GetRemoteMapping();
             }
             if (clicked == Options[2])
             {
