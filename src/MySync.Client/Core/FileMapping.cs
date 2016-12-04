@@ -63,7 +63,7 @@ namespace MySync.Client.Core
 
                 mapping.Files.Add(new FileEntry
                 {
-                    File = filePath,
+                    File = filePath.Replace("\\", "/"),
                     Version = fileinfo.LastWriteTime.ToBinary()
                 });
             }

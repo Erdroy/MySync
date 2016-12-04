@@ -167,12 +167,17 @@ namespace MySync.Client.Core.Projects
                         else
                         {
                             // upload file
+                            var lf = LocalDirectory + "\\data\\" + entry.Entry.Replace("/", "\\");
+                            var rf = RemoteDirectory + "/data/" + entry.Entry;
+                            
+                            FileSystem.Client.UploadFile(lf, rf);
 
                             // TODO: Optimize transfer size using some sort of binary diff?
                         }
                     }
 
-                    // update commitID
+                    // update remote commit id
+
 
                     // cleanup
                     FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
