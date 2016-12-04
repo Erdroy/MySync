@@ -8,12 +8,6 @@ namespace MySync.Client.Core
 {
     public class FileSystem
     {
-        public SFtpClient Client { get; private set; }
-
-        public FileMapping Mapping { get; private set; }
-
-        public Project Project { get; set; }
-
         private FileSystemWatcher _fileSystemWatcher;
 
         internal FileSystem() { }
@@ -33,10 +27,18 @@ namespace MySync.Client.Core
             // create file mapping
             // run file system watcher
 
-            Mapping = FileMapping.CreateFileMapping(Project.LocalDirectory + "\\data\\");
+            var rootDir = Project.LocalDirectory + "\\data\\";
+
+            if (Mapping != null)
+            {
+                Mapping.Update(rootDir);
+                return;
+            }
+
+            Mapping = FileMapping.CreateFileMapping(rootDir);
 
             _fileSystemWatcher?.Dispose();
-            _fileSystemWatcher = new FileSystemWatcher(Project.LocalDirectory + "\\data\\")
+            _fileSystemWatcher = new FileSystemWatcher(rootDir)
             {
                 EnableRaisingEvents = true,
 
@@ -61,19 +63,17 @@ namespace MySync.Client.Core
             var remoteFilemapOut = Project.LocalDirectory + "\\remoteFileMap.json";
             Client.DownloadFile(remoteFilemapOut, Project.RemoteDirectory + "/filemap");
 
-            var remoteMapping = FileMapping.FromJson(remoteFilemapOut);
-            var localMapping = Mapping.ToJson();
-
-            var changedFiles = FileMapping.GetChangedFiles(Mapping, remoteMapping);
-            var newFiles = FileMapping.GetNewFiles(Mapping, remoteMapping);
-            var deletedFiles = FileMapping.GetDeletedFiles(Mapping, remoteMapping);
-
-            return null;
+            return FileMapping.FromJson(remoteFilemapOut);
         }
 
         public FileMapping GetLocalMapping()
         {
             return Mapping;
+        }
+
+        public void DeleteLocalFile(string file)
+        {
+            File.Delete(file);
         }
 
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
@@ -124,6 +124,16 @@ namespace MySync.Client.Core
             }
         }
 
-        public string[] Excluded { get; private set; }
+        public string[] ExcludedExtensions { get; private set; }
+
+        public string[] ExcludedFiles { get; private set; }
+
+        public string[] ExcludedDirectories { get; private set; }
+
+        public SFtpClient Client { get; private set; }
+
+        public FileMapping Mapping { get; private set; }
+
+        public Project Project { get; set; }
     }
 }

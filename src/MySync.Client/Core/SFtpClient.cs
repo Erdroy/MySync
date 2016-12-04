@@ -24,6 +24,8 @@ namespace MySync.Client.Core
 
             _sftp = new SftpClient(address, port, "mysync", password);
             _sftp.Connect();
+
+            // TODO: Error handling
         }
 
         public void Close()
@@ -43,11 +45,39 @@ namespace MySync.Client.Core
             return command.Error.Length > 2 ? command.Error : command.Result;
         }
 
+        public void DeleteFile(string file)
+        {
+            
+        }
+
+        public void DeleteEmptyDirs(string path)
+        {
+            Execute("cd " + path);
+            Execute("find . -type d -empty -delete");
+        }
+
         public void DownloadFile(string outputFile, string remoteFile)
         {
             using (var fileStream = new FileStream(outputFile, FileMode.Create))
             {
-                _sftp.DownloadFile(remoteFile, fileStream);
+                _sftp.DownloadFile(remoteFile, fileStream); // TODO: Progress
+            }
+        }
+
+        public void UploadFile(string inputFile, string remoteFile)
+        {
+            using (var fileStream = new FileStream(inputFile, FileMode.Open))
+            {
+                _sftp.UploadFile(fileStream, remoteFile, true); // TODO: Progress
+            }
+        }
+
+        public void Upload(string text, string remoteFile)
+        {
+            var data = Encoding.UTF8.GetBytes(text);
+            using (var stream = new MemoryStream(data))
+            {
+                _sftp.UploadFile(stream, remoteFile, true); // TODO: Progress
             }
         }
     }

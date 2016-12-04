@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using MySync.Client.Core;
 using MySync.Client.Core.Projects;
 using MySync.Client.Utilities;
 
@@ -132,7 +133,7 @@ namespace MySync.Client.UI
             Invalidate();
         }
         
-        private void Menu_Click(object sender, System.EventArgs e)
+        private void Menu_Click(object sender, EventArgs e)
         {
             _clickPos = PointToClient(Cursor.Position);
         }
@@ -180,8 +181,17 @@ namespace MySync.Client.UI
             {
                 // open project
                 // TODO: Open project
+                
+                var entries = FileMapping.BuildEntries(Projects[0]);
 
-                Projects[0].FileSystem.GetRemoteMapping();
+                foreach (var entry in entries)
+                {
+                    Projects[0].AddChanges(entry);
+                }
+
+                Projects[0].Push();
+
+                return;
             }
             if (clicked == Options[2])
             {

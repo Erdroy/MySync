@@ -67,6 +67,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Commit.cs" />
+    <Compile Include="Core\CommitEntryType.cs" />
     <Compile Include="Core\FileMapping.cs" />
     <Compile Include="Core\FileSystem.cs" />
     <Compile Include="Core\Projects\Project.cs" />

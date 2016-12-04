@@ -6,10 +6,9 @@ UNDER DEVELOPMENT!
 -----------------
 
 TODO
- - Project view
- - Creating commit aka. COMMIT (adding commit title, files etc.)
- - Sending commit aka. PUSH (sending everything what was created before)
+ - CURRENT Sending commit aka. PUSH (sending everything what was created before)
  - Downloading commits aka. PULL(downloading changed files also setting local current commit to the latest)
+ - Fancy UI
  - Conflicts handling
  - more... will be updated later.
 

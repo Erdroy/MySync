@@ -1,6 +1,7 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using System;
 using MySync.Client.Utilities;
 
 namespace MySync.Client.Core.Projects
@@ -17,6 +18,8 @@ namespace MySync.Client.Core.Projects
         public string LocalDirectory { get; set; }
 
         public FileSystem FileSystem { get; }
+
+        public Commit Commit { get; set; }
 
         // hide the constructor
         internal Project(SFtpClient client, string name, string localdir, string remotedir)
@@ -50,6 +53,7 @@ namespace MySync.Client.Core.Projects
 
         public bool IsUpToDate()
         {
+            // TODO: compare latest downloaded commit to the remote commits
             return true;
         }
 
@@ -71,28 +75,121 @@ namespace MySync.Client.Core.Projects
             // this will be in the future
         }
 
-        public void AddChanges(string file)
+        public void CreateCommit(string name)
         {
-            // add file to commit
+            Commit = new Commit
+            {
+                CommitDescription = name
+            };
         }
 
-        public void RemoveChanges(string file)
+        public void AddChanges(Commit.CommitEntry entry)
+        {
+            if (Commit == null)
+            {
+                Commit = new Commit
+                {
+                    CommitDescription = "So sad. No message."
+                };
+            }
+
+            // add file to commit
+            Commit.FileChanges.Add(entry);
+        }
+
+        public void RemoveChanges(Commit.CommitEntry entry)
         {
             // remove file from commit
+            Commit.FileChanges.Remove(entry);
         }
 
-        public void Discard(string file)
+        public void Discard(Commit.CommitEntry entry)
         {
-            // download the file from the server
+            switch (entry.EntryType)
+            {
+                case CommitEntryType.Created:
+                    // delete
+                    FileSystem.DeleteLocalFile(entry.Entry);
+                    break;
+                case CommitEntryType.Deleted:
+                    // download from server
+                    if (!IsLocked())
+                    {
+                        
+                    }
+                    break;
+                case CommitEntryType.Changed:
+                    // download from server
+                    if (!IsLocked())
+                    {
+
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        public void Push(string message)
+        public void Push()
         {
+            if (!IsUpToDate())
+            {
+                // show error?
+                return;
+            }
+
             // send the current commit
+            if (!IsLocked())
+            {
+                try
+                {
+                    Lock();
+                    
+                    // find commit id
+
+
+                    // push commit
+                    var commitJson = Commit.ToJson();
+                    FileSystem.Client.Upload(commitJson, RemoteDirectory + "/commits/commit_1.json");
+
+                    // push filemap
+                    var filemapJson = FileSystem.GetLocalMapping().ToJson();
+                    FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemap");
+
+                    // do remote changes
+                    foreach (var entry in Commit.FileChanges)
+                    {
+                        if (entry.EntryType == CommitEntryType.Deleted)
+                        {
+                            // delete file
+                            FileSystem.Client.DeleteFile(entry.Entry);
+                        }
+                        else
+                        {
+                            // upload file
+
+                            // TODO: Optimize transfer size using some sort of binary diff?
+                        }
+                    }
+
+                    // update commitID
+
+                    // cleanup
+                    FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
+
+                    // done
+                    Unlock();
+                }
+                catch
+                {
+                    Unlock();
+                }
+            }
         }
 
         public void Pull()
         {
+            // apply all commits
 
         }
     }

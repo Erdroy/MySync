@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MySync.Client.Core.Projects;
 using Newtonsoft.Json;
 
 namespace MySync.Client.Core
@@ -56,9 +57,13 @@ namespace MySync.Client.Core
             foreach (var file in files)
             {
                 var fileinfo = new FileInfo(file);
+
+                var filePath = file;
+                filePath = filePath.Remove(0, rootDirectory.Length);
+
                 mapping.Files.Add(new FileEntry
                 {
-                    File = file,
+                    File = filePath,
                     Version = fileinfo.LastWriteTime.ToBinary()
                 });
             }
@@ -99,6 +104,24 @@ namespace MySync.Client.Core
             }
 
             return deletedFiles;
+        }
+
+        public static Commit.CommitEntry[] BuildEntries(Project project)
+        {
+            return BuildEntries(project.FileSystem.GetLocalMapping(), project.FileSystem.GetRemoteMapping());
+        }
+
+        public static Commit.CommitEntry[] BuildEntries(FileMapping localMapping, FileMapping remoteMapping)
+        {
+            var changedFiles = GetChangedFiles(localMapping, remoteMapping);
+            var newFiles = GetNewFiles(localMapping, remoteMapping);
+            var deletedFiles = GetDeletedFiles(localMapping, remoteMapping);
+
+            var files = changedFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Changed, file.File)).ToList();
+            files.AddRange(newFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Created, file.File)));
+            files.AddRange(deletedFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Deleted, file.File)));
+
+            return files.ToArray();
         }
 
         public static FileMapping FromJson(string jsonfile)
