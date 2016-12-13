@@ -3,4 +3,5 @@
   &lt;Assembly Path="D:\#GIT\MySync\lib\Renci.SshNet.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Windows\Microsoft.NET\Framework\v4.0.30319\mscorlib.dll" /&gt;&#xD;
   &lt;Assembly Path="D:\#GIT\MySync\src\MySync.Client\packages\MetroModernUI.1.4.0.0\lib\net\MetroFramework.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Windows\Microsoft.NET\Framework\v4.0.30319\System.Windows.Forms.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>

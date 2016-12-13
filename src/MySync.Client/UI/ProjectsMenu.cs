@@ -3,6 +3,8 @@
 
 using System.Windows.Forms;
 using MetroFramework.Controls;
+using MySync.Client.Core.Projects;
+using MySync.Client.Utilities;
 
 namespace MySync.Client.UI
 {
@@ -16,24 +18,33 @@ namespace MySync.Client.UI
         private void ProjectsMenu_Load(object sender, System.EventArgs e)
         {
             // TODO: Load all projects
+            foreach (var projectToOpen in ClientSettings.Instance.OpenedProjects)
+            {
+                CreateProjectView(ProjectsManager.Instance.OpenProject(projectToOpen.Name, projectToOpen.LocalDir));
+            }
         }
 
         private void labelNewProject_Click(object sender, System.EventArgs e)
         {
+            // TODO: Show project creation window
+        }
+
+        public void CreateProjectView(Project project)
+        {
             var tab = new MetroTabPage
             {
-                Text = @"New Project"
+                Text = project.Name
             };
 
-            // TODO: Show project creation window
             var view = new ProjectView
             {
                 Dock = DockStyle.Fill
             };
 
             tab.Controls.Add(view);
-
             tabs.TabPages.Add(tab);
+
+            view.LoadProject(project);
         }
     }
 }

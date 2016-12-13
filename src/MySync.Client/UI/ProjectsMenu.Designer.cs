@@ -48,6 +48,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabs.Location = new System.Drawing.Point(3, 22);
+            this.tabs.Margin = new System.Windows.Forms.Padding(0);
             this.tabs.Name = "tabs";
             this.tabs.Size = new System.Drawing.Size(563, 405);
             this.tabs.Style = MetroFramework.MetroColorStyle.Orange;
@@ -59,11 +60,11 @@
             this.labelNewProject.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labelNewProject.AutoSize = true;
             this.labelNewProject.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.labelNewProject.Location = new System.Drawing.Point(489, 0);
+            this.labelNewProject.Location = new System.Drawing.Point(473, 3);
             this.labelNewProject.Name = "labelNewProject";
-            this.labelNewProject.Size = new System.Drawing.Size(80, 19);
+            this.labelNewProject.Size = new System.Drawing.Size(93, 19);
             this.labelNewProject.TabIndex = 2;
-            this.labelNewProject.Text = "New Project";
+            this.labelNewProject.Text = "Create Project";
             this.labelNewProject.Click += new System.EventHandler(this.labelNewProject_Click);
             // 
             // ProjectsMenu

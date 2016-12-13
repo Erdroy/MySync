@@ -35,7 +35,7 @@
             // 
             this.labelCopyinfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.labelCopyinfo.AutoSize = true;
-            this.labelCopyinfo.Location = new System.Drawing.Point(0, 431);
+            this.labelCopyinfo.Location = new System.Drawing.Point(0, 581);
             this.labelCopyinfo.Name = "labelCopyinfo";
             this.labelCopyinfo.Size = new System.Drawing.Size(264, 38);
             this.labelCopyinfo.TabIndex = 0;
@@ -45,7 +45,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(700, 450);
+            this.ClientSize = new System.Drawing.Size(800, 600);
             this.Controls.Add(this.labelCopyinfo);
             this.MinimumSize = new System.Drawing.Size(700, 450);
             this.Name = "MainWindow";
