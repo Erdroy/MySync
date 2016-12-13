@@ -187,6 +187,7 @@ namespace MySync.Client.Core.Projects
                 }
                 catch
                 {
+                    // TODO: Throw error?
                     Unlock();
                 }
             }

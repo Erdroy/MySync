@@ -6,8 +6,16 @@ using System.Windows.Forms;
 
 namespace MySync.Client.UI
 {
-    public partial class MainWindow : Form
+    public partial class MainWindow : MetroFramework.Forms.MetroForm
     {
+        public enum Screens
+        {
+            ProjectsMenu,
+            ProjectView
+        }
+
+        private ProjectsMenu _projectsMenu;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -15,11 +23,18 @@ namespace MySync.Client.UI
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            var menu = new Menu();
-            Controls.Add(menu);
+            // initialize ProjectsMenu
+            _projectsMenu = new ProjectsMenu
+            {
+                Dock = DockStyle.Fill,
+                Visible = true
+            };
 
-            menu.Dock = DockStyle.Left;
-            menu.Width = 250;
+            // add the control
+            Controls.Add(_projectsMenu);
+            
+            // copyinfo label should be always visible ;)
+            labelCopyinfo.BringToFront();
         }
     }
 }

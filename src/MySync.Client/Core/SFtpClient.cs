@@ -67,8 +67,8 @@ namespace MySync.Client.Core
         public void UploadFile(string inputFile, string remoteFile)
         {
             // check dir
-            var path = "";
-            var i = remoteFile.Length-1;
+            var path = Path.GetPathRoot(remoteFile);
+            /*var i = remoteFile.Length-1;
             while (true)
             {
                 if (i < 5)
@@ -79,12 +79,12 @@ namespace MySync.Client.Core
 
                 i--;
             }
-            path = remoteFile.Substring(0, i);
+            path = remoteFile.Substring(0, i);*/
 
             // TODO: Optimize directory structure building process
             if (!_sftp.Exists(path))
                 _sftp.CreateDirectory(path);
-
+            
             using (var fileStream = new FileStream(inputFile, FileMode.Open))
             {
                 _sftp.UploadFile(fileStream, remoteFile, true); // TODO: Progress
