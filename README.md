@@ -5,7 +5,14 @@ Under GPL-3.0 license.
 UNDER DEVELOPMENT!
 -----------------
 
-TODO
+How it looks like now(UI Design)?
+![alt tag](https://erdroy.com/imgs/mysync_r1_s1.png)
+
+Supported platforms:
+ - Windows(official)
+ - And more using Mono(officialy not supported).
+
+TODOs:
  - CURRENT Sending commit aka. PUSH (sending everything what was created before)
  - Downloading commits aka. PULL(downloading changed files also setting local current commit to the latest)
  - Fancy UI
