@@ -8,6 +8,8 @@ namespace MySync.Client.UI
 {
     public partial class MainWindow : MetroFramework.Forms.MetroForm
     {
+        internal static MainWindow Instance;
+
         public enum Screens
         {
             ProjectsMenu,
@@ -18,6 +20,7 @@ namespace MySync.Client.UI
 
         public MainWindow()
         {
+            Instance = this;
             InitializeComponent();
         }
 

@@ -1,6 +1,7 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using System.Linq;
 using System.Windows.Forms;
 using MetroFramework.Controls;
 using MySync.Client.Core;
@@ -12,6 +13,8 @@ namespace MySync.Client.UI
     {
         private Project _project;
 
+        private Timer _updateTimer;
+
         public ProjectView()
         {
             InitializeComponent();
@@ -20,16 +23,28 @@ namespace MySync.Client.UI
         private void ProjectView_Load(object sender, System.EventArgs e)
         {
             Resize += ProjectView_Resize;
-        }
 
+            _updateTimer = new Timer
+            {
+                Interval = 2000
+            };
+
+            _updateTimer.Start();
+            _updateTimer.Tick += UpdateTimer_Tick;
+
+            files.HeaderStyle = ColumnHeaderStyle.None;
+        }
+        
         private void pull_Click(object sender, System.EventArgs e)
         {
-
+            //_project.Pull();
+            MessageBox.Show(@"Not implemented, yet.");
         }
 
         private void push_Click(object sender, System.EventArgs e)
         {
-
+            //_project.Push();
+            MessageBox.Show(@"Not implemented, yet.");
         }
 
         private void history_Click(object sender, System.EventArgs e)
@@ -69,9 +84,18 @@ namespace MySync.Client.UI
             files.Columns[0].Width = files.Width - 5;
         }
 
+        private void UpdateTimer_Tick(object sender, System.EventArgs e)
+        {
+            if (_project.FileSystem.Changed && MainWindow.Instance.Visible)
+            {
+                UpdateFiles();
+            }
+        }
+
         public void LoadProject(Project project)
         {
             _project = project;
+            _project.FileSystem.BuildFilemap();
 
             // update
             UpdateFiles();
@@ -79,23 +103,29 @@ namespace MySync.Client.UI
 
         public void UpdateFiles()
         {
-            files.Clear();
-            var column = files.Columns.Add("Changes");
-            files.HeaderStyle = ColumnHeaderStyle.None;
+            if (files.Columns.Count == 0)
+            {
+                var column = files.Columns.Add("Changes");
+                column.Width = files.Width - 5;
+            }
 
-            column.Width = files.Width - 5;
-
+            _project.FileSystem.BuildFilemap();
             var entries = FileMapping.BuildEntries(_project);
+            files.Items.Clear();
 
             foreach (var entry in entries)
             {
-                var item = new ListViewItem(files.Groups["unstaged"])
+                if (entry.EntryType != CommitEntryType.Deleted)
                 {
-                    Text = entry.Entry,
-                    Tag = entry
-                };
+                    var item = new ListViewItem(files.Groups["unstaged"])
+                    {
+                        Text = entry.Entry,
+                        Tag = entry,
+                        Name = entry.Entry
+                    };
 
-                files.Items.Add(item);
+                    files.Items.Add(item);
+                }
             }
         }
     }

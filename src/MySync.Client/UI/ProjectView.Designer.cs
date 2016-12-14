@@ -30,8 +30,6 @@
         {
             System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Staged files", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("Unstaged files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem("game.exe");
-            System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem("assets.astdb");
             this.files = new MetroFramework.Controls.MetroListView();
             this.pull = new MetroFramework.Controls.MetroTile();
             this.push = new MetroFramework.Controls.MetroTile();
@@ -60,14 +58,6 @@
             this.files.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
             listViewGroup1,
             listViewGroup2});
-            listViewItem1.Group = listViewGroup2;
-            listViewItem1.StateImageIndex = 0;
-            listViewItem2.Group = listViewGroup1;
-            listViewItem2.StateImageIndex = 0;
-            listViewItem2.ToolTipText = "assets.astdb";
-            this.files.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-            listViewItem1,
-            listViewItem2});
             this.files.Location = new System.Drawing.Point(69, 3);
             this.files.Name = "files";
             this.files.Size = new System.Drawing.Size(706, 464);

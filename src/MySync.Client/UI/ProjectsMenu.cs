@@ -17,7 +17,7 @@ namespace MySync.Client.UI
 
         private void ProjectsMenu_Load(object sender, System.EventArgs e)
         {
-            // TODO: Load all projects
+            // Load all projects
             foreach (var projectToOpen in ClientSettings.Instance.OpenedProjects)
             {
                 CreateProjectView(ProjectsManager.Instance.OpenProject(projectToOpen.Name, projectToOpen.LocalDir));
@@ -26,7 +26,14 @@ namespace MySync.Client.UI
 
         private void labelNewProject_Click(object sender, System.EventArgs e)
         {
-            // TODO: Show project creation window
+            if (CreateProject.CreateNew() == DialogResult.OK)
+            {
+                ProjectsManager.Instance.CreateProject(CreateProject.ProjectName); // create project
+
+                var project = ProjectsManager.Instance.OpenProject(CreateProject.ProjectName, CreateProject.ProjectDirectory);
+
+                CreateProjectView(project);
+            }
         }
 
         public void CreateProjectView(Project project)

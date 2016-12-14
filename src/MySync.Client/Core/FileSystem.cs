@@ -9,7 +9,7 @@ namespace MySync.Client.Core
     public class FileSystem
     {
         private FileSystemWatcher _fileSystemWatcher;
-
+        
         internal FileSystem() { }
 
         public void Open(SFtpClient client)
@@ -31,6 +31,7 @@ namespace MySync.Client.Core
 
             if (Mapping != null)
             {
+                Changed = false;
                 Mapping.Update(rootDir);
                 return;
             }
@@ -43,6 +44,7 @@ namespace MySync.Client.Core
                 EnableRaisingEvents = true,
 
                 Filter = "*.*",
+                IncludeSubdirectories = true,
 
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | 
                 NotifyFilters.FileName | NotifyFilters.DirectoryName
@@ -83,6 +85,7 @@ namespace MySync.Client.Core
                 File = e.FullPath,
                 Version = new FileInfo(e.FullPath).LastWriteTime.ToBinary()
             });
+            Changed = true;
         }
 
         private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
@@ -91,6 +94,7 @@ namespace MySync.Client.Core
 
             if (modfile.File != null)
                 modfile.File = e.FullPath;
+            Changed = true;
         }
 
         private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
@@ -99,6 +103,7 @@ namespace MySync.Client.Core
 
             if(modfile.File != null)
                 Mapping.Files.Remove(modfile);
+            Changed = true;
         }
 
         private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
@@ -120,6 +125,7 @@ namespace MySync.Client.Core
                     File = e.FullPath,
                     Version = new FileInfo(e.FullPath).LastWriteTime.ToBinary()
                 });
+                Changed = true;
                 return;
             }
         }
@@ -129,6 +135,8 @@ namespace MySync.Client.Core
         public string[] ExcludedFiles { get; private set; }
 
         public string[] ExcludedDirectories { get; private set; }
+
+        public bool Changed { get; private set; }
 
         public SFtpClient Client { get; private set; }
 
