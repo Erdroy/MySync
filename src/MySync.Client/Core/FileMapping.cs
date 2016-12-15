@@ -46,6 +46,16 @@ namespace MySync.Client.Core
             return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
 
+        public FileMapping Exclude(List<Commit.CommitEntry> exclude)
+        {
+            var vmap = new FileMapping();
+            vmap.Files.AddRange(Files);
+            
+            vmap.Files.RemoveAll(x => exclude.Any(y => x.File == y.Entry));
+
+            return vmap;
+        }
+        
         public static FileMapping CreateFileMapping(string rootDirectory)
         {
             var mapping = new FileMapping();
