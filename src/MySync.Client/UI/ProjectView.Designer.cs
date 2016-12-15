@@ -28,15 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Staged files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("Unstaged files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup7 = new System.Windows.Forms.ListViewGroup("Staged files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup8 = new System.Windows.Forms.ListViewGroup("Unstaged files", System.Windows.Forms.HorizontalAlignment.Left);
             this.files = new MetroFramework.Controls.MetroListView();
+            this.changed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.pull = new MetroFramework.Controls.MetroTile();
             this.push = new MetroFramework.Controls.MetroTile();
             this.history = new MetroFramework.Controls.MetroTile();
             this.stage = new MetroFramework.Controls.MetroTile();
             this.unstage = new MetroFramework.Controls.MetroTile();
-            this.changed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // files
@@ -51,15 +51,16 @@
             this.changed});
             this.files.Font = new System.Drawing.Font("Segoe UI", 12F);
             this.files.FullRowSelect = true;
-            listViewGroup1.Header = "Staged files";
-            listViewGroup1.Name = "staged";
-            listViewGroup2.Header = "Unstaged files";
-            listViewGroup2.Name = "unstaged";
+            listViewGroup7.Header = "Staged files";
+            listViewGroup7.Name = "staged";
+            listViewGroup8.Header = "Unstaged files";
+            listViewGroup8.Name = "unstaged";
             this.files.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            listViewGroup1,
-            listViewGroup2});
+            listViewGroup7,
+            listViewGroup8});
             this.files.Location = new System.Drawing.Point(69, 3);
             this.files.Name = "files";
+            this.files.OwnerDraw = true;
             this.files.Size = new System.Drawing.Size(706, 464);
             this.files.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.files.Style = MetroFramework.MetroColorStyle.Orange;
@@ -68,6 +69,11 @@
             this.files.UseSelectable = true;
             this.files.View = System.Windows.Forms.View.Details;
             this.files.SelectedIndexChanged += new System.EventHandler(this.files_SelectedIndexChanged);
+            // 
+            // changed
+            // 
+            this.changed.Text = "Changed files";
+            this.changed.Width = 485;
             // 
             // pull
             // 
@@ -131,11 +137,6 @@
             this.unstage.TileTextFontSize = MetroFramework.MetroTileTextSize.Small;
             this.unstage.UseSelectable = true;
             this.unstage.Click += new System.EventHandler(this.unstage_Click);
-            // 
-            // changed
-            // 
-            this.changed.Text = "Changed files";
-            this.changed.Width = 485;
             // 
             // ProjectView
             // 

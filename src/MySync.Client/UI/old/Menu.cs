@@ -177,27 +177,6 @@ namespace MySync.Client.UI
                     }
                 }
             }
-            if (clicked == Options[1])
-            {
-                // open project
-                // TODO: Open project
-                
-                var entries = FileMapping.BuildEntries(Projects[0]);
-
-                foreach (var entry in entries)
-                {
-                    Projects[0].AddChanges(entry);
-                }
-
-                Projects[0].Push();
-
-                return;
-            }
-            if (clicked == Options[2])
-            {
-                // options
-                // TODO: Options
-            }
         }
 
         private void OnProjectClicked(Project project)

@@ -33,9 +33,13 @@ namespace MySync.Client.Core
             foreach (var file in files)
             {
                 var fileinfo = new FileInfo(file);
+                
+                var filePath = file;
+                filePath = filePath.Remove(0, rootDirectory.Length);
+
                 Files.Add(new FileEntry
                 {
-                    File = file,
+                    File = filePath.Replace("\\", "/"),
                     Version = fileinfo.LastWriteTime.ToBinary()
                 });
             }

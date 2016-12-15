@@ -2,6 +2,7 @@
 // under GPL-3.0 license
 
 using System;
+using System.Collections.Generic;
 using MySync.Client.Utilities;
 
 namespace MySync.Client.Core.Projects
@@ -82,27 +83,7 @@ namespace MySync.Client.Core.Projects
                 CommitDescription = name
             };
         }
-
-        public void AddChanges(Commit.CommitEntry entry)
-        {
-            if (Commit == null)
-            {
-                Commit = new Commit
-                {
-                    CommitDescription = "So sad. No message."
-                };
-            }
-
-            // add file to commit
-            Commit.FileChanges.Add(entry);
-        }
-
-        public void RemoveChanges(Commit.CommitEntry entry)
-        {
-            // remove file from commit
-            Commit.FileChanges.Remove(entry);
-        }
-
+        
         public void Discard(Commit.CommitEntry entry)
         {
             switch (entry.EntryType)
@@ -130,7 +111,7 @@ namespace MySync.Client.Core.Projects
             }
         }
 
-        public void Push()
+        public void Push(List<Commit.CommitEntry> excluded)
         {
             if (!IsUpToDate())
             {
@@ -143,18 +124,20 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    Lock();
+                    //Lock();
                     
                     // find commit id
 
 
                     // push commit
                     var commitJson = Commit.ToJson();
-                    FileSystem.Client.Upload(commitJson, RemoteDirectory + "/commits/commit_1.json");
+                    //FileSystem.Client.Upload(commitJson, RemoteDirectory + "/commits/commit_1.json");
 
                     // push filemap
-                    var filemapJson = FileSystem.GetLocalMapping().ToJson();
-                    FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemap");
+                    var mapping = FileSystem.GetLocalMapping().Exclude(excluded);
+                    
+                    var filemapJson = mapping.ToJson();
+                    /*FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemap");
 
                     // do remote changes
                     foreach (var entry in Commit.FileChanges)
@@ -180,10 +163,10 @@ namespace MySync.Client.Core.Projects
 
 
                     // cleanup
-                    FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
+                    FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");*/
 
                     // done
-                    Unlock();
+                    //Unlock();
                 }
                 catch
                 {

@@ -42,9 +42,9 @@ namespace MySync.Client.Core
             _fileSystemWatcher = new FileSystemWatcher(rootDir)
             {
                 EnableRaisingEvents = true,
+                IncludeSubdirectories = true,
 
                 Filter = "*.*",
-                IncludeSubdirectories = true,
 
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | 
                 NotifyFilters.FileName | NotifyFilters.DirectoryName
@@ -80,9 +80,11 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
         {
+            var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+
             Mapping.Files.Add(new FileMapping.FileEntry
             {
-                File = e.FullPath,
+                File = filename,
                 Version = new FileInfo(e.FullPath).LastWriteTime.ToBinary()
             });
             Changed = true;
@@ -90,19 +92,26 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
         {
-            var modfile = Mapping.Files.Find(file => file.File == e.OldFullPath);
+            var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+            var oldfilename = e.OldFullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+
+            var modfile = Mapping.Files.Find(file => file.File == oldfilename);
 
             if (modfile.File != null)
-                modfile.File = e.FullPath;
+                modfile.File = filename;
+
             Changed = true;
         }
 
         private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
         {
-            var modfile = Mapping.Files.Find(file => file.File == e.FullPath);
+            var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+
+            var modfile = Mapping.Files.Find(file => file.File == filename);
 
             if(modfile.File != null)
                 Mapping.Files.Remove(modfile);
+
             Changed = true;
         }
 
@@ -112,17 +121,19 @@ namespace MySync.Client.Core
             if (e.ChangeType != WatcherChangeTypes.Changed)
                 return;
 
+            var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+
             // find then remove and add new version of file to the mapping
             for (var i = 0; i < Mapping.Files.Count; i++)
             {
-                if (Mapping.Files[i].File != e.FullPath)
+                if (Mapping.Files[i].File != filename)
                     continue;
 
                 Mapping.Files.RemoveAt(i);
 
                 Mapping.Files.Add(new FileMapping.FileEntry
                 {
-                    File = e.FullPath,
+                    File = filename,
                     Version = new FileInfo(e.FullPath).LastWriteTime.ToBinary()
                 });
                 Changed = true;
@@ -136,7 +147,7 @@ namespace MySync.Client.Core
 
         public string[] ExcludedDirectories { get; private set; }
 
-        public bool Changed { get; private set; }
+        public bool Changed { get; set; }
 
         public SFtpClient Client { get; private set; }
 

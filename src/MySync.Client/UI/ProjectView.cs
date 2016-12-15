@@ -1,7 +1,7 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
-using System.Linq;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using MetroFramework.Controls;
 using MySync.Client.Core;
@@ -31,20 +31,39 @@ namespace MySync.Client.UI
 
             _updateTimer.Start();
             _updateTimer.Tick += UpdateTimer_Tick;
-
+            
             files.HeaderStyle = ColumnHeaderStyle.None;
         }
         
         private void pull_Click(object sender, System.EventArgs e)
         {
-            //_project.Pull();
+            _project.Pull();
             MessageBox.Show(@"Not implemented, yet.");
         }
 
         private void push_Click(object sender, System.EventArgs e)
         {
-            //_project.Push();
-            MessageBox.Show(@"Not implemented, yet.");
+            var unstaged = new List<Commit.CommitEntry>();
+
+            _project.CreateCommit("");
+            foreach (ListViewItem item in files.Items)
+            {
+                var entry = (Commit.CommitEntry) item.Tag;
+
+                if (item.Group.Name == "staged")
+                {
+                    _project.Commit.FileChanges.Add(entry);
+                }
+                else
+                {
+                    unstaged.Add(entry);
+                }
+            }
+            
+            _project.FileSystem.BuildFilemap();
+            _project.Push(unstaged);
+            
+            MessageBox.Show(@"Done!");
         }
 
         private void history_Click(object sender, System.EventArgs e)
@@ -95,7 +114,6 @@ namespace MySync.Client.UI
         public void LoadProject(Project project)
         {
             _project = project;
-            _project.FileSystem.BuildFilemap();
 
             // update
             UpdateFiles();
@@ -109,7 +127,6 @@ namespace MySync.Client.UI
                 column.Width = files.Width - 5;
             }
 
-            _project.FileSystem.BuildFilemap();
             var entries = FileMapping.BuildEntries(_project);
             files.Items.Clear();
 
@@ -119,7 +136,7 @@ namespace MySync.Client.UI
                 {
                     var item = new ListViewItem(files.Groups["unstaged"])
                     {
-                        Text = entry.Entry,
+                        Text = @"["+ entry.EntryType + @"]" + entry.Entry,
                         Tag = entry,
                         Name = entry.Entry
                     };
@@ -127,6 +144,8 @@ namespace MySync.Client.UI
                     files.Items.Add(item);
                 }
             }
+
+            _project.FileSystem.Changed = false;
         }
     }
 }
