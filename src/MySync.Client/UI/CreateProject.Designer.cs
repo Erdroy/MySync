@@ -70,6 +70,7 @@
             this.projectName.Size = new System.Drawing.Size(274, 23);
             this.projectName.TabIndex = 0;
             this.projectName.UseSelectable = true;
+            this.projectName.WaterMark = "project name";
             this.projectName.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.projectName.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
             // 
@@ -118,6 +119,7 @@
             this.serverAddress.Size = new System.Drawing.Size(274, 23);
             this.serverAddress.TabIndex = 2;
             this.serverAddress.UseSelectable = true;
+            this.serverAddress.WaterMark = "server ipv4 address";
             this.serverAddress.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.serverAddress.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
             // 
@@ -157,6 +159,7 @@
             this.username.Size = new System.Drawing.Size(274, 23);
             this.username.TabIndex = 4;
             this.username.UseSelectable = true;
+            this.username.WaterMark = "username";
             this.username.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.username.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
             // 
@@ -187,7 +190,7 @@
             this.password.Location = new System.Drawing.Point(23, 264);
             this.password.MaxLength = 32767;
             this.password.Name = "password";
-            this.password.PasswordChar = '\0';
+            this.password.PasswordChar = '*';
             this.password.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.password.SelectedText = "";
             this.password.SelectionLength = 0;
@@ -196,6 +199,7 @@
             this.password.Size = new System.Drawing.Size(274, 23);
             this.password.TabIndex = 6;
             this.password.UseSelectable = true;
+            this.password.WaterMark = "password";
             this.password.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.password.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
             // 
@@ -255,6 +259,7 @@
             this.directory.Size = new System.Drawing.Size(274, 23);
             this.directory.TabIndex = 7;
             this.directory.UseSelectable = true;
+            this.directory.WaterMark = "the local directory";
             this.directory.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.directory.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
             // 
