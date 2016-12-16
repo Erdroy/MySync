@@ -59,7 +59,6 @@ namespace MySync.Client.Core.Projects
             Client.Execute("mkdir " + projectDir + "/commits; " +
                            "mkdir " + projectDir + "/data; " +
                            "echo \"0\"> " + projectDir + "/lockfile; " +
-                           "echo 0> " + projectDir + "/current; " +
                            "echo > " + projectDir + "/filemap");
         }
 
@@ -79,8 +78,8 @@ namespace MySync.Client.Core.Projects
             if (localFiles.Length < 2)
             {
                 Directory.CreateDirectory(localDirectory + "\\data");
+                Directory.CreateDirectory(localDirectory + "\\commits");
                 File.WriteAllText(localDirectory + "\\config.json", @"{}");
-                File.WriteAllText(localDirectory + "\\latestCommit.json", @"{ ""CommitID"" : 0 }");
             }
             
             // try open project

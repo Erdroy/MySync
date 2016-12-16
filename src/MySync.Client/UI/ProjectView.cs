@@ -132,17 +132,14 @@ namespace MySync.Client.UI
 
             foreach (var entry in entries)
             {
-                if (entry.EntryType != CommitEntryType.Deleted)
+                var item = new ListViewItem(files.Groups["unstaged"])
                 {
-                    var item = new ListViewItem(files.Groups["unstaged"])
-                    {
-                        Text = @"["+ entry.EntryType + @"]" + entry.Entry,
-                        Tag = entry,
-                        Name = entry.Entry
-                    };
+                    Text = @"[" + entry.EntryType + @"]" + entry.Entry,
+                    Tag = entry,
+                    Name = entry.Entry
+                };
 
-                    files.Items.Add(item);
-                }
+                files.Items.Add(item);
             }
 
             _project.FileSystem.Changed = false;

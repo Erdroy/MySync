@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using MySync.Client.Utilities;
 
 namespace MySync.Client.Core.Projects
@@ -52,10 +53,48 @@ namespace MySync.Client.Core.Projects
             FileSystem.Client.Execute("echo 0 >" + RemoteDirectory + "/lockfile");
         }
 
-        public bool IsUpToDate()
+        public bool IsUpToDate(out int commitId)
         {
+            commitId = 0;
             // TODO: compare latest downloaded commit to the remote commits
-            return true;
+
+            // find remote commit id
+            // find local commit id
+
+            var remoteFiles = FileSystem.GetFilesRemote("/commits");
+            var localFiles = FileSystem.GetFilesLocal("/commits");
+
+            if (remoteFiles.Length == 0)
+                return true;
+
+            var highestRemote = GetHighestCommitId(remoteFiles);
+            var highestLocal = GetHighestCommitId(localFiles);
+
+            if(highestLocal > highestRemote)
+                throw new Exception("INVALID LOCAL COMMITS!");
+
+            commitId = highestRemote;
+            return highestLocal == highestRemote;
+        }
+
+        public int GetHighestCommitId(string[] files)
+        {
+            var highest = 0;
+            foreach (var file in files)
+            {
+                // commit_X.json
+                //   |      +-- remove '.json'
+                //   +--------- remote 'commit_'
+                // this will give only 'X'
+
+                var filename = file.Replace("commit_", "");
+                filename = filename.Replace(".json", "");
+
+                // TODO: some validation
+                highest = Math.Max(highest, int.Parse(filename));
+            }
+
+            return highest;
         }
 
         public bool IsLocked()
@@ -113,7 +152,14 @@ namespace MySync.Client.Core.Projects
 
         public void Push(List<Commit.CommitEntry> excluded)
         {
-            if (!IsUpToDate())
+            if (Commit.FileChanges.Count == 0)
+            {
+                // nothing to push
+                return;
+            }
+
+            int commitId;
+            if (!IsUpToDate(out commitId))
             {
                 // show error?
                 return;
@@ -126,18 +172,29 @@ namespace MySync.Client.Core.Projects
                 {
                     //Lock();
                     
-                    // find commit id
+                    // --
 
+
+                    // Create commit
+                    var newCommitid = commitId + 1;
 
                     // push commit
                     var commitJson = Commit.ToJson();
-                    //FileSystem.Client.Upload(commitJson, RemoteDirectory + "/commits/commit_1.json");
 
-                    // push filemap
+                    // write remote
+                    FileSystem.Client.Upload(commitJson, RemoteDirectory + "/commits/commit_" + newCommitid + ".json");
+
+                    // write local
+                    File.WriteAllText(LocalDirectory + "/commits/commit_" + newCommitid + ".json", commitJson);
+
+                    // --
+
+
+                    // Update filemap
                     var mapping = FileSystem.GetLocalMapping().Exclude(excluded);
                     
                     var filemapJson = mapping.ToJson();
-                    /*FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemap");
+                    FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemap");
 
                     // do remote changes
                     foreach (var entry in Commit.FileChanges)
@@ -145,7 +202,7 @@ namespace MySync.Client.Core.Projects
                         if (entry.EntryType == CommitEntryType.Deleted)
                         {
                             // delete file
-                            FileSystem.Client.DeleteFile(entry.Entry);
+                            FileSystem.Client.DeleteFile(RemoteDirectory + "/data/" + entry.Entry);
                         }
                         else
                         {
@@ -158,12 +215,12 @@ namespace MySync.Client.Core.Projects
                             // TODO: Optimize transfer size using some sort of binary diff?
                         }
                     }
+                    
+                    // --
 
-                    // update remote commit id
-
-
+                    
                     // cleanup
-                    FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");*/
+                    FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
 
                     // done
                     //Unlock();

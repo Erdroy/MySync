@@ -1,7 +1,9 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MySync.Client.Core.Projects;
 
 namespace MySync.Client.Core
@@ -139,6 +141,18 @@ namespace MySync.Client.Core
                 Changed = true;
                 return;
             }
+        }
+
+        public string[] GetFilesRemote(string offDir)
+        {
+            return Client.ListFiles(Project.RemoteDirectory + offDir);
+        }
+
+        public string[] GetFilesLocal(string offDir)
+        {
+            var files = Directory.GetFiles(Project.LocalDirectory + offDir);
+
+            return files.Select(Path.GetFileName).ToArray();
         }
 
         public string[] ExcludedExtensions { get; private set; }

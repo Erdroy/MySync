@@ -1,7 +1,9 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Renci.SshNet;
 
@@ -47,7 +49,7 @@ namespace MySync.Client.Core
 
         public void DeleteFile(string file)
         {
-            
+            Execute("rm " + file);
         }
 
         public void DeleteEmptyDirs(string path)
@@ -67,8 +69,7 @@ namespace MySync.Client.Core
         public void UploadFile(string inputFile, string remoteFile)
         {
             // check dir
-            var path = Path.GetPathRoot(remoteFile);
-            /*var i = remoteFile.Length-1;
+            var i = remoteFile.Length-1;
             while (true)
             {
                 if (i < 5)
@@ -79,7 +80,7 @@ namespace MySync.Client.Core
 
                 i--;
             }
-            path = remoteFile.Substring(0, i);*/
+            var path = remoteFile.Substring(0, i);
 
             // TODO: Optimize directory structure building process
             if (!_sftp.Exists(path))
@@ -89,6 +90,12 @@ namespace MySync.Client.Core
             {
                 _sftp.UploadFile(fileStream, remoteFile, true); // TODO: Progress
             }
+        }
+
+        public string[] ListFiles(string rootdir)
+        {
+            var objects = _sftp.ListDirectory(rootdir);
+            return (from obj in objects where obj.IsRegularFile select obj.Name).ToArray();
         }
 
         public void Upload(string text, string remoteFile)
