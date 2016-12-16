@@ -10,7 +10,7 @@ Trello, to-do's: https://trello.com/b/NxN9L6Gf/mysync
 ---
 
 How it looks like now(UI Design)?
-![alt tag](https://erdroy.com/imgs/mysync_r1_s1.png)
+![alt tag](https://erdroy.com/imgs/mysync_r1_s2.png)
 
 ---
 
