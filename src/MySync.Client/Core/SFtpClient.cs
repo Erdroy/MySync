@@ -65,6 +65,16 @@ namespace MySync.Client.Core
             }
         }
 
+        public string DownloadFile(string remoteFile)
+        {
+            using (var stream = new MemoryStream())
+            {
+                _sftp.DownloadFile(remoteFile, stream);
+
+                return Encoding.UTF8.GetString(stream.ToArray());
+            }
+        }
+
         public void UploadFile(string inputFile, string remoteFile)
         {
             // check dir

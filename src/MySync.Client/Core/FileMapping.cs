@@ -127,6 +127,8 @@ namespace MySync.Client.Core
 
         public static Commit.CommitEntry[] BuildEntries(FileMapping localMapping, FileMapping remoteMapping)
         {
+            // TODO: Check if the file was created ealier in the local commits
+
             var changedFiles = GetChangedFiles(localMapping, remoteMapping);
             var newFiles = GetNewFiles(localMapping, remoteMapping);
             var deletedFiles = GetDeletedFiles(localMapping, remoteMapping);

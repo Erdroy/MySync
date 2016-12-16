@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MySync.Client.Utilities;
 
 namespace MySync.Client.Core.Projects
@@ -77,24 +78,35 @@ namespace MySync.Client.Core.Projects
             return highestLocal == highestRemote;
         }
 
+        public int GetCurrentCommit()
+        {
+            var localFiles = FileSystem.GetFilesLocal("/commits");
+
+            return localFiles.Length == 0 ? 0 : GetHighestCommitId(localFiles);
+        }
+
         public int GetHighestCommitId(string[] files)
         {
             var highest = 0;
             foreach (var file in files)
             {
-                // commit_X.json
-                //   |      +-- remove '.json'
-                //   +--------- remote 'commit_'
-                // this will give only 'X'
-
-                var filename = file.Replace("commit_", "");
-                filename = filename.Replace(".json", "");
-
                 // TODO: some validation
-                highest = Math.Max(highest, int.Parse(filename));
+                highest = Math.Max(highest, GetCommitId(file));
             }
 
             return highest;
+        }
+
+        public int GetCommitId(string file)
+        {
+            // commit_X.json
+            //   |      +-- remove '.json'
+            //   +--------- remote 'commit_'
+            // this will give only 'X'
+
+            var filename = file.Replace("commit_", "");
+            filename = filename.Replace(".json", "");
+            return int.Parse(filename);
         }
 
         public bool IsLocked()
@@ -152,6 +164,7 @@ namespace MySync.Client.Core.Projects
 
         public void Push(List<Commit.CommitEntry> excluded)
         {
+            // TODO: progress
             if (Commit.FileChanges.Count == 0)
             {
                 // nothing to push
@@ -227,7 +240,7 @@ namespace MySync.Client.Core.Projects
                 }
                 catch
                 {
-                    // TODO: Throw error?
+                    // TODO: Show error?
                     Unlock();
                 }
             }
@@ -235,8 +248,72 @@ namespace MySync.Client.Core.Projects
 
         public void Pull()
         {
+            // TODO: progress
             // apply all commits
+            if (Commit != null && Commit.FileChanges.Count != 0)
+            {
+                var i = 0;
+                foreach (var file in Commit.FileChanges)
+                {
+                    if (file.EntryType != CommitEntryType.Created)
+                        i++;
+                }
 
+                if (i > 0)
+                {
+                    // all changes must be pushed!
+                    return;
+                }
+            }
+
+            int commitId;
+            if (IsUpToDate(out commitId))
+            {
+                // show message?
+                return;
+            }
+
+            if (!IsLocked())
+            {
+                try
+                {
+                    //Lock();
+
+                    // download commits, start from commit_'commitId'.json
+                    var commitFiles = FileSystem.GetFilesRemote("/commits");
+                    commitFiles = commitFiles.OrderBy(x => x).ToArray();
+
+                    var cCommit = GetCurrentCommit();
+
+                    if (cCommit == 0)
+                        cCommit = 1;
+                    
+                    var firstIndex = Array.FindIndex(commitFiles, x => x == "commit_" + cCommit + ".json");
+                    var lastIndex = GetCommitId(commitFiles[commitFiles.Length-1]);
+
+                    var commits = new List<Commit>();
+                    for (var i = firstIndex+1; i < lastIndex+1; i++)
+                    {
+                        var commitfile = RemoteDirectory + "/commits/" + "commit_" + i + ".json";
+                        var commit = FileSystem.Client.DownloadFile(commitfile);
+                        commits.Add(Commit.FromJson(commit));
+                    }
+
+                    // calculate download list
+
+                    // download files
+
+                    // apply the commits as local commits
+
+                    // done
+                    Unlock();
+                }
+                catch(Exception ex)
+                {
+                    // TODO: Show error?
+                    Unlock();
+                }
+            }
         }
     }
 }

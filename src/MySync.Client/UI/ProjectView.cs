@@ -38,7 +38,7 @@ namespace MySync.Client.UI
         private void pull_Click(object sender, System.EventArgs e)
         {
             _project.Pull();
-            MessageBox.Show(@"Not implemented, yet.");
+            MessageBox.Show(@"Done!");
         }
 
         private void push_Click(object sender, System.EventArgs e)
@@ -46,6 +46,7 @@ namespace MySync.Client.UI
             var unstaged = new List<Commit.CommitEntry>();
 
             _project.CreateCommit("");
+
             foreach (ListViewItem item in files.Items)
             {
                 var entry = (Commit.CommitEntry) item.Tag;
