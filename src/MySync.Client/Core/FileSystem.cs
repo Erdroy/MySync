@@ -1,7 +1,6 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MySync.Client.Core.Projects;
@@ -97,10 +96,16 @@ namespace MySync.Client.Core
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
             var oldfilename = e.OldFullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
 
-            var modfile = Mapping.Files.Find(file => file.File == oldfilename);
+            var modfile = Mapping.Files.FindIndex(file => file.File == oldfilename);
 
-            if (modfile.File != null)
-                modfile.File = filename;
+            if (modfile == -1)
+                return;
+            
+            Mapping.Files[modfile] = new FileMapping.FileEntry
+            {
+                File = filename,
+                Version = new FileInfo(e.FullPath).LastWriteTime.ToBinary()
+            };
 
             Changed = true;
         }

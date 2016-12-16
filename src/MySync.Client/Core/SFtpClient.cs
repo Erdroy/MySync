@@ -1,7 +1,6 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
