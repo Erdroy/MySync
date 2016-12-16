@@ -63,7 +63,7 @@ namespace MySync.Client.UI
             
             _project.FileSystem.BuildFilemap();
             _project.Push(unstaged);
-            
+            UpdateFiles();
             MessageBox.Show(@"Done!");
         }
 
