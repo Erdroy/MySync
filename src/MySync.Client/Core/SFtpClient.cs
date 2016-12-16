@@ -4,6 +4,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using MySync.Client.Utilities;
 using Renci.SshNet;
 
 namespace MySync.Client.Core
@@ -78,18 +79,7 @@ namespace MySync.Client.Core
         public void UploadFile(string inputFile, string remoteFile)
         {
             // check dir
-            var i = remoteFile.Length-1;
-            while (true)
-            {
-                if (i < 5)
-                    return;
-
-                if (remoteFile[i] == '/')
-                    break;
-
-                i--;
-            }
-            var path = remoteFile.Substring(0, i);
+            var path = PathUtils.GetPath(remoteFile);
 
             // TODO: Optimize directory structure building process
             if (!_sftp.Exists(path))

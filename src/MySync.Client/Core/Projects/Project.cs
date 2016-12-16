@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 using MySync.Client.Utilities;
 
 namespace MySync.Client.Core.Projects
@@ -277,7 +278,7 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    //Lock();
+                    Lock();
 
                     // download commits, start from commit_'commitId'.json
                     var commitFiles = FileSystem.GetFilesRemote("/commits");
@@ -299,16 +300,77 @@ namespace MySync.Client.Core.Projects
                         commits.Add(Commit.FromJson(commit));
                     }
 
-                    // calculate download list
+                    // calculate download list and download
+                    if (GetCurrentCommit() == 0)
+                    {
+                        // download whole project
 
-                    // download files
+                        // get all files
+                        var files = FileSystem.GetRemoteMapping().Files;
 
+                        // download files
+                        foreach (var file in files)
+                        {
+                            var outputFile = LocalDirectory + "/data/" + file.File;
+                            var remoteFile = RemoteDirectory + "/data/" + file.File;
+
+                            // download
+                            try
+                            {
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+                            catch
+                            {
+                                Directory.CreateDirectory(PathUtils.GetPath(outputFile));
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+
+                            // set file mod time(version base)
+                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
+                        }
+                    }
+                    else
+                    {
+                        // calculate diff
+                        var files = FileSystem.GetRemoteMapping().Files;
+                        var toDownload = Commit.CalculateDownloadable(commits.ToArray());
+
+                        foreach (var file in toDownload)
+                        {
+                            var outputFile = LocalDirectory + "/data/" + file;
+                            var remoteFile = RemoteDirectory + "/data/" + file;
+
+                            // download
+                            try
+                            {
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+                            catch
+                            {
+                                Directory.CreateDirectory(PathUtils.GetPath(outputFile));
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+
+                            // set file mod time(version base)
+                            var fileEntry = files.FirstOrDefault(x => x.File == file);
+                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
+                        }
+                    }
+                    
                     // apply the commits as local commits
-
+                    var cid = cCommit;
+                    foreach (var commit in commits)
+                    {
+                        var json = commit.ToJson();
+                        var fileName = "commit_" + cid + ".json";
+                        File.WriteAllText(LocalDirectory + "/commits/" + fileName, json);
+                        cid++;
+                    }
+                    
                     // done
                     Unlock();
                 }
-                catch(Exception ex)
+                catch
                 {
                     // TODO: Show error?
                     Unlock();

@@ -63,9 +63,8 @@ namespace MySync.Client.Core
         public static FileMapping CreateFileMapping(string rootDirectory)
         {
             var mapping = new FileMapping();
-
-            // TODO: Some optimizations? Caching or something?
-            // TODO: Run in other thread, maybe show progress bar
+            
+            // TODO: Some optimizations? Run in other thread, maybe show progress bar
             var files = Directory.EnumerateFiles(rootDirectory, "*.*", SearchOption.AllDirectories);
 
             foreach (var file in files)
