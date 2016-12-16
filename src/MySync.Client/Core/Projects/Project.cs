@@ -170,7 +170,7 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    //Lock();
+                    Lock();
                     
                     // --
 
@@ -223,7 +223,7 @@ namespace MySync.Client.Core.Projects
                     FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
 
                     // done
-                    //Unlock();
+                    Unlock();
                 }
                 catch
                 {
