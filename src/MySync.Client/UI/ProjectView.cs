@@ -45,26 +45,35 @@ namespace MySync.Client.UI
         {
             var unstaged = new List<Commit.CommitEntry>();
 
-            _project.CreateCommit("");
-
-            foreach (ListViewItem item in files.Items)
+            if (CreateCommit.CreateNew() == DialogResult.OK)
             {
-                var entry = (Commit.CommitEntry) item.Tag;
+                _project.CreateCommit(CreateCommit.CommitDesc);
 
-                if (item.Group.Name == "staged")
+                foreach (ListViewItem item in files.Items)
                 {
-                    _project.Commit.FileChanges.Add(entry);
+                    var entry = (Commit.CommitEntry) item.Tag;
+
+                    if (item.Group.Name == "staged")
+                    {
+                        _project.Commit.FileChanges.Add(entry);
+                    }
+                    else
+                    {
+                        unstaged.Add(entry);
+                    }
                 }
-                else
+
+                if (_project.Commit.FileChanges.Count == 0)
                 {
-                    unstaged.Add(entry);
+                    MessageBox.Show(@"No changes!");
+                    return;
                 }
+
+                _project.FileSystem.BuildFilemap();
+                _project.Push(unstaged);
+                UpdateFiles();
+                MessageBox.Show(@"Done!");
             }
-            
-            _project.FileSystem.BuildFilemap();
-            _project.Push(unstaged);
-            UpdateFiles();
-            MessageBox.Show(@"Done!");
         }
 
         private void history_Click(object sender, System.EventArgs e)
