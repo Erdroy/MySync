@@ -251,22 +251,6 @@ namespace MySync.Client.Core.Projects
         {
             // TODO: progress
             // apply all commits
-            if (Commit != null && Commit.FileChanges.Count != 0)
-            {
-                var i = 0;
-                foreach (var file in Commit.FileChanges)
-                {
-                    if (file.EntryType != CommitEntryType.Created)
-                        i++;
-                }
-
-                if (i > 0)
-                {
-                    // all changes must be pushed!
-                    return;
-                }
-            }
-
             int commitId;
             if (IsUpToDate(out commitId))
             {
@@ -333,8 +317,12 @@ namespace MySync.Client.Core.Projects
                     {
                         // calculate diff
                         var files = FileSystem.GetRemoteMapping().Files;
-                        var toDownload = Commit.CalculateDownloadable(commits.ToArray());
+                        var changes = Commit.MergeChanges(commits.ToArray());
 
+                        var toDownload = changes.GetFilesToDownload();
+                        var toRemove = changes.GetFilesToRemove();
+                        
+                        // download all changed files
                         foreach (var file in toDownload)
                         {
                             var outputFile = LocalDirectory + "/data/" + file;
@@ -354,6 +342,23 @@ namespace MySync.Client.Core.Projects
                             // set file mod time(version base)
                             var fileEntry = files.FirstOrDefault(x => x.File == file);
                             File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
+                        }
+
+                        FileSystem.BuildFilemap();
+                        
+                        // remove all files
+                        foreach (var file in toRemove)
+                        {
+                            var path = LocalDirectory + "/data/" + file;
+
+                            try
+                            {
+                                File.Delete(path);
+                            }
+                            catch
+                            {
+                                // ignore
+                            }
                         }
                     }
                     

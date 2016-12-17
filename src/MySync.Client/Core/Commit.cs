@@ -2,6 +2,7 @@
 // under GPL-3.0 license
 
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace MySync.Client.Core
@@ -10,13 +11,13 @@ namespace MySync.Client.Core
     {
         public struct CommitEntry
         {
-            public CommitEntryType EntryType;
             public string Entry;
+            public CommitEntryType EntryType;
 
             public CommitEntry(CommitEntryType entryType, string entry)
             {
-                EntryType = entryType;
                 Entry = entry;
+                EntryType = entryType;
             }
         }
 
@@ -30,30 +31,49 @@ namespace MySync.Client.Core
             return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
 
-        public static string[] CalculateDownloadable(Commit[] commits)
+        public string[] GetFilesToDownload()
         {
-            var toDownload = new List<string>();
+            return (from change in FileChanges where change.EntryType != CommitEntryType.Deleted select change.Entry).ToArray();
+        }
+
+        public string[] GetFilesToRemove()
+        {
+            return (from change in FileChanges where change.EntryType == CommitEntryType.Deleted select change.Entry).ToArray();
+        }
+
+        public static Commit MergeChanges(Commit[] commits)
+        {
+            var output = new Commit();
 
             foreach (var commit in commits)
             {
                 foreach (var change in commit.FileChanges)
                 {
+                    if (output.FileChanges.Any(x => x.Entry == change.Entry))
+                        output.FileChanges.RemoveAt(output.FileChanges.FindIndex(x => x.Entry == change.Entry));
+
                     if (change.EntryType == CommitEntryType.Deleted)
                     {
-                        if (toDownload.Contains(change.Entry))
-                            toDownload.Remove(change.Entry);
+                        output.FileChanges.Add(new CommitEntry
+                        {
+                            Entry = change.Entry,
+                            EntryType = CommitEntryType.Deleted
+                        });
                     }
                     else
                     {
-                        if(!toDownload.Contains(change.Entry))
-                            toDownload.Add(change.Entry);
+                        output.FileChanges.Add(new CommitEntry
+                        {
+                            Entry = change.Entry,
+                            EntryType = CommitEntryType.Created
+                        });
                     }
                 }
             }
 
-            return toDownload.ToArray();
+            return output;
         }
-
+        
         public static Commit FromJson(string jsonsource)
         {
             return JsonConvert.DeserializeObject<Commit>(jsonsource);
@@ -61,6 +81,6 @@ namespace MySync.Client.Core
         
         public string CommitDescription { get; set; }
 
-        public List<CommitEntry> FileChanges { get; private set; }
+        public List<CommitEntry> FileChanges { get; }
     }
 }
