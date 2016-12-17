@@ -46,13 +46,21 @@ namespace MySync.Client.Core.Projects
         public void Lock()
         {
             // lock
-            FileSystem.Client.Execute("echo 1 >" + RemoteDirectory + "/lockfile");
+            FileSystem.Client.Execute("touch " + RemoteDirectory + "/lockfile");
         }
 
         public void Unlock()
         {
             // unlock
-            FileSystem.Client.Execute("echo 0 >" + RemoteDirectory + "/lockfile");
+            FileSystem.Client.Execute("rm " + RemoteDirectory + "/lockfile");
+        }
+
+        public bool IsLocked()
+        {
+            const string lockfile = "lockfile";
+
+            var data = FileSystem.Client.Execute("ls " + RemoteDirectory + " |grep " + lockfile);
+            return data.Length >= lockfile.Length;
         }
 
         public bool IsUpToDate(out int commitId)
@@ -109,13 +117,7 @@ namespace MySync.Client.Core.Projects
             filename = filename.Replace(".json", "");
             return int.Parse(filename);
         }
-
-        public bool IsLocked()
-        {
-            var data = FileSystem.Client.Execute("cat " + RemoteDirectory + "/lockfile");
-            return data[0] == '1';
-        }
-
+        
         public void LockFile(string file)
         {
             // lock file
@@ -144,18 +146,27 @@ namespace MySync.Client.Core.Projects
                     // delete
                     FileSystem.DeleteLocalFile(entry.Entry);
                     break;
+                case CommitEntryType.Changed:
                 case CommitEntryType.Deleted:
                     // download from server
                     if (!IsLocked())
                     {
-                        
-                    }
-                    break;
-                case CommitEntryType.Changed:
-                    // download from server
-                    if (!IsLocked())
-                    {
+                        using (new ProjectLock(this))
+                        {
+                            var outputFile = LocalDirectory + "/data/" + entry.Entry;
+                            var remoteFile = RemoteDirectory + "/data/" + entry.Entry;
 
+                            // download
+                            try
+                            {
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+                            catch
+                            {
+                                Directory.CreateDirectory(PathUtils.GetPath(outputFile));
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+                        }
                     }
                     break;
                 default:
@@ -186,61 +197,60 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    //Lock();
-                    
-                    // --
-
-
-                    // Create commit
-                    var newCommitid = commitId + 1;
-
-                    // push commit
-                    var commitJson = Commit.ToJson();
-
-                    // write remote
-                    FileSystem.Client.Upload(commitJson, RemoteDirectory + "/commits/commit_" + newCommitid + ".json");
-
-                    // write local
-                    File.WriteAllText(LocalDirectory + "/commits/commit_" + newCommitid + ".json", commitJson);
-
-                    // --
-
-
-                    // upload filemap
-                    var mapping = FileSystem.GetLocalMapping().Exclude(excluded);
-                    
-                    var filemapJson = mapping.ToJson();
-                    FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemaps/filemap_" + newCommitid + ".json");
-
-                    // do remote changes
-                    foreach (var entry in Commit.FileChanges)
+                    using (new ProjectLock(this))
                     {
-                        if (entry.EntryType == CommitEntryType.Deleted)
-                        {
-                            // delete file
-                            FileSystem.Client.DeleteFile(RemoteDirectory + "/data/" + entry.Entry);
-                        }
-                        else
-                        {
-                            // upload file
-                            var lf = LocalDirectory + "\\data\\" + entry.Entry.Replace("/", "\\");
-                            var rf = RemoteDirectory + "/data/" + entry.Entry;
-                            
-                            FileSystem.Client.UploadFile(lf, rf);
+                        // --
+                        
+                        // Create commit
+                        var newCommitid = commitId + 1;
 
-                            // TODO: Optimize transfer size using some sort of binary diff?
+                        // push commit
+                        var commitJson = Commit.ToJson();
+
+                        // write remote
+                        FileSystem.Client.Upload(commitJson,
+                            RemoteDirectory + "/commits/commit_" + newCommitid + ".json");
+
+                        // write local
+                        File.WriteAllText(LocalDirectory + "/commits/commit_" + newCommitid + ".json", commitJson);
+
+                        // --
+
+
+                        // upload filemap
+                        var mapping = FileSystem.GetLocalMapping().Exclude(excluded);
+
+                        var filemapJson = mapping.ToJson();
+                        FileSystem.Client.Upload(filemapJson,
+                            RemoteDirectory + "/filemaps/filemap_" + newCommitid + ".json");
+
+                        // do remote changes
+                        foreach (var entry in Commit.FileChanges)
+                        {
+                            if (entry.EntryType == CommitEntryType.Deleted)
+                            {
+                                // delete file
+                                FileSystem.Client.DeleteFile(RemoteDirectory + "/data/" + entry.Entry);
+                            }
+                            else
+                            {
+                                // upload file
+                                var lf = LocalDirectory + "\\data\\" + entry.Entry.Replace("/", "\\");
+                                var rf = RemoteDirectory + "/data/" + entry.Entry;
+
+                                FileSystem.Client.UploadFile(lf, rf);
+
+                                // TODO: Optimize transfer size using some sort of binary diff?
+                            }
                         }
+
+
+                        // --
+
+
+                        // cleanup
+                        FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
                     }
-
-
-                    // --
-
-                    
-                    // cleanup
-                    FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
-
-                    // done
-                    Unlock();
 
                     MessageBox.Show(@"Pushed all changes!");
                 }
@@ -249,6 +259,10 @@ namespace MySync.Client.Core.Projects
                     Unlock();
                     MessageBox.Show(@"Error: " + ex);
                 }
+            }
+            else
+            {
+                MessageBox.Show(@"Sorry, project is currently locked due to PUSH or PULL of other user. If you are sure that no one is using the project, this may be a bug, delete `lockfile` in the remote project directory.");
             }
         }
 
@@ -268,118 +282,118 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    //Lock();
-
-                    // download commits, start from commit_'commitId'.json
-                    var commitFiles = FileSystem.GetFilesRemote("/commits");
-                    commitFiles = commitFiles.OrderBy(x => x).ToArray();
-
-                    var cCommit = GetCurrentCommit();
-
-                    if (cCommit == 0)
-                        cCommit = 1;
-                    
-                    var firstIndex = Array.FindIndex(commitFiles, x => x == "commit_" + cCommit + ".json");
-                    var lastIndex = GetCommitId(commitFiles[commitFiles.Length-1]);
-
-                    var commits = new List<Commit>();
-                    for (var i = firstIndex+2; i < lastIndex+1; i++)
+                    using (new ProjectLock(this))
                     {
-                        var commitfile = RemoteDirectory + "/commits/" + "commit_" + i + ".json";
-                        var commit = FileSystem.Client.DownloadFile(commitfile);
-                        commits.Add(Commit.FromJson(commit));
+
+                        // download commits, start from commit_'commitId'.json
+                        var commitFiles = FileSystem.GetFilesRemote("/commits");
+                        commitFiles = commitFiles.OrderBy(x => x).ToArray();
+
+                        var cCommit = GetCurrentCommit();
+
+                        if (cCommit == 0)
+                            cCommit = 1;
+
+                        var firstIndex = Array.FindIndex(commitFiles, x => x == "commit_" + cCommit + ".json");
+                        var lastIndex = GetCommitId(commitFiles[commitFiles.Length - 1]);
+
+                        var commits = new List<Commit>();
+                        for (var i = firstIndex + 2; i < lastIndex + 1; i++)
+                        {
+                            var commitfile = RemoteDirectory + "/commits/" + "commit_" + i + ".json";
+                            var commit = FileSystem.Client.DownloadFile(commitfile);
+                            commits.Add(Commit.FromJson(commit));
+                        }
+
+                        // calculate download list and download
+                        if (GetCurrentCommit() == 0)
+                        {
+                            // download whole project
+
+                            // get all files
+                            var files = FileSystem.GetRemoteMapping().Files;
+
+                            // download files
+                            foreach (var file in files)
+                            {
+                                var outputFile = LocalDirectory + "/data/" + file.File;
+                                var remoteFile = RemoteDirectory + "/data/" + file.File;
+
+                                // download
+                                try
+                                {
+                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                                }
+                                catch
+                                {
+                                    Directory.CreateDirectory(PathUtils.GetPath(outputFile));
+                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                                }
+
+                                // set file mod time(version base)
+                                File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
+                            }
+                        }
+                        else
+                        {
+                            // apply the commits as local commits
+                            var cid = cCommit + 1;
+                            foreach (var commit in commits)
+                            {
+                                var json = commit.ToJson();
+                                var fileName = "commit_" + cid + ".json";
+                                File.WriteAllText(LocalDirectory + "/commits/" + fileName, json);
+                                cid++;
+                            }
+
+                            // calculate diff
+                            var files = FileSystem.GetRemoteMapping().Files;
+                            var changes = Commit.MergeChanges(commits.ToArray());
+
+                            var toDownload = changes.GetFilesToDownload();
+                            var toRemove = changes.GetFilesToRemove();
+
+                            // download all changed files
+                            foreach (var file in toDownload)
+                            {
+                                var outputFile = LocalDirectory + "/data/" + file;
+                                var remoteFile = RemoteDirectory + "/data/" + file;
+
+                                // download
+                                try
+                                {
+                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                                }
+                                catch
+                                {
+                                    Directory.CreateDirectory(PathUtils.GetPath(outputFile));
+                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                                }
+
+                                // set file mod time(version base)
+                                var fileEntry = files.FirstOrDefault(x => x.File == file);
+                                File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
+                            }
+
+                            FileSystem.BuildFilemap();
+
+                            // remove all files
+                            foreach (var file in toRemove)
+                            {
+                                var path = LocalDirectory + "/data/" + file;
+
+                                try
+                                {
+                                    File.Delete(path);
+                                }
+                                catch
+                                {
+                                    // ignore
+                                }
+                            }
+                        }
                     }
 
-                    // calculate download list and download
-                    if (GetCurrentCommit() == 0)
-                    {
-                        // download whole project
-
-                        // get all files
-                        var files = FileSystem.GetRemoteMapping().Files;
-
-                        // download files
-                        foreach (var file in files)
-                        {
-                            var outputFile = LocalDirectory + "/data/" + file.File;
-                            var remoteFile = RemoteDirectory + "/data/" + file.File;
-
-                            // download
-                            try
-                            {
-                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                            }
-                            catch
-                            {
-                                Directory.CreateDirectory(PathUtils.GetPath(outputFile));
-                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                            }
-
-                            // set file mod time(version base)
-                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
-                        }
-                    }
-                    else
-                    {
-                        // apply the commits as local commits
-                        var cid = cCommit+1;
-                        foreach (var commit in commits)
-                        {
-                            var json = commit.ToJson();
-                            var fileName = "commit_" + cid + ".json";
-                            File.WriteAllText(LocalDirectory + "/commits/" + fileName, json);
-                            cid++;
-                        }
-
-                        // calculate diff
-                        var files = FileSystem.GetRemoteMapping().Files;
-                        var changes = Commit.MergeChanges(commits.ToArray());
-
-                        var toDownload = changes.GetFilesToDownload();
-                        var toRemove = changes.GetFilesToRemove();
-                        
-                        // download all changed files
-                        foreach (var file in toDownload)
-                        {
-                            var outputFile = LocalDirectory + "/data/" + file;
-                            var remoteFile = RemoteDirectory + "/data/" + file;
-
-                            // download
-                            try
-                            {
-                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                            }
-                            catch
-                            {
-                                Directory.CreateDirectory(PathUtils.GetPath(outputFile));
-                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                            }
-
-                            // set file mod time(version base)
-                            var fileEntry = files.FirstOrDefault(x => x.File == file);
-                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
-                        }
-
-                        FileSystem.BuildFilemap();
-                        
-                        // remove all files
-                        foreach (var file in toRemove)
-                        {
-                            var path = LocalDirectory + "/data/" + file;
-
-                            try
-                            {
-                                File.Delete(path);
-                            }
-                            catch
-                            {
-                                // ignore
-                            }
-                        }
-                    }
-                    
-                    // done
-                    Unlock();
                     MessageBox.Show(@"Pulled all changes!");
                 }
                 catch(Exception ex)

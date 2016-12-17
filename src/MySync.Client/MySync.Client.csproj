@@ -71,6 +71,7 @@
     <Compile Include="Core\CommitEntryType.cs" />
     <Compile Include="Core\FileMapping.cs" />
     <Compile Include="Core\FileSystem.cs" />
+    <Compile Include="Core\ProjectLock.cs" />
     <Compile Include="Core\Projects\Project.cs" />
     <Compile Include="Core\Projects\ProjectsManager.cs" />
     <Compile Include="Core\SFtpClient.cs" />
