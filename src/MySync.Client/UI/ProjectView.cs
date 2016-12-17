@@ -38,7 +38,6 @@ namespace MySync.Client.UI
         private void pull_Click(object sender, System.EventArgs e)
         {
             _project.Pull();
-            MessageBox.Show(@"Done!");
         }
 
         private void push_Click(object sender, System.EventArgs e)
@@ -72,7 +71,6 @@ namespace MySync.Client.UI
                 _project.FileSystem.BuildFilemap();
                 _project.Push(unstaged);
                 UpdateFiles();
-                MessageBox.Show(@"Done!");
             }
         }
 

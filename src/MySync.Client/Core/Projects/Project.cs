@@ -169,6 +169,7 @@ namespace MySync.Client.Core.Projects
             if (Commit.FileChanges.Count == 0)
             {
                 // nothing to push
+                MessageBox.Show(@"No staged changes.");
                 return;
             }
 
@@ -176,6 +177,7 @@ namespace MySync.Client.Core.Projects
             if (!IsUpToDate(out commitId))
             {
                 // show error?
+                MessageBox.Show(@"Cannot push changes, project is not up-to-date! Please pull all changes before pushing.");
                 return;
             }
 
@@ -184,7 +186,7 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    Lock();
+                    //Lock();
                     
                     // --
 
@@ -204,11 +206,11 @@ namespace MySync.Client.Core.Projects
                     // --
 
 
-                    // Update filemap
+                    // upload filemap
                     var mapping = FileSystem.GetLocalMapping().Exclude(excluded);
                     
                     var filemapJson = mapping.ToJson();
-                    FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemap");
+                    FileSystem.Client.Upload(filemapJson, RemoteDirectory + "/filemaps/filemap_" + newCommitid + ".json");
 
                     // do remote changes
                     foreach (var entry in Commit.FileChanges)
@@ -229,7 +231,8 @@ namespace MySync.Client.Core.Projects
                             // TODO: Optimize transfer size using some sort of binary diff?
                         }
                     }
-                    
+
+
                     // --
 
                     
@@ -238,11 +241,13 @@ namespace MySync.Client.Core.Projects
 
                     // done
                     Unlock();
+
+                    MessageBox.Show(@"Pushed all changes!");
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: Show error?
                     Unlock();
+                    MessageBox.Show(@"Error: " + ex);
                 }
             }
         }
@@ -255,6 +260,7 @@ namespace MySync.Client.Core.Projects
             if (IsUpToDate(out commitId))
             {
                 // show message?
+                MessageBox.Show(@"No changes to download.");
                 return;
             }
 
@@ -262,7 +268,7 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    Lock();
+                    //Lock();
 
                     // download commits, start from commit_'commitId'.json
                     var commitFiles = FileSystem.GetFilesRemote("/commits");
@@ -277,7 +283,7 @@ namespace MySync.Client.Core.Projects
                     var lastIndex = GetCommitId(commitFiles[commitFiles.Length-1]);
 
                     var commits = new List<Commit>();
-                    for (var i = firstIndex+1; i < lastIndex+1; i++)
+                    for (var i = firstIndex+2; i < lastIndex+1; i++)
                     {
                         var commitfile = RemoteDirectory + "/commits/" + "commit_" + i + ".json";
                         var commit = FileSystem.Client.DownloadFile(commitfile);
@@ -315,6 +321,16 @@ namespace MySync.Client.Core.Projects
                     }
                     else
                     {
+                        // apply the commits as local commits
+                        var cid = cCommit+1;
+                        foreach (var commit in commits)
+                        {
+                            var json = commit.ToJson();
+                            var fileName = "commit_" + cid + ".json";
+                            File.WriteAllText(LocalDirectory + "/commits/" + fileName, json);
+                            cid++;
+                        }
+
                         // calculate diff
                         var files = FileSystem.GetRemoteMapping().Files;
                         var changes = Commit.MergeChanges(commits.ToArray());
@@ -362,23 +378,14 @@ namespace MySync.Client.Core.Projects
                         }
                     }
                     
-                    // apply the commits as local commits
-                    var cid = cCommit;
-                    foreach (var commit in commits)
-                    {
-                        var json = commit.ToJson();
-                        var fileName = "commit_" + cid + ".json";
-                        File.WriteAllText(LocalDirectory + "/commits/" + fileName, json);
-                        cid++;
-                    }
-                    
                     // done
                     Unlock();
+                    MessageBox.Show(@"Pulled all changes!");
                 }
-                catch
+                catch(Exception ex)
                 {
-                    // TODO: Show error?
                     Unlock();
+                    MessageBox.Show(@"Error: " + ex);
                 }
             }
         }

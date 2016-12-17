@@ -58,8 +58,8 @@ namespace MySync.Client.Core.Projects
 
             Client.Execute("mkdir " + projectDir + "/commits; " +
                            "mkdir " + projectDir + "/data; " +
-                           "echo \"0\"> " + projectDir + "/lockfile; " +
-                           "echo > " + projectDir + "/filemap");
+                           "mkdir " + projectDir + "/filemaps; " +
+                           "echo \"0\"> " + projectDir + "/lockfile; ");
         }
 
         /// <summary>

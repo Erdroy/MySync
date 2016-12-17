@@ -62,11 +62,16 @@ namespace MySync.Client.Core
             // download from the server
             // load from json
             // return
-
-            var remoteFilemapOut = Project.LocalDirectory + "\\remoteFileMap.json";
-            Client.DownloadFile(remoteFilemapOut, Project.RemoteDirectory + "/filemap");
-
-            return FileMapping.FromJson(remoteFilemapOut);
+            var commitId = Project.GetCurrentCommit();
+            try
+            {
+                var json = Client.DownloadFile(Project.RemoteDirectory + "/filemaps/filemap_" + commitId + ".json");
+                return FileMapping.FromJson(json);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public FileMapping GetLocalMapping()
@@ -160,11 +165,11 @@ namespace MySync.Client.Core
             return files.Select(Path.GetFileName).ToArray();
         }
 
-        public string[] ExcludedExtensions { get; private set; }
+        /*public string[] ExcludedExtensions { get; private set; }
 
         public string[] ExcludedFiles { get; private set; }
 
-        public string[] ExcludedDirectories { get; private set; }
+        public string[] ExcludedDirectories { get; private set; }*/
 
         public bool Changed { get; set; }
 

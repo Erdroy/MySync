@@ -126,22 +126,39 @@ namespace MySync.Client.Core
 
         public static Commit.CommitEntry[] BuildEntries(FileMapping localMapping, FileMapping remoteMapping)
         {
-            // TODO: Check if the file was created ealier in the local commits
+            List<Commit.CommitEntry> files;
+
+            if (remoteMapping == null)
+            {
+                files = new List<Commit.CommitEntry>();
+
+                foreach (var file in localMapping.Files)
+                {
+                    files.Add(new Commit.CommitEntry(CommitEntryType.Created, file.File));
+                }
+
+                return files.ToArray();
+            }
 
             var changedFiles = GetChangedFiles(localMapping, remoteMapping);
             var newFiles = GetNewFiles(localMapping, remoteMapping);
             var deletedFiles = GetDeletedFiles(localMapping, remoteMapping);
 
-            var files = changedFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Changed, file.File)).ToList();
+            files = changedFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Changed, file.File)).ToList();
             files.AddRange(newFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Created, file.File)));
             files.AddRange(deletedFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Deleted, file.File)));
 
             return files.ToArray();
         }
 
-        public static FileMapping FromJson(string jsonfile)
+        public static FileMapping FromJsonFile(string jsonfile)
         {
             return JsonConvert.DeserializeObject<FileMapping>(File.ReadAllText(jsonfile));
+        }
+
+        public static FileMapping FromJson(string json)
+        {
+            return JsonConvert.DeserializeObject<FileMapping>(json);
         }
     }
 }
