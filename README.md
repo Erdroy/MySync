@@ -5,12 +5,7 @@ Under GPL-3.0 license.
 UNDER DEVELOPMENT! EARLY PROTOTYPE.
 -----------------
 
-Trello, to-do's: https://trello.com/b/NxN9L6Gf/mysync
-
----
-
-How it looks like now(UI Design)?
-![alt tag](https://erdroy.com/imgs/mysync_r1_s2.png)
+Trello, screenshots, to-do's: https://trello.com/b/NxN9L6Gf/mysync
 
 ---
 
@@ -19,8 +14,7 @@ If you would like to contribute to this project, join this Discord server: https
 ---
 
 Supported platforms:
- - Windows(official)
- - And more using Mono(officialy not supported).
+ Currently there is only Windows on .NET 4.5 officialy supported, there will be more soon.
  
 ---
 
