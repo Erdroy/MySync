@@ -28,52 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.ListViewGroup listViewGroup7 = new System.Windows.Forms.ListViewGroup("Staged files", System.Windows.Forms.HorizontalAlignment.Left);
-            System.Windows.Forms.ListViewGroup listViewGroup8 = new System.Windows.Forms.ListViewGroup("Unstaged files", System.Windows.Forms.HorizontalAlignment.Left);
-            this.files = new MetroFramework.Controls.MetroListView();
-            this.changed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Staged files", System.Windows.Forms.HorizontalAlignment.Left);
+            System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("Unstaged files", System.Windows.Forms.HorizontalAlignment.Left);
             this.pull = new MetroFramework.Controls.MetroTile();
             this.push = new MetroFramework.Controls.MetroTile();
             this.history = new MetroFramework.Controls.MetroTile();
             this.stage = new MetroFramework.Controls.MetroTile();
             this.unstage = new MetroFramework.Controls.MetroTile();
+            this.files = new System.Windows.Forms.ListView();
+            this.column = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
-            // 
-            // files
-            // 
-            this.files.Activation = System.Windows.Forms.ItemActivation.OneClick;
-            this.files.AllowSorting = true;
-            this.files.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.files.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.files.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.changed});
-            this.files.Font = new System.Drawing.Font("Segoe UI", 12F);
-            this.files.FullRowSelect = true;
-            listViewGroup7.Header = "Staged files";
-            listViewGroup7.Name = "staged";
-            listViewGroup8.Header = "Unstaged files";
-            listViewGroup8.Name = "unstaged";
-            this.files.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
-            listViewGroup7,
-            listViewGroup8});
-            this.files.Location = new System.Drawing.Point(69, 3);
-            this.files.Name = "files";
-            this.files.OwnerDraw = true;
-            this.files.Size = new System.Drawing.Size(706, 464);
-            this.files.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.files.Style = MetroFramework.MetroColorStyle.Orange;
-            this.files.TabIndex = 4;
-            this.files.UseCompatibleStateImageBehavior = false;
-            this.files.UseSelectable = true;
-            this.files.View = System.Windows.Forms.View.Details;
-            this.files.SelectedIndexChanged += new System.EventHandler(this.files_SelectedIndexChanged);
-            // 
-            // changed
-            // 
-            this.changed.Text = "Changed files";
-            this.changed.Width = 485;
             // 
             // pull
             // 
@@ -138,16 +102,42 @@
             this.unstage.UseSelectable = true;
             this.unstage.Click += new System.EventHandler(this.unstage_Click);
             // 
+            // files
+            // 
+            this.files.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.files.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.files.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.column});
+            listViewGroup1.Header = "Staged files";
+            listViewGroup1.Name = "staged";
+            listViewGroup2.Header = "Unstaged files";
+            listViewGroup2.Name = "unstaged";
+            this.files.Groups.AddRange(new System.Windows.Forms.ListViewGroup[] {
+            listViewGroup1,
+            listViewGroup2});
+            this.files.Location = new System.Drawing.Point(69, 3);
+            this.files.Name = "files";
+            this.files.Size = new System.Drawing.Size(706, 464);
+            this.files.TabIndex = 10;
+            this.files.UseCompatibleStateImageBehavior = false;
+            this.files.View = System.Windows.Forms.View.Details;
+            // 
+            // column
+            // 
+            this.column.Text = "";
+            // 
             // ProjectView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.files);
             this.Controls.Add(this.unstage);
             this.Controls.Add(this.stage);
             this.Controls.Add(this.history);
             this.Controls.Add(this.push);
             this.Controls.Add(this.pull);
-            this.Controls.Add(this.files);
             this.Name = "ProjectView";
             this.Size = new System.Drawing.Size(778, 470);
             this.Style = MetroFramework.MetroColorStyle.Orange;
@@ -157,12 +147,12 @@
         }
 
         #endregion
-        private MetroFramework.Controls.MetroListView files;
         private MetroFramework.Controls.MetroTile pull;
         private MetroFramework.Controls.MetroTile push;
         private MetroFramework.Controls.MetroTile history;
         private MetroFramework.Controls.MetroTile stage;
         private MetroFramework.Controls.MetroTile unstage;
-        private System.Windows.Forms.ColumnHeader changed;
+        private System.Windows.Forms.ListView files;
+        private System.Windows.Forms.ColumnHeader column;
     }
 }

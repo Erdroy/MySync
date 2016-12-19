@@ -100,15 +100,10 @@ namespace MySync.Client.UI
                 }
             }
         }
-
-        private void files_SelectedIndexChanged(object sender, System.EventArgs e)
-        {
-
-        }
-
+        
         private void ProjectView_Resize(object sender, System.EventArgs e)
         {
-            files.Columns[0].Width = files.Width - 5;
+            files.Columns[0].Width = files.Width - 20;
         }
 
         private void UpdateTimer_Tick(object sender, System.EventArgs e)
@@ -131,8 +126,8 @@ namespace MySync.Client.UI
         {
             if (files.Columns.Count == 0)
             {
-                var column = files.Columns.Add("Changes");
-                column.Width = files.Width - 5;
+                var col = files.Columns.Add("Changes");
+                col.Width = files.Width - 20;
             }
 
             var entries = FileMapping.BuildEntries(_project);
@@ -142,7 +137,7 @@ namespace MySync.Client.UI
             {
                 var item = new ListViewItem(files.Groups["unstaged"])
                 {
-                    Text = @"[" + entry.EntryType + @"]" + entry.Entry,
+                    Text = @"[" + entry.EntryType + @"] " + entry.Entry,
                     Tag = entry,
                     Name = entry.Entry
                 };
