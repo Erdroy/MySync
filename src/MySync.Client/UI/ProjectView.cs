@@ -1,6 +1,7 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 // under GPL-3.0 license
 
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using MetroFramework.Controls;
@@ -146,6 +147,34 @@ namespace MySync.Client.UI
             }
 
             _project.FileSystem.Changed = false;
+        }
+
+        private void stageToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            stage_Click(null, null);
+        }
+
+        private void unstageToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            unstage_Click(null, null);
+        }
+
+        private void discardToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            foreach (ListViewItem item in files.SelectedItems)
+            {
+                _project.Discard((Commit.CommitEntry)item.Tag);
+            }
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            throw new NotImplementedException("Not implemented");
+        }
+
+        private void lockToolStripMenuItem_Click(object sender, System.EventArgs e)
+        {
+            throw new NotImplementedException("Not implemented");
         }
     }
 }

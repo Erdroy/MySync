@@ -144,13 +144,14 @@ namespace MySync.Client.Core.Projects
             {
                 case CommitEntryType.Created:
                     // delete
-                    FileSystem.DeleteLocalFile(entry.Entry);
+                    FileSystem.DeleteLocalFile(LocalDirectory + "/data/"+ entry.Entry);
                     break;
                 case CommitEntryType.Changed:
                 case CommitEntryType.Deleted:
                     // download from server
                     if (!IsLocked())
                     {
+                        var files = FileSystem.GetRemoteMapping().Files;
                         using (new ProjectLock(this))
                         {
                             var outputFile = LocalDirectory + "/data/" + entry.Entry;
@@ -166,6 +167,11 @@ namespace MySync.Client.Core.Projects
                                 Directory.CreateDirectory(PathUtils.GetPath(outputFile));
                                 FileSystem.Client.DownloadFile(outputFile, remoteFile);
                             }
+
+
+                            // set file mod time(version base)
+                            var fileEntry = files.FirstOrDefault(x => x.File == entry.Entry);
+                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
                         }
                     }
                     break;

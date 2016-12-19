@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ListViewGroup listViewGroup1 = new System.Windows.Forms.ListViewGroup("Staged files", System.Windows.Forms.HorizontalAlignment.Left);
             System.Windows.Forms.ListViewGroup listViewGroup2 = new System.Windows.Forms.ListViewGroup("Unstaged files", System.Windows.Forms.HorizontalAlignment.Left);
             this.pull = new MetroFramework.Controls.MetroTile();
@@ -37,6 +38,13 @@
             this.unstage = new MetroFramework.Controls.MetroTile();
             this.files = new System.Windows.Forms.ListView();
             this.column = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.stageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.unstageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.discardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // pull
@@ -110,6 +118,7 @@
             this.files.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.files.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.column});
+            this.files.ContextMenuStrip = this.contextMenu;
             listViewGroup1.Header = "Staged files";
             listViewGroup1.Name = "staged";
             listViewGroup2.Header = "Unstaged files";
@@ -128,6 +137,52 @@
             // 
             this.column.Text = "";
             // 
+            // contextMenu
+            // 
+            this.contextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.stageToolStripMenuItem,
+            this.unstageToolStripMenuItem,
+            this.discardToolStripMenuItem,
+            this.deleteToolStripMenuItem,
+            this.lockToolStripMenuItem});
+            this.contextMenu.Name = "contextMenu";
+            this.contextMenu.Size = new System.Drawing.Size(153, 136);
+            // 
+            // stageToolStripMenuItem
+            // 
+            this.stageToolStripMenuItem.Name = "stageToolStripMenuItem";
+            this.stageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stageToolStripMenuItem.Text = "Stage";
+            this.stageToolStripMenuItem.Click += new System.EventHandler(this.stageToolStripMenuItem_Click);
+            // 
+            // unstageToolStripMenuItem
+            // 
+            this.unstageToolStripMenuItem.Name = "unstageToolStripMenuItem";
+            this.unstageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.unstageToolStripMenuItem.Text = "Unstage";
+            this.unstageToolStripMenuItem.Click += new System.EventHandler(this.unstageToolStripMenuItem_Click);
+            // 
+            // discardToolStripMenuItem
+            // 
+            this.discardToolStripMenuItem.Name = "discardToolStripMenuItem";
+            this.discardToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.discardToolStripMenuItem.Text = "Discard";
+            this.discardToolStripMenuItem.Click += new System.EventHandler(this.discardToolStripMenuItem_Click);
+            // 
+            // deleteToolStripMenuItem
+            // 
+            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.deleteToolStripMenuItem.Text = "Delete";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            // 
+            // lockToolStripMenuItem
+            // 
+            this.lockToolStripMenuItem.Name = "lockToolStripMenuItem";
+            this.lockToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.lockToolStripMenuItem.Text = "Lock";
+            this.lockToolStripMenuItem.Click += new System.EventHandler(this.lockToolStripMenuItem_Click);
+            // 
             // ProjectView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -142,6 +197,7 @@
             this.Size = new System.Drawing.Size(778, 470);
             this.Style = MetroFramework.MetroColorStyle.Orange;
             this.Load += new System.EventHandler(this.ProjectView_Load);
+            this.contextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -154,5 +210,11 @@
         private MetroFramework.Controls.MetroTile unstage;
         private System.Windows.Forms.ListView files;
         private System.Windows.Forms.ColumnHeader column;
+        private System.Windows.Forms.ContextMenuStrip contextMenu;
+        private System.Windows.Forms.ToolStripMenuItem stageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem unstageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem discardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lockToolStripMenuItem;
     }
 }
