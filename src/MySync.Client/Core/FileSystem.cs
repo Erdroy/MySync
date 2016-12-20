@@ -87,11 +87,15 @@ namespace MySync.Client.Core
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
         {
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+            var fileInfo = new FileInfo(e.FullPath);
+
+            if (!fileInfo.Exists)
+                return; // ignore directories
 
             Mapping.Files.Add(new FileMapping.FileEntry
             {
                 File = filename,
-                Version = new FileInfo(e.FullPath).LastWriteTime.ToBinary()
+                Version = fileInfo.LastWriteTime.ToBinary()
             });
             Changed = true;
         }
