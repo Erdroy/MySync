@@ -1,5 +1,5 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
-// under GPL-3.0 license
+
 
 using System.Reflection;
 using System.Runtime.InteropServices;
