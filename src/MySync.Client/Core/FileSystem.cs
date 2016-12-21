@@ -86,11 +86,16 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
         {
+            var attributes = File.GetAttributes(e.FullPath);
+
+            if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                // this is a directory
+                return;
+            }
+
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
             var fileInfo = new FileInfo(e.FullPath);
-
-            if (!fileInfo.Exists)
-                return; // ignore directories
 
             Mapping.Files.Add(new FileMapping.FileEntry
             {
@@ -102,6 +107,14 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
         {
+            var attributes = File.GetAttributes(e.FullPath);
+
+            if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                // this is a directory
+                return;
+            }
+
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
             var oldfilename = e.OldFullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
 
