@@ -112,6 +112,8 @@ namespace MySync.Client.Core
             if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
             {
                 // this is a directory
+                BuildFilemap();
+                Changed = true;
                 return;
             }
 
