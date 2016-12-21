@@ -21,7 +21,7 @@ namespace MySync.Client.UI
             InitializeComponent();
         }
 
-        private void ProjectView_Load(object sender, System.EventArgs e)
+        private void ProjectView_Load(object sender, EventArgs e)
         {
             Resize += ProjectView_Resize;
 
@@ -36,12 +36,12 @@ namespace MySync.Client.UI
             files.HeaderStyle = ColumnHeaderStyle.None;
         }
         
-        private void pull_Click(object sender, System.EventArgs e)
+        private void pull_Click(object sender, EventArgs e)
         {
             _project.Pull();
         }
 
-        private void push_Click(object sender, System.EventArgs e)
+        private void push_Click(object sender, EventArgs e)
         {
             var unstaged = new List<Commit.CommitEntry>();
 
@@ -75,12 +75,12 @@ namespace MySync.Client.UI
             }
         }
 
-        private void history_Click(object sender, System.EventArgs e)
+        private void history_Click(object sender, EventArgs e)
         {
             MessageBox.Show(@"Not implemented, yet.");
         }
 
-        private void stage_Click(object sender, System.EventArgs e)
+        private void stage_Click(object sender, EventArgs e)
         {
             foreach (ListViewItem item in files.SelectedItems)
             {
@@ -91,7 +91,7 @@ namespace MySync.Client.UI
             }
         }
 
-        private void unstage_Click(object sender, System.EventArgs e)
+        private void unstage_Click(object sender, EventArgs e)
         {
             foreach (ListViewItem item in files.SelectedItems)
             {
@@ -102,12 +102,12 @@ namespace MySync.Client.UI
             }
         }
         
-        private void ProjectView_Resize(object sender, System.EventArgs e)
+        private void ProjectView_Resize(object sender, EventArgs e)
         {
             files.Columns[0].Width = files.Width - 20;
         }
 
-        private void UpdateTimer_Tick(object sender, System.EventArgs e)
+        private void UpdateTimer_Tick(object sender, EventArgs e)
         {
             if (_project.FileSystem.Changed && MainWindow.Instance.Visible)
             {
@@ -149,17 +149,17 @@ namespace MySync.Client.UI
             _project.FileSystem.Changed = false;
         }
 
-        private void stageToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void stageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             stage_Click(null, null);
         }
 
-        private void unstageToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void unstageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             unstage_Click(null, null);
         }
 
-        private void discardToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void discardToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (ListViewItem item in files.SelectedItems)
             {
@@ -167,12 +167,12 @@ namespace MySync.Client.UI
             }
         }
 
-        private void deleteToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             throw new NotImplementedException("Not implemented");
         }
 
-        private void lockToolStripMenuItem_Click(object sender, System.EventArgs e)
+        private void lockToolStripMenuItem_Click(object sender, EventArgs e)
         {
             throw new NotImplementedException("Not implemented");
         }
