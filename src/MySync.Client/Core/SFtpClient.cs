@@ -81,10 +81,9 @@ namespace MySync.Client.Core
             // check dir
             var path = PathUtils.GetPath(remoteFile);
 
-            // TODO: Optimize directory structure building process
             if (!_sftp.Exists(path))
-                _sftp.CreateDirectory(path);
-            
+                Execute("mkdir -p " + path);
+
             using (var fileStream = new FileStream(inputFile, FileMode.Open))
             {
                 _sftp.UploadFile(fileStream, remoteFile, true); // TODO: Progress

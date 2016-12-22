@@ -89,6 +89,12 @@
     <Compile Include="UI\CreateProject.Designer.cs">
       <DependentUpon>CreateProject.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\Message.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Message.Designer.cs">
+      <DependentUpon>Message.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\old\InfoBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -143,6 +149,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\CreateProject.resx">
       <DependentUpon>CreateProject.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\Message.resx">
+      <DependentUpon>Message.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\old\InfoBox.resx">
       <DependentUpon>InfoBox.cs</DependentUpon>
