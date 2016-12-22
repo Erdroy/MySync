@@ -18,12 +18,9 @@ namespace MySync.Client
             Application.SetCompatibleTextRenderingDefault(false);
 
             // initialize project manager
-            InfoBox.ShowMessage("Connecting to server");
-            {
-                ClientSettings.Load();
-                ProjectsManager.Instance.Initialize();
-                InfoBox.HideMessage();
-            }
+
+            ClientSettings.Load();
+            ProjectsManager.Instance.Initialize();
 
             Application.Run(new MainWindow());
         }
