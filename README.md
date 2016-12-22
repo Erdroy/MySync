@@ -1,6 +1,6 @@
 # MySync
 MySync - File synchronization software with GIT-like PUSH/PULL/COMMIT, aka. SFTP client on steroids.
-Under GPL-3.0 license.
+Under AGPL-3.0 license.
 
 UNDER DEVELOPMENT! EARLY PROTOTYPE.
 -----------------
