@@ -65,7 +65,7 @@ namespace MySync.Client.UI
 
                 if (_project.Commit.FileChanges.Count == 0)
                 {
-                    MessageBox.Show(@"No changes!");
+                    Message.ShowMessage("", "No changes!");
                     return;
                 }
 
@@ -77,7 +77,7 @@ namespace MySync.Client.UI
 
         private void history_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(@"Not implemented, yet.");
+            Message.NotImplemented();
         }
 
         private void stage_Click(object sender, EventArgs e)

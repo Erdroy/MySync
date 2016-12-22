@@ -49,7 +49,7 @@ namespace MySync.Client.UI
             }
             else
             {
-                MessageBox.Show(@"Project name contains illegal characters! Available: 'A-Z', 'a-z', '-', '_', '0-9', and the minimal/maximal length is: 4/17.");
+                Message.ShowMessage("Error", "Project name contains illegal characters! Available: 'A-Z', 'a-z', '-', '_', '0-9', and the minimal/maximal length is: 4/17.");
             }
         }
 

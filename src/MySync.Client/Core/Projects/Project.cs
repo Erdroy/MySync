@@ -186,7 +186,7 @@ namespace MySync.Client.Core.Projects
             if (Commit.FileChanges.Count == 0)
             {
                 // nothing to push
-                MessageBox.Show(@"No staged changes.");
+                UI.Message.ShowMessage("", "There is no staged changes.");
                 return;
             }
 
@@ -194,7 +194,7 @@ namespace MySync.Client.Core.Projects
             if (!IsUpToDate(out commitId))
             {
                 // show error?
-                MessageBox.Show(@"Cannot push changes, project is not up-to-date! Please pull all changes before pushing.");
+                UI.Message.ShowMessage("Warning", "Cannot push changes, project is not up-to-date! Please pull all changes before pushing.");
                 return;
             }
 
@@ -258,17 +258,17 @@ namespace MySync.Client.Core.Projects
                         FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
                     }
 
-                    MessageBox.Show(@"Pushed all changes!");
+                    UI.Message.ShowMessage("", "Pushed all changes!");
                 }
                 catch(Exception ex)
                 {
                     Unlock();
-                    MessageBox.Show(@"Error: " + ex);
+                    UI.Message.ShowMessage("Error", "Error: " + ex);
                 }
             }
             else
             {
-                MessageBox.Show(@"Sorry, project is currently locked due to PUSH or PULL of other user. If you are sure that no one is using the project, this may be a bug, delete `lockfile` in the remote project directory.");
+                UI.Message.ShowMessage("Error", "Sorry, project is currently locked due to PUSH or PULL of other user. If you are sure that no one is using the project, this may be a bug, delete `lockfile` in the remote project directory.");
             }
         }
 
@@ -280,7 +280,7 @@ namespace MySync.Client.Core.Projects
             if (IsUpToDate(out commitId))
             {
                 // show message?
-                MessageBox.Show(@"No changes to download.");
+                UI.Message.ShowMessage("", "No changes to download.");
                 return;
             }
 
@@ -399,13 +399,13 @@ namespace MySync.Client.Core.Projects
                             }
                         }
                     }
-
-                    MessageBox.Show(@"Pulled all changes!");
+                    
+                    UI.Message.ShowMessage("", "Pulled all changes!");
                 }
                 catch(Exception ex)
                 {
                     Unlock();
-                    MessageBox.Show(@"Error: " + ex);
+                    UI.Message.ShowMessage("Error", "Error: " + ex);
                 }
             }
         }

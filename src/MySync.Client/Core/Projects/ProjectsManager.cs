@@ -47,7 +47,7 @@ namespace MySync.Client.Core.Projects
 
                 if (projectNames.Any(name => name == projectName))
                 {
-                    MessageBox.Show(@"This project name is already used!");
+                    UI.Message.ShowMessage("Error", "This project name is already used!");
                     return;
                 }
             }
