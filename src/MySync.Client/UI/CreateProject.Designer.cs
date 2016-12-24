@@ -62,6 +62,7 @@
             this.projectName.MaxLength = 32767;
             this.projectName.Name = "projectName";
             this.projectName.PasswordChar = '\0';
+            this.projectName.PromptText = "project name";
             this.projectName.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.projectName.SelectedText = "";
             this.projectName.SelectionLength = 0;
@@ -111,6 +112,7 @@
             this.serverAddress.MaxLength = 32767;
             this.serverAddress.Name = "serverAddress";
             this.serverAddress.PasswordChar = '\0';
+            this.serverAddress.PromptText = "server ipv4 address";
             this.serverAddress.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.serverAddress.SelectedText = "";
             this.serverAddress.SelectionLength = 0;
@@ -151,6 +153,7 @@
             this.username.MaxLength = 32767;
             this.username.Name = "username";
             this.username.PasswordChar = '\0';
+            this.username.PromptText = "username";
             this.username.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.username.SelectedText = "";
             this.username.SelectionLength = 0;
@@ -191,6 +194,7 @@
             this.password.MaxLength = 32767;
             this.password.Name = "password";
             this.password.PasswordChar = '*';
+            this.password.PromptText = "password";
             this.password.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.password.SelectedText = "";
             this.password.SelectionLength = 0;
@@ -251,6 +255,7 @@
             this.directory.MaxLength = 32767;
             this.directory.Name = "directory";
             this.directory.PasswordChar = '\0';
+            this.directory.PromptText = "the local directory";
             this.directory.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.directory.SelectedText = "";
             this.directory.SelectionLength = 0;
@@ -295,6 +300,7 @@
             this.MaximumSize = new System.Drawing.Size(320, 440);
             this.MinimumSize = new System.Drawing.Size(320, 440);
             this.Name = "CreateProject";
+            this.ShowInTaskbar = false;
             this.Style = MetroFramework.MetroColorStyle.Orange;
             this.Text = "CreateProject";
             this.Load += new System.EventHandler(this.CreateProject_Load);

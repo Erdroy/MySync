@@ -57,6 +57,7 @@
             this.desc.Multiline = true;
             this.desc.Name = "desc";
             this.desc.PasswordChar = '\0';
+            this.desc.PromptText = "Enter commit description";
             this.desc.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.desc.SelectedText = "";
             this.desc.SelectionLength = 0;
@@ -114,6 +115,7 @@
             this.Controls.Add(this.metroLabel1);
             this.Controls.Add(this.desc);
             this.Name = "CreateCommit";
+            this.ShowInTaskbar = false;
             this.Style = MetroFramework.MetroColorStyle.Orange;
             this.Text = "Commit";
             this.ResumeLayout(false);

@@ -71,6 +71,7 @@ namespace MySync.Client.UI
         public static DialogResult CreateNew()
         {
             var wnd = new CreateProject();
+            MainWindow.Instance.AddOwnedForm(wnd);
             return wnd.ShowDialog();
         }
 
