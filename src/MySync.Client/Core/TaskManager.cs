@@ -53,6 +53,18 @@ namespace MySync.Client.Core
         // INTERNAL
         internal static void DispatchEvents()
         {
+            // call events
+            lock (Events)
+            {
+                foreach (var evnt in Events)
+                {
+                    evnt();
+                }
+
+                Events.Clear();
+            }
+
+            // do task end
             lock (Tasks)
             {
                 var doneTasks = Tasks.Where(task => task.IsDone).ToList();
@@ -63,17 +75,6 @@ namespace MySync.Client.Core
                     task.OnDone();
                     Tasks.Remove(task);
                 }
-            }
-
-            // call events
-            lock (Events)
-            {
-                foreach (var evnt in Events)
-                {
-                    evnt();
-                }
-
-                Events.Clear();
             }
         }
 
