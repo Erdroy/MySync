@@ -4,6 +4,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using MySync.Client.UI;
 using MySync.Client.Utilities;
 using Renci.SshNet;
 
@@ -22,12 +23,18 @@ namespace MySync.Client.Core
         public void Open(string password, string address, ushort port = 22)
         {
             _ssh = new SshClient(address, port, "mysync", password);
+            _ssh.ErrorOccurred += delegate 
+            {
+                Message.ShowMessage("Error!", "Failed to connect to project's server!");
+            };
             _ssh.Connect();
 
             _sftp = new SftpClient(address, port, "mysync", password);
+            _sftp.ErrorOccurred += delegate
+            {
+                Message.ShowMessage("Error!", "Failed to connect to project's server!");
+            };
             _sftp.Connect();
-
-            // TODO: Error handling
         }
 
         public void Close()
