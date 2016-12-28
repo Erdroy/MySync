@@ -39,6 +39,20 @@ namespace MySync.Client.Core
         }
 
         /// <summary>
+        /// Queue task.
+        /// </summary>
+        /// <param name="job">The 'on' job method.</param>
+        /// <param name="done">the 'on' done method.</param>
+        public static void QueueTask(TaskEvent job, TaskEvent done)
+        {
+            QueueTask(new Task
+            {
+                OnJob = job,
+                OnDone = done
+            });
+        }
+
+        /// <summary>
         /// Dispatch custom event.
         /// </summary>
         /// <param name="evnt">The event.</param>

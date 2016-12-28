@@ -38,7 +38,15 @@ namespace MySync.Client.UI
         
         private void pull_Click(object sender, EventArgs e)
         {
-            _project.Pull();
+            Progress.ShowWindow("Pulling...");
+            Progress.Message = "";
+            TaskManager.QueueTask(
+                delegate
+                {
+                    _project.Pull();
+                },
+                Progress.CloseWindow
+            );
         }
 
         private void push_Click(object sender, EventArgs e)
@@ -151,20 +159,44 @@ namespace MySync.Client.UI
 
         private void stageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            stage_Click(null, null);
+            Progress.ShowWindow("Stage...");
+            Progress.Message = "";
+            TaskManager.QueueTask(
+                delegate
+                {
+                    stage_Click(null, null);
+                },
+                Progress.CloseWindow
+            );
         }
 
         private void unstageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            unstage_Click(null, null);
+            Progress.ShowWindow("Unstage...");
+            Progress.Message = "";
+            TaskManager.QueueTask(
+                delegate
+                {
+                    unstage_Click(null, null);
+                },
+                Progress.CloseWindow
+            );
         }
 
         private void discardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in files.SelectedItems)
-            {
-                _project.Discard((Commit.CommitEntry)item.Tag);
-            }
+            Progress.ShowWindow("Discarding...");
+            Progress.Message = "";
+            TaskManager.QueueTask(
+                delegate
+                {
+                    foreach (ListViewItem item in files.SelectedItems)
+                    {
+                        _project.Discard((Commit.CommitEntry)item.Tag);
+                    }
+                },
+                Progress.CloseWindow
+            );
         }
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)

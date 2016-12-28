@@ -40,6 +40,8 @@ namespace MySync.Client.UI
         {
             Current.Close();
             Current = null;
+
+            MainWindow.Instance.FocusMe();
         }
         
         public static string Message

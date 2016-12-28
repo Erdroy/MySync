@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using MySync.Client.UI;
 using MySync.Client.Utilities;
 
 namespace MySync.Client.Core.Projects
@@ -274,13 +275,15 @@ namespace MySync.Client.Core.Projects
 
         public void Pull()
         {
-            // TODO: progress
             // apply all commits
             int commitId;
             if (IsUpToDate(out commitId))
             {
                 // show message?
-                UI.Message.ShowMessage("", "No changes to download.");
+                TaskManager.DispathSingle(delegate
+                {
+                    UI.Message.ShowMessage("", "No changes to download.");
+                });
                 return;
             }
 
@@ -290,7 +293,10 @@ namespace MySync.Client.Core.Projects
                 {
                     using (new ProjectLock(this))
                     {
-
+                        TaskManager.DispathSingle(delegate
+                        {
+                            Progress.Message = "Checking for updates...";
+                        });
                         // download commits, start from commit_'commitId'.json
                         var commitFiles = FileSystem.GetFilesRemote("/commits");
                         commitFiles = commitFiles.OrderBy(x => x).ToArray();
@@ -320,8 +326,15 @@ namespace MySync.Client.Core.Projects
                             var files = FileSystem.GetRemoteMapping().Files;
 
                             // download files
+                            var filesDownloaded = 0;
                             foreach (var file in files)
                             {
+                                var downloaded = filesDownloaded;
+                                TaskManager.DispathSingle(delegate
+                                {
+                                    Progress.Message = "Downlading file " + (downloaded+1) + " out of " + files.Count;
+                                });
+
                                 var outputFile = LocalDirectory + "/data/" + file.File;
                                 var remoteFile = RemoteDirectory + "/data/" + file.File;
 
@@ -338,10 +351,15 @@ namespace MySync.Client.Core.Projects
 
                                 // set file mod time(version base)
                                 File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
+                                filesDownloaded++;
                             }
                         }
                         else
                         {
+                            TaskManager.DispathSingle(delegate
+                            {
+                                Progress.Message = "Saving changes...";
+                            });
                             // apply the commits as local commits
                             var cid = cCommit + 1;
                             foreach (var commit in commits)
@@ -397,10 +415,13 @@ namespace MySync.Client.Core.Projects
                                     // ignore
                                 }
                             }
+                            TaskManager.DispathSingle(delegate
+                            {
+                                Progress.Message = "Done!";
+                            });
                         }
                     }
                     
-                    UI.Message.ShowMessage("", "Pulled all changes!");
                 }
                 catch(Exception ex)
                 {

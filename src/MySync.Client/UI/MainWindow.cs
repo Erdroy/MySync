@@ -49,6 +49,9 @@ namespace MySync.Client.UI
             
             _dispatcher.Tick += delegate
             {
+                if (Lock)
+                    return;
+
                 // dispatch events
                 TaskManager.DispatchEvents();
             };
@@ -60,5 +63,7 @@ namespace MySync.Client.UI
             // dispose all
             _dispatcher.Dispose();
         }
+
+        public static bool Lock { get; set; }
     }
 }
