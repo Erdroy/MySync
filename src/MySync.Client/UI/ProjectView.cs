@@ -59,7 +59,7 @@ namespace MySync.Client.UI
 
                 foreach (ListViewItem item in files.Items)
                 {
-                    var entry = (Commit.CommitEntry) item.Tag;
+                    var entry = (Commit.CommitEntry)item.Tag;
 
                     if (item.Group.Name == "staged")
                     {
@@ -77,9 +77,23 @@ namespace MySync.Client.UI
                     return;
                 }
 
-                _project.FileSystem.BuildFilemap();
-                _project.Push(unstaged);
-                UpdateFiles();
+                Progress.ShowWindow("Pushing...");
+                Progress.Message = "";
+                TaskManager.QueueTask(
+                    delegate
+                    {
+                        lock (_project)
+                        {
+                            _project.FileSystem.BuildFilemap();
+                            _project.Push(unstaged);
+                        }
+                    },
+                    delegate
+                    {
+                        Progress.CloseWindow();
+                        UpdateFiles();
+                    }
+                );
             }
         }
 

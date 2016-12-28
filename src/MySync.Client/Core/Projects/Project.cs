@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using MySync.Client.UI;
 using MySync.Client.Utilities;
 
@@ -183,11 +182,19 @@ namespace MySync.Client.Core.Projects
 
         public void Push(List<Commit.CommitEntry> excluded)
         {
+            TaskManager.DispathSingle(delegate
+            {
+                Progress.Message = "Checking for updates...";
+            });
+
             // TODO: progress
             if (Commit.FileChanges.Count == 0)
             {
                 // nothing to push
-                UI.Message.ShowMessage("", "There is no staged changes.");
+                TaskManager.DispathSingle(delegate
+                {
+                    Message.ShowMessage("", "There is no staged changes.");
+                });
                 return;
             }
 
@@ -195,7 +202,10 @@ namespace MySync.Client.Core.Projects
             if (!IsUpToDate(out commitId))
             {
                 // show error?
-                UI.Message.ShowMessage("Warning", "Cannot push changes, project is not up-to-date! Please pull all changes before pushing.");
+                TaskManager.DispathSingle(delegate
+                {
+                    Message.ShowMessage("Warning", "Cannot push changes, project is not up-to-date! Please pull all changes before pushing.");
+                });
                 return;
             }
 
@@ -207,7 +217,10 @@ namespace MySync.Client.Core.Projects
                     using (new ProjectLock(this))
                     {
                         // --
-                        
+                        TaskManager.DispathSingle(delegate
+                        {
+                            Progress.Message = "Uploading commit...";
+                        });
                         // Create commit
                         var newCommitid = commitId + 1;
 
@@ -232,8 +245,15 @@ namespace MySync.Client.Core.Projects
                             RemoteDirectory + "/filemaps/filemap_" + newCommitid + ".json");
 
                         // do remote changes
+                        var fileId = 0;
+                        var files = Commit.FileChanges.Count;
                         foreach (var entry in Commit.FileChanges)
                         {
+                            var id = fileId;
+                            TaskManager.DispathSingle(delegate
+                            {
+                                Progress.Message = "Updating file " + id + " out of " + files;
+                            });
                             if (entry.EntryType == CommitEntryType.Deleted)
                             {
                                 // delete file
@@ -249,27 +269,42 @@ namespace MySync.Client.Core.Projects
 
                                 // TODO: Optimize transfer size using some sort of binary diff?
                             }
+
+                            fileId++;
                         }
 
 
                         // --
 
+                        TaskManager.DispathSingle(delegate
+                        {
+                            Progress.Message = "Cleaning...";
+                        });
 
                         // cleanup
                         FileSystem.Client.DeleteEmptyDirs(RemoteDirectory + "/data/");
                     }
 
-                    UI.Message.ShowMessage("", "Pushed all changes!");
+                    TaskManager.DispathSingle(delegate
+                    {
+                        Message.ShowMessage("", "Pushed all changes!");
+                    });
                 }
                 catch(Exception ex)
                 {
                     Unlock();
-                    UI.Message.ShowMessage("Error", "Error: " + ex);
+                    TaskManager.DispathSingle(delegate
+                    {
+                        Message.ShowMessage("Error", "Error: " + ex);
+                    });
                 }
             }
             else
             {
-                UI.Message.ShowMessage("Error", "Sorry, project is currently locked due to PUSH or PULL of other user. If you are sure that no one is using the project, this may be a bug, delete `lockfile` in the remote project directory.");
+                TaskManager.DispathSingle(delegate
+                {
+                    Message.ShowMessage("Error", "Sorry, project is currently locked due to PUSH or PULL of other user. If you are sure that no one is using the project, this may be a bug, delete `lockfile` in the remote project directory.");
+                });
             }
         }
 
@@ -282,7 +317,7 @@ namespace MySync.Client.Core.Projects
                 // show message?
                 TaskManager.DispathSingle(delegate
                 {
-                    UI.Message.ShowMessage("", "No changes to download.");
+                    Message.ShowMessage("", "No changes to download.");
                 });
                 return;
             }
@@ -415,18 +450,18 @@ namespace MySync.Client.Core.Projects
                                     // ignore
                                 }
                             }
-                            TaskManager.DispathSingle(delegate
-                            {
-                                Progress.Message = "Done!";
-                            });
                         }
+                        TaskManager.DispathSingle(delegate
+                        {
+                            Progress.Message = "Done!";
+                        });
                     }
                     
                 }
                 catch(Exception ex)
                 {
                     Unlock();
-                    UI.Message.ShowMessage("Error", "Error: " + ex);
+                    Message.ShowMessage("Error", "Error: " + ex);
                 }
             }
         }
