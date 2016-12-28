@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 using MySync.Client.Utilities;
 
 namespace MySync.Client.Core.Projects

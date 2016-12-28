@@ -1,8 +1,8 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 
-
 using System.Windows.Forms;
 using MetroFramework.Controls;
+using MySync.Client.Core;
 using MySync.Client.Core.Projects;
 using MySync.Client.Utilities;
 
@@ -18,25 +18,59 @@ namespace MySync.Client.UI
         private void ProjectsMenu_Load(object sender, System.EventArgs e)
         {
             // Load all projects
-            foreach (var projectToOpen in ClientSettings.Instance.OpenedProjects)
+            Progress.ShowWindow("Loading projects.");
+            Progress.Message = "";
+            TaskManager.QueueTask(new Task
             {
-                CreateProjectView(ProjectsManager.Instance.OpenProject(projectToOpen.Name, projectToOpen.LocalDir));
-            }
+                OnJob = delegate
+                {
+                    foreach (var projectToOpen in ClientSettings.Instance.OpenedProjects)
+                    {
+                        LoadProject(projectToOpen.Name, projectToOpen.LocalDir);
+                    }
+                },
+                OnDone = delegate
+                {
+                    Progress.CloseWindow();
+                }
+            });
         }
 
+        // private
         private void labelNewProject_Click(object sender, System.EventArgs e)
         {
             if (CreateProject.CreateNew() == DialogResult.OK)
             {
-                ProjectsManager.Instance.CreateProject(CreateProject.ProjectName); // create project
-
-                var project = ProjectsManager.Instance.OpenProject(CreateProject.ProjectName, CreateProject.ProjectDirectory);
-
-                CreateProjectView(project);
+                Progress.ShowWindow("Creating...");
+                Progress.Message = "Creating project '" + CreateProject.ProjectName + "'...";
+                TaskManager.QueueTask(new Task
+                {
+                    OnJob = delegate
+                    {
+                        ProjectsManager.Instance.CreateProject(CreateProject.ProjectName); // create project
+                        LoadProject(CreateProject.ProjectName, CreateProject.ProjectDirectory);
+                    },
+                    OnDone = delegate
+                    {
+                        Progress.CloseWindow();
+                    }
+                });
             }
         }
 
-        public void CreateProjectView(Project project)
+        // private
+        private void LoadProject(string name, string dir)
+        {
+            var project = ProjectsManager.Instance.OpenProject(name, dir);
+
+            TaskManager.DispathSingle(delegate
+            {
+                CreateProjectView(project);
+            });
+        }
+
+        // private
+        private void CreateProjectView(Project project)
         {
             var tab = new MetroTabPage
             {
