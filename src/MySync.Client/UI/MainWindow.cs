@@ -3,6 +3,7 @@
 
 using System;
 using System.Windows.Forms;
+using MySync.Client.Core;
 
 namespace MySync.Client.UI
 {
@@ -17,6 +18,7 @@ namespace MySync.Client.UI
         }
 
         private ProjectsMenu _projectsMenu;
+        private Timer _dispatcher;
 
         public MainWindow()
         {
@@ -38,6 +40,25 @@ namespace MySync.Client.UI
             
             // copyinfo label should be always visible ;)
             labelCopyinfo.BringToFront();
+
+            // run dispatch timer
+            _dispatcher = new Timer
+            {
+                Interval = 250 // every 1/4 of a second.
+            };
+            
+            _dispatcher.Tick += delegate
+            {
+                // dispatch events
+                TaskManager.DispatchEvents();
+            };
+            _dispatcher.Start();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            // dispose all
+            _dispatcher.Dispose();
         }
     }
 }

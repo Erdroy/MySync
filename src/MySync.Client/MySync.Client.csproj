@@ -75,6 +75,8 @@
     <Compile Include="Core\Projects\Project.cs" />
     <Compile Include="Core\Projects\ProjectsManager.cs" />
     <Compile Include="Core\SFtpClient.cs" />
+    <Compile Include="Core\Task.cs" />
+    <Compile Include="Core\TaskManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\CreateCommit.cs">
