@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MySync.Client.Core.Projects;
+using MySync.Client.Utilities;
 using Newtonsoft.Json;
 
 namespace MySync.Client.Core
@@ -25,13 +26,18 @@ namespace MySync.Client.Core
 
         public List<FileEntry> Files = new List<FileEntry>();
 
-        public void Update(string rootDirectory)
+        public void Update(Project project, string rootDirectory)
         {
             var files = Directory.EnumerateFiles(rootDirectory, "*.*", SearchOption.AllDirectories);
 
             Files.Clear();
             foreach (var file in files)
             {
+                // ignore files
+
+                if (PathUtils.IsExcluded(project.Exclusions, file))
+                    return;
+
                 var fileinfo = new FileInfo(file);
                 
                 var filePath = file;

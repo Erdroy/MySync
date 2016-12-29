@@ -20,5 +20,10 @@ namespace MySync.Client.Utilities
             }
             return file.Substring(0, i);
         }
+
+        public static bool IsExcluded(string[] exclusions, string file)
+        {
+            return false;
+        }
     }
 }

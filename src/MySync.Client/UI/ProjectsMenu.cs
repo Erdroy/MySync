@@ -26,7 +26,11 @@ namespace MySync.Client.UI
                 {
                     foreach (var projectToOpen in ClientSettings.Instance.OpenedProjects)
                     {
-                        LoadProject(projectToOpen.Name, projectToOpen.LocalDir, projectToOpen.Host, projectToOpen.Password);
+                        var project = ProjectsManager.Instance.OpenProject(projectToOpen.Name, projectToOpen.LocalDir, projectToOpen.Host, projectToOpen.Password);
+                        TaskManager.DispathSingle(delegate
+                        {
+                            CreateProjectView(project);
+                        });
                     }
                 },
                 OnDone = delegate
@@ -48,7 +52,13 @@ namespace MySync.Client.UI
                     OnJob = delegate
                     {
                         ProjectsManager.Instance.CreateProject(CreateProject.ProjectName, CreateProject.ServerIp, CreateProject.Password); // create project
-                        LoadProject(CreateProject.ProjectName, CreateProject.ProjectDirectory, CreateProject.ServerIp, CreateProject.Password);
+
+                        var project = ProjectsManager.Instance.OpenProject(CreateProject.ProjectName, CreateProject.ProjectDirectory, CreateProject.ServerIp, CreateProject.Password);
+
+                        TaskManager.DispathSingle(delegate
+                        {
+                            CreateProjectView(project);
+                        });
                     },
                     OnDone = delegate
                     {
@@ -57,18 +67,7 @@ namespace MySync.Client.UI
                 });
             }
         }
-
-        // private
-        private void LoadProject(string name, string dir, string addr, string pass)
-        {
-            var project = ProjectsManager.Instance.OpenProject(name, dir, addr, pass);
-
-            TaskManager.DispathSingle(delegate
-            {
-                CreateProjectView(project);
-            });
-        }
-
+        
         // private
         private void CreateProjectView(Project project)
         {

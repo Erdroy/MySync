@@ -19,7 +19,6 @@ namespace MySync.Client.Core.Projects
         /// <param name="projectName">The project name</param>
         /// <param name="address">The project's server IP address.</param>
         /// <param name="password">The project's server password for user 'mysync'.</param>
-        /// <exception cref="MySyncException">Handles all exceptions.</exception>
         public void CreateProject(string projectName, string address, string password)
         {
             var mainDir = "/home/mysync";
@@ -68,7 +67,6 @@ namespace MySync.Client.Core.Projects
         /// <param name="address">The project's server IP address.</param>
         /// <param name="password">The project's server password for user 'mysync'.</param>
         /// <returns>The opened project, null when failed</returns>
-        /// <exception cref="MySyncException">Handles all exceptions.</exception>
         public Project OpenProject(string projectName, string localDirectory, string address, string password)
         {
             var mainDir = "/home/mysync";

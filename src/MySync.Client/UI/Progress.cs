@@ -14,7 +14,7 @@ namespace MySync.Client.UI
             InitializeComponent();
         }
 
-        private void Progress_Load(object sender, System.EventArgs e)
+        private void Progress_Load(object sender, EventArgs e)
         {
 
         }

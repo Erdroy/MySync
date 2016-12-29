@@ -1,7 +1,5 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 
-
-using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 

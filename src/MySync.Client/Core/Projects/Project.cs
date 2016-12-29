@@ -1,6 +1,5 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +24,8 @@ namespace MySync.Client.Core.Projects
 
         public Commit Commit { get; set; }
 
+        public string[] Exclusions { get; set; }
+
         // hide the constructor
         internal Project(SFtpClient client, string name, string localdir, string remotedir)
         {
@@ -38,6 +39,9 @@ namespace MySync.Client.Core.Projects
             {
                 Project = this
             };
+
+            // load local exclusions
+            LoadExclusions();
 
             FileSystem.BuildFilemap();
             FileSystem.Open(client);
@@ -137,14 +141,24 @@ namespace MySync.Client.Core.Projects
                 CommitDescription = name
             };
         }
-        
+
+        public void LoadExclusions()
+        {
+            if (File.Exists(LocalDirectory + "/data/.ignore"))
+            {
+                var data = File.ReadAllText(LocalDirectory + "/data/.ignore");
+                data = data.Replace("\r", "").Trim();
+                Exclusions = data.Split('\n');
+            }
+        }
+
         public void Discard(Commit.CommitEntry entry)
         {
             switch (entry.EntryType)
             {
                 case CommitEntryType.Created:
                     // delete
-                    FileSystem.DeleteLocalFile(LocalDirectory + "/data/"+ entry.Entry);
+                    FileSystem.DeleteLocalFile(LocalDirectory + "/data/" + entry.Entry);
                     break;
                 case CommitEntryType.Changed:
                 case CommitEntryType.Deleted:
@@ -287,6 +301,7 @@ namespace MySync.Client.Core.Projects
 
                     TaskManager.DispathSingle(delegate
                     {
+                        LoadExclusions();
                         Message.ShowMessage("", "Pushed all changes!");
                     });
                 }
@@ -453,6 +468,7 @@ namespace MySync.Client.Core.Projects
                         }
                         TaskManager.DispathSingle(delegate
                         {
+                            LoadExclusions();
                             Progress.Message = "Done!";
                         });
                     }

@@ -4,6 +4,7 @@
 using System.IO;
 using System.Linq;
 using MySync.Client.Core.Projects;
+using MySync.Client.Utilities;
 
 namespace MySync.Client.Core
 {
@@ -33,7 +34,7 @@ namespace MySync.Client.Core
             if (Mapping != null)
             {
                 Changed = false;
-                Mapping.Update(rootDir);
+                Mapping.Update(Project, rootDir);
                 return;
             }
 
@@ -95,6 +96,11 @@ namespace MySync.Client.Core
             }
 
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+            
+            // ignore files
+            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+                return;
+
             var fileInfo = new FileInfo(e.FullPath);
 
             Mapping.Files.Add(new FileMapping.FileEntry
@@ -116,6 +122,9 @@ namespace MySync.Client.Core
                 Changed = true;
                 return;
             }
+            // ignore files
+            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+                return;
 
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
             var oldfilename = e.OldFullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
@@ -138,6 +147,10 @@ namespace MySync.Client.Core
         {
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
 
+            // ignore files 
+            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+                return;
+
             var modfile = Mapping.Files.Find(file => file.File == filename);
 
             if(modfile.File != null)
@@ -153,6 +166,10 @@ namespace MySync.Client.Core
                 return;
 
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+
+            // ignore files
+            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+                return;
 
             // find then remove and add new version of file to the mapping
             for (var i = 0; i < Mapping.Files.Count; i++)
