@@ -1,6 +1,6 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 
-
+using System;
 using System.IO;
 using System.Linq;
 using MySync.Client.Core.Projects;
@@ -57,7 +57,31 @@ namespace MySync.Client.Core
             _fileSystemWatcher.Renamed += FileSystemWatcher_Renamed;
             _fileSystemWatcher.Deleted += FileSystemWatcher_Deleted;
         }
-        
+
+        public void DeleteEmptyDirs(string dir)
+        {
+            try
+            {
+                foreach (var d in Directory.EnumerateDirectories(dir))
+                {
+                    DeleteEmptyDirs(d);
+                }
+
+                var entries = Directory.EnumerateFileSystemEntries(dir);
+
+                if (!entries.Any())
+                {
+                    try
+                    {
+                        Directory.Delete(dir);
+                    }
+                    catch (UnauthorizedAccessException) { }
+                    catch (DirectoryNotFoundException) { }
+                }
+            }
+            catch (UnauthorizedAccessException) { }
+        }
+
         public FileMapping GetRemoteMapping()
         {
             // download from the server
@@ -157,6 +181,7 @@ namespace MySync.Client.Core
                 Mapping.Files.Remove(modfile);
 
             Changed = true;
+            DeleteEmptyDirs(Project.LocalDirectory + "/data/");
         }
 
         private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)

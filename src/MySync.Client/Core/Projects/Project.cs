@@ -148,7 +148,7 @@ namespace MySync.Client.Core.Projects
             data = data.Replace("\r", "").Trim();
             Exclusions = data.Split('\n');
         }
-
+        
         public void Discard(Commit.CommitEntry entry)
         {
             switch (entry.EntryType)
@@ -189,6 +189,8 @@ namespace MySync.Client.Core.Projects
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            FileSystem.DeleteEmptyDirs(LocalDirectory + "/data/");
         }
 
         public void Push(List<Commit.CommitEntry> excluded)
@@ -318,6 +320,7 @@ namespace MySync.Client.Core.Projects
                     Message.ShowMessage("Error", "Sorry, project is currently locked due to PUSH or PULL of other user. If you are sure that no one is using the project, this may be a bug, delete `lockfile` in the remote project directory.");
                 });
             }
+            FileSystem.DeleteEmptyDirs(LocalDirectory + "/data/");
         }
 
         public void Pull()
@@ -477,6 +480,7 @@ namespace MySync.Client.Core.Projects
                     Message.ShowMessage("Error", "Error: " + ex);
                 }
             }
+            FileSystem.DeleteEmptyDirs(LocalDirectory + "/data/");
         }
     }
 }
