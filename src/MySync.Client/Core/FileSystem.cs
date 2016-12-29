@@ -38,7 +38,7 @@ namespace MySync.Client.Core
                 return;
             }
 
-            Mapping = FileMapping.CreateFileMapping(rootDir);
+            Mapping = FileMapping.CreateFileMapping(Project, rootDir);
 
             _fileSystemWatcher?.Dispose();
             _fileSystemWatcher = new FileSystemWatcher(rootDir)
@@ -98,7 +98,7 @@ namespace MySync.Client.Core
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
             
             // ignore files
-            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+            if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
 
             var fileInfo = new FileInfo(e.FullPath);
@@ -123,7 +123,7 @@ namespace MySync.Client.Core
                 return;
             }
             // ignore files
-            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+            if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
 
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
@@ -148,7 +148,7 @@ namespace MySync.Client.Core
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
 
             // ignore files 
-            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+            if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
 
             var modfile = Mapping.Files.Find(file => file.File == filename);
@@ -168,8 +168,20 @@ namespace MySync.Client.Core
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
 
             // ignore files
-            if (PathUtils.IsExcluded(Project.Exclusions, e.FullPath))
+            if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
+
+            if (e.Name == ".ignore")
+            {
+                // dispatch
+                TaskManager.DispathSingle(delegate
+                {
+                    Project.LoadExclusions();
+                    BuildFilemap();
+                    Changed = true;
+                });
+                return;
+            }
 
             // find then remove and add new version of file to the mapping
             for (var i = 0; i < Mapping.Files.Count; i++)
@@ -200,13 +212,7 @@ namespace MySync.Client.Core
 
             return files.Select(Path.GetFileName).ToArray();
         }
-
-        /*public string[] ExcludedExtensions { get; private set; }
-
-        public string[] ExcludedFiles { get; private set; }
-
-        public string[] ExcludedDirectories { get; private set; }*/
-
+        
         public bool Changed { get; set; }
 
         public SFtpClient Client { get; private set; }

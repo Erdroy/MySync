@@ -35,8 +35,8 @@ namespace MySync.Client.Core
             {
                 // ignore files
 
-                if (PathUtils.IsExcluded(project.Exclusions, file))
-                    return;
+                if (PathUtils.IsExcluded(project, file))
+                    continue;
 
                 var fileinfo = new FileInfo(file);
                 
@@ -66,7 +66,7 @@ namespace MySync.Client.Core
             return vmap;
         }
         
-        public static FileMapping CreateFileMapping(string rootDirectory)
+        public static FileMapping CreateFileMapping(Project project, string rootDirectory)
         {
             var mapping = new FileMapping();
             
@@ -75,6 +75,11 @@ namespace MySync.Client.Core
 
             foreach (var file in files)
             {
+                // ignore files
+
+                if (PathUtils.IsExcluded(project, file))
+                    continue;
+
                 var fileinfo = new FileInfo(file);
 
                 var filePath = file;

@@ -144,12 +144,9 @@ namespace MySync.Client.Core.Projects
 
         public void LoadExclusions()
         {
-            if (File.Exists(LocalDirectory + "/data/.ignore"))
-            {
-                var data = File.ReadAllText(LocalDirectory + "/data/.ignore");
-                data = data.Replace("\r", "").Trim();
-                Exclusions = data.Split('\n');
-            }
+            var data = File.ReadAllText(LocalDirectory + "/data/.ignore");
+            data = data.Replace("\r", "").Trim();
+            Exclusions = data.Split('\n');
         }
 
         public void Discard(Commit.CommitEntry entry)
