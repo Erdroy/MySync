@@ -26,7 +26,7 @@ namespace MySync.Client.UI
                 {
                     foreach (var projectToOpen in ClientSettings.Instance.OpenedProjects)
                     {
-                        LoadProject(projectToOpen.Name, projectToOpen.LocalDir);
+                        LoadProject(projectToOpen.Name, projectToOpen.LocalDir, projectToOpen.Host, projectToOpen.Password);
                     }
                 },
                 OnDone = delegate
@@ -47,8 +47,8 @@ namespace MySync.Client.UI
                 {
                     OnJob = delegate
                     {
-                        ProjectsManager.Instance.CreateProject(CreateProject.ProjectName); // create project
-                        LoadProject(CreateProject.ProjectName, CreateProject.ProjectDirectory);
+                        ProjectsManager.Instance.CreateProject(CreateProject.ProjectName, CreateProject.ServerIp, CreateProject.Password); // create project
+                        LoadProject(CreateProject.ProjectName, CreateProject.ProjectDirectory, CreateProject.ServerIp, CreateProject.Password);
                     },
                     OnDone = delegate
                     {
@@ -59,9 +59,9 @@ namespace MySync.Client.UI
         }
 
         // private
-        private void LoadProject(string name, string dir)
+        private void LoadProject(string name, string dir, string addr, string pass)
         {
-            var project = ProjectsManager.Instance.OpenProject(name, dir);
+            var project = ProjectsManager.Instance.OpenProject(name, dir, addr, pass);
 
             TaskManager.DispathSingle(delegate
             {

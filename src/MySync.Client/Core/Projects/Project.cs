@@ -32,7 +32,7 @@ namespace MySync.Client.Core.Projects
             LocalDirectory = localdir;
             RemoteDirectory = remotedir;
 
-            RemoteDirectory = ClientSettings.Instance.MainDirectory + "/projects/" + Name;
+            RemoteDirectory = "/home/mysync/projects/" + Name;
 
             FileSystem = new FileSystem
             {

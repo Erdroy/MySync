@@ -14,23 +14,14 @@ namespace MySync.Client.Utilities
         {
             public string Name;
             public string LocalDir;
+            public string Host;
+            public string Password;
         }
 
         public static ClientSettings Instance;
-
-        public string Host { get; set; }
-
-        public string Password { get; set; }
-
-        public string MainDirectory { get; set; }
-
+        
         public OpenedProject[] OpenedProjects;
-
-        public ClientSettings()
-        {
-            MainDirectory = "/home/mysync";
-        }
-
+        
         public static void Load()
         {
             if (!File.Exists("config.json"))
