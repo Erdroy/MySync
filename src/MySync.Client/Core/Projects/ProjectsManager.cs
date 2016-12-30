@@ -74,7 +74,7 @@ namespace MySync.Client.Core.Projects
 
             var localFiles = Directory.GetFiles(localDirectory);
 
-            if (localFiles.Length < 2)
+            if (localFiles.Length == 0)
             {
                 Directory.CreateDirectory(localDirectory + "\\data");
                 Directory.CreateDirectory(localDirectory + "\\commits");

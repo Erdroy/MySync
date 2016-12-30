@@ -1,5 +1,6 @@
 ﻿// MySync © 2016 Damian 'Erdroy' Korczowski
 
+using System;
 using System.IO;
 using MySync.Client.Core.Projects;
 
@@ -7,6 +8,18 @@ namespace MySync.Client.Utilities
 {
     public static class PathUtils
     {
+        public static string Encode(string file)
+        {
+            var data = Uri.EscapeUriString(file);
+            data = data.Replace("&", "%101");
+            data = data.Replace("^", "%102");
+            data = data.Replace("$", "%103");
+            data = data.Replace("*", "%104");
+            data = data.Replace("!", "%105");
+            data = data.Replace("@", "%106");
+            return data;
+        }
+
         public static string GetPath(string file)
         {
             var i = file.Length - 1;

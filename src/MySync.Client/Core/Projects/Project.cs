@@ -144,9 +144,13 @@ namespace MySync.Client.Core.Projects
 
         public void LoadExclusions()
         {
-            var data = File.ReadAllText(LocalDirectory + "/data/.ignore");
-            data = data.Replace("\r", "").Trim();
-            Exclusions = data.Split('\n');
+            var file = LocalDirectory + "/data/.ignore";
+            if (File.Exists(file))
+            {
+                var data = File.ReadAllText(file);
+                data = data.Replace("\r", "").Trim();
+                Exclusions = data.Split('\n');
+            }
         }
         
         public void Discard(Commit.CommitEntry entry)
@@ -263,6 +267,7 @@ namespace MySync.Client.Core.Projects
                         foreach (var entry in Commit.FileChanges)
                         {
                             var id = fileId;
+                            
                             TaskManager.DispathSingle(delegate
                             {
                                 Progress.Message = "Updating file " + id + " out of " + files;
@@ -277,6 +282,8 @@ namespace MySync.Client.Core.Projects
                                 // upload file
                                 var lf = LocalDirectory + "\\data\\" + entry.Entry.Replace("/", "\\");
                                 var rf = RemoteDirectory + "/data/" + entry.Entry;
+
+                                rf = PathUtils.Encode(rf);
 
                                 FileSystem.Client.UploadFile(lf, rf);
 
@@ -385,8 +392,12 @@ namespace MySync.Client.Core.Projects
                                     Progress.Message = "Downlading file " + (downloaded+1) + " out of " + files.Count;
                                 });
 
-                                var outputFile = LocalDirectory + "/data/" + file.File;
+                                var fileName = file.File.Replace("%20", " ");
+
+                                var outputFile = LocalDirectory + "/data/" + fileName;
                                 var remoteFile = RemoteDirectory + "/data/" + file.File;
+
+                                remoteFile = PathUtils.Encode(remoteFile);
 
                                 // download
                                 try
@@ -432,6 +443,8 @@ namespace MySync.Client.Core.Projects
                             {
                                 var outputFile = LocalDirectory + "/data/" + file;
                                 var remoteFile = RemoteDirectory + "/data/" + file;
+
+                                remoteFile = PathUtils.Encode(remoteFile);
 
                                 // download
                                 try

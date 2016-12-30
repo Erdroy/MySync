@@ -111,6 +111,10 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
         {
+            // ignore files
+            if (PathUtils.IsExcluded(Project, e.FullPath))
+                return;
+
             var attributes = File.GetAttributes(e.FullPath);
 
             if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
@@ -121,10 +125,6 @@ namespace MySync.Client.Core
 
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
             
-            // ignore files
-            if (PathUtils.IsExcluded(Project, e.FullPath))
-                return;
-
             var fileInfo = new FileInfo(e.FullPath);
 
             Mapping.Files.Add(new FileMapping.FileEntry
@@ -137,6 +137,10 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
         {
+            // ignore files
+            if (PathUtils.IsExcluded(Project, e.FullPath))
+                return;
+
             var attributes = File.GetAttributes(e.FullPath);
 
             if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
@@ -146,9 +150,6 @@ namespace MySync.Client.Core
                 Changed = true;
                 return;
             }
-            // ignore files
-            if (PathUtils.IsExcluded(Project, e.FullPath))
-                return;
 
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
             var oldfilename = e.OldFullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
@@ -169,12 +170,12 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
         {
-            var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
-
             // ignore files 
             if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
 
+            var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
+            
             var modfile = Mapping.Files.Find(file => file.File == filename);
 
             if(modfile.File != null)
@@ -186,16 +187,16 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
         {
+            // ignore files
+            if (PathUtils.IsExcluded(Project, e.FullPath))
+                return;
+
             // only changed event type can pass
             if (e.ChangeType != WatcherChangeTypes.Changed)
                 return;
 
             var filename = e.FullPath.Remove(0, (Project.LocalDirectory + "\\data\\").Length).Replace("\\", "/");
-
-            // ignore files
-            if (PathUtils.IsExcluded(Project, e.FullPath))
-                return;
-
+            
             if (e.Name == ".ignore")
             {
                 // dispatch
