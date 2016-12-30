@@ -382,7 +382,7 @@ namespace MySync.Client.Core.Projects
                             // download whole project
 
                             // get all files
-                            var files = FileSystem.GetRemoteMapping(cCommit).Files;
+                            var files = FileSystem.GetRemoteMapping(lastIndex).Files;
 
                             // download files
                             var filesDownloaded = 0;
@@ -414,6 +414,14 @@ namespace MySync.Client.Core.Projects
 
                                 if (fileName == ".ignore")
                                     LoadExclusions();
+
+                                var id = 1;
+                                foreach (var commit in commits)
+                                {
+                                    var json = commit.ToJson();
+                                    File.WriteAllText(LocalDirectory + "/commits/" + "commit_" + id + ".json", json);
+                                    id++;
+                                }
 
                                 // set file mod time(version base)
                                 File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
@@ -499,13 +507,6 @@ namespace MySync.Client.Core.Projects
                                 }
                             }
                         }
-
-                        FileSystem.IgnoreChanges = false;
-                        TaskManager.DispathSingle(delegate
-                        {
-                            Progress.Message = "Done!";
-                            Message.ShowMessage("", "Done!");
-                        });
                     }
                     
                 }
@@ -515,6 +516,16 @@ namespace MySync.Client.Core.Projects
                     Message.ShowMessage("Error", "Error: " + ex);
                 }
             }
+
+            FileSystem.Changed = true;
+            FileSystem.BuildFilemap();
+
+            FileSystem.IgnoreChanges = false;
+            TaskManager.DispathSingle(delegate
+            {
+                Progress.Message = "Done!";
+                Message.ShowMessage("", "Done!");
+            });
             FileSystem.DeleteEmptyDirs(LocalDirectory + "/data/");
         }
     }
