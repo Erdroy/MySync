@@ -82,12 +82,17 @@ namespace MySync.Client.Core
             catch (UnauthorizedAccessException) { }
         }
 
-        public FileMapping GetRemoteMapping()
+        public FileMapping GetRemoteMapping(int commitId = -1)
         {
             // download from the server
             // load from json
             // return
-            var commitId = Project.GetCurrentCommit();
+
+            if(commitId == -1)
+            {
+                commitId = Project.GetCurrentCommit();
+            }
+
             try
             {
                 var json = Client.DownloadFile(Project.RemoteDirectory + "/filemaps/filemap_" + commitId + ".json");
@@ -111,6 +116,9 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Created(object sender, FileSystemEventArgs e)
         {
+            if (IgnoreChanges)
+                return;
+
             // ignore files
             if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
@@ -137,6 +145,9 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Renamed(object sender, RenamedEventArgs e)
         {
+            if (IgnoreChanges)
+                return;
+
             // ignore files
             if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
@@ -170,6 +181,9 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
         {
+            if (IgnoreChanges)
+                return;
+
             // ignore files 
             if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
@@ -187,6 +201,9 @@ namespace MySync.Client.Core
 
         private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
         {
+            if (IgnoreChanges)
+                return;
+
             // ignore files
             if (PathUtils.IsExcluded(Project, e.FullPath))
                 return;
@@ -246,5 +263,7 @@ namespace MySync.Client.Core
         public FileMapping Mapping { get; private set; }
 
         public Project Project { get; set; }
+
+        public bool IgnoreChanges { get; set; }
     }
 }

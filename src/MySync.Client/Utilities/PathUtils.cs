@@ -45,6 +45,9 @@ namespace MySync.Client.Utilities
 
             if (fileName == ".ignore")
                 return false;
+
+            if (project.Exclusions == null)
+                return false;
             
             foreach (var exclusion in project.Exclusions)
             {

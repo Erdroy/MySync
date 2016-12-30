@@ -350,6 +350,8 @@ namespace MySync.Client.Core.Projects
                 {
                     using (new ProjectLock(this))
                     {
+                        FileSystem.IgnoreChanges = true;
+
                         TaskManager.DispathSingle(delegate
                         {
                             Progress.Message = "Checking for updates...";
@@ -380,7 +382,7 @@ namespace MySync.Client.Core.Projects
                             // download whole project
 
                             // get all files
-                            var files = FileSystem.GetRemoteMapping().Files;
+                            var files = FileSystem.GetRemoteMapping(cCommit).Files;
 
                             // download files
                             var filesDownloaded = 0;
@@ -396,7 +398,7 @@ namespace MySync.Client.Core.Projects
 
                                 var outputFile = LocalDirectory + "/data/" + fileName;
                                 var remoteFile = RemoteDirectory + "/data/" + file.File;
-
+                                
                                 remoteFile = PathUtils.Encode(remoteFile);
 
                                 // download
@@ -409,6 +411,9 @@ namespace MySync.Client.Core.Projects
                                     Directory.CreateDirectory(PathUtils.GetPath(outputFile));
                                     FileSystem.Client.DownloadFile(outputFile, remoteFile);
                                 }
+
+                                if (fileName == ".ignore")
+                                    LoadExclusions();
 
                                 // set file mod time(version base)
                                 File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
@@ -439,8 +444,15 @@ namespace MySync.Client.Core.Projects
                             var toRemove = changes.GetFilesToRemove();
 
                             // download all changed files
+                            var filesDownloaded = 0;
                             foreach (var file in toDownload)
                             {
+                                var downloaded = filesDownloaded;
+                                TaskManager.DispathSingle(delegate
+                                {
+                                    Progress.Message = "Downlading file " + (downloaded + 1) + " out of " + files.Count;
+                                });
+
                                 var outputFile = LocalDirectory + "/data/" + file;
                                 var remoteFile = RemoteDirectory + "/data/" + file;
 
@@ -460,7 +472,14 @@ namespace MySync.Client.Core.Projects
                                 // set file mod time(version base)
                                 var fileEntry = files.FirstOrDefault(x => x.File == file);
                                 File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
+                                filesDownloaded++;
                             }
+
+                            TaskManager.DispathSingle(delegate
+                            {
+                                Progress.Message = "Finishing...";
+                                LoadExclusions();
+                            });
 
                             FileSystem.BuildFilemap();
 
@@ -475,14 +494,17 @@ namespace MySync.Client.Core.Projects
                                 }
                                 catch
                                 {
+                                    FileSystem.IgnoreChanges = false;
                                     // ignore
                                 }
                             }
                         }
+
+                        FileSystem.IgnoreChanges = false;
                         TaskManager.DispathSingle(delegate
                         {
-                            LoadExclusions();
                             Progress.Message = "Done!";
+                            Message.ShowMessage("", "Done!");
                         });
                     }
                     

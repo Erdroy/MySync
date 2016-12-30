@@ -97,7 +97,7 @@ namespace MySync.Client.Core
 
         public static List<FileEntry> GetChangedFiles(FileMapping localMapping, FileMapping remoteMapping)
         {
-            return localMapping.Files.Where(p => remoteMapping.Files.Any(l => p.File == l.File && p.Version != l.Version)).ToList();
+            return localMapping.Files.Where(local => remoteMapping.Files.Any(remote => local.File == remote.File && DateTime.FromBinary(local.Version) < DateTime.FromBinary(remote.Version))).ToList();
         }
 
         public static List<FileEntry> GetNewFiles(FileMapping localMapping, FileMapping remoteMapping)
