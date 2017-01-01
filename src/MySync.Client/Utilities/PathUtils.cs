@@ -1,4 +1,4 @@
-﻿// MySync © 2016 Damian 'Erdroy' Korczowski
+﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 using System;
 using System.IO;

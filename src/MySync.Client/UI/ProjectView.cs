@@ -1,4 +1,4 @@
-﻿// MySync © 2016 Damian 'Erdroy' Korczowski
+﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 
 using System;
@@ -201,16 +201,18 @@ namespace MySync.Client.UI
         {
             Progress.ShowWindow("Discarding...");
             Progress.Message = "";
-            TaskManager.QueueTask(
+
+            foreach (ListViewItem item in files.SelectedItems)
+            {
+                TaskManager.QueueTask(
                 delegate
                 {
-                    foreach (ListViewItem item in files.SelectedItems)
-                    {
-                        _project.Discard((Commit.CommitEntry)item.Tag);
-                    }
+
+                    _project.Discard((Commit.CommitEntry)item.Tag);
                 },
                 Progress.CloseWindow
             );
+            }
         }
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)

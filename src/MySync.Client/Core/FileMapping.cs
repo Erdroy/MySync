@@ -1,4 +1,4 @@
-﻿// MySync © 2016 Damian 'Erdroy' Korczowski
+﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 
 using System;
@@ -97,7 +97,7 @@ namespace MySync.Client.Core
 
         public static List<FileEntry> GetChangedFiles(FileMapping localMapping, FileMapping remoteMapping)
         {
-            return localMapping.Files.Where(local => remoteMapping.Files.Any(remote => local.File == remote.File && DateTime.FromBinary(local.Version) < DateTime.FromBinary(remote.Version))).ToList();
+            return localMapping.Files.Where(local => remoteMapping.Files.Any(remote => local.File == remote.File && DateTime.FromBinary(local.Version) > DateTime.FromBinary(remote.Version))).ToList();
         }
 
         public static List<FileEntry> GetNewFiles(FileMapping localMapping, FileMapping remoteMapping)

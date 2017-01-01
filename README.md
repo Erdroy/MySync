@@ -16,4 +16,4 @@ Currently only Windows on .NET 4.5 is officialy supported, more platforms will b
 
 ---
 
-MySync © 2016 Damian 'Erdroy' Korczowski
+MySync © 2016-2017 Damian 'Erdroy' Korczowski
