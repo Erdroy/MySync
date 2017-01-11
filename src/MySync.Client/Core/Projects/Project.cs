@@ -458,7 +458,7 @@ namespace MySync.Client.Core.Projects
                                 var downloaded = filesDownloaded;
                                 TaskManager.DispathSingle(delegate
                                 {
-                                    Progress.Message = "Downlading file " + (downloaded + 1) + " out of " + files.Count;
+                                    Progress.Message = "Downlading file " + (downloaded + 1) + " out of " + toDownload.Length;
                                 });
 
                                 var outputFile = LocalDirectory + "/data/" + file;
