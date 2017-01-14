@@ -38,6 +38,9 @@ namespace MySync.Client.UI
 
         public static void CloseWindow()
         {
+            if (Current == null)
+                return;
+
             Current.Close();
             Current = null;
 

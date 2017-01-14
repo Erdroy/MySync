@@ -124,6 +124,7 @@
     <Compile Include="Utilities\ClientSettings.cs" />
     <Compile Include="Utilities\MySyncException.cs" />
     <Compile Include="Utilities\PathUtils.cs" />
+    <Compile Include="Utilities\StringUtils.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

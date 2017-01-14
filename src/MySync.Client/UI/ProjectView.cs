@@ -1,6 +1,5 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
-
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
