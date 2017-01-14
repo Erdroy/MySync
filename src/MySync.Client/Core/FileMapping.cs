@@ -132,7 +132,8 @@ namespace MySync.Client.Core
 
         public static Commit.CommitEntry[] BuildEntries(Project project)
         {
-            return BuildEntries(project.FileSystem.GetLocalMapping(), project.FileSystem.GetRemoteMapping());
+            var commitId = project.GetCurrentCommit();
+            return BuildEntries(project.FileSystem.GetLocalMapping(), project.FileSystem.GetRemoteMapping(commitId));
         }
 
         public static Commit.CommitEntry[] BuildEntries(FileMapping localMapping, FileMapping remoteMapping)

@@ -166,24 +166,19 @@ namespace MySync.Client.Core.Projects
                     // download from server
                     if (!IsLocked())
                     {
-                        var files = FileSystem.GetRemoteMapping().Files;
+                        var files = FileSystem.GetRemoteMapping(GetCurrentCommit()).Files;
                         using (new ProjectLock(this))
                         {
                             var outputFile = LocalDirectory + "/data/" + entry.Entry;
-                            var remoteFile = RemoteDirectory + "/data/" + entry.Entry;
+                            var remoteFile = PathUtils.Encode(RemoteDirectory + "/data/" + entry.Entry);
 
                             // download
-                            try
-                            {
-                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                            }
-                            catch
-                            {
+
+                            if(!Directory.Exists(PathUtils.GetPath(outputFile)))
                                 Directory.CreateDirectory(PathUtils.GetPath(outputFile));
-                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                            }
 
-
+                            FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            
                             // set file mod time(version base)
                             var fileEntry = files.FirstOrDefault(x => x.File == entry.Entry);
                             File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
@@ -348,167 +343,164 @@ namespace MySync.Client.Core.Projects
             {
                 try
                 {
-                    using (new ProjectLock(this))
+                    FileSystem.IgnoreChanges = true;
+
+                    TaskManager.DispathSingle(delegate
                     {
-                        FileSystem.IgnoreChanges = true;
+                        Progress.Message = "Checking for updates...";
+                    });
+                    // download commits, start from commit_'commitId'.json
+                    var commitFiles = FileSystem.GetFilesRemote("/commits");
+                    var sortedFiles = commitFiles.OrderBy(x => x).ToList();
+                    sortedFiles.Sort((x, y) => StringUtils.ExtractNumber(x).CompareTo(StringUtils.ExtractNumber(y)));
 
-                        TaskManager.DispathSingle(delegate
+                    var cCommit = GetCurrentCommit();
+
+                    if (cCommit == 0)
+                        cCommit = 1;
+                    
+                    var firstIndex = Array.FindIndex(sortedFiles.ToArray(), x => x == "commit_" + cCommit + ".json");
+                    var lastIndex = GetCommitId(sortedFiles[sortedFiles.Count - 1]);
+
+                    var commits = new List<Commit>();
+                    for (var i = firstIndex + 2; i < lastIndex + 1; i++)
+                    {
+                        var commitfile = RemoteDirectory + "/commits/" + "commit_" + i + ".json";
+                        var commit = FileSystem.Client.DownloadFile(commitfile);
+                        commits.Add(Commit.FromJson(commit));
+                    }
+
+                    // calculate download list and download
+                    if (GetCurrentCommit() == 0)
+                    {
+                        // download whole project
+
+                        // get all files
+                        var files = FileSystem.GetRemoteMapping(lastIndex).Files;
+
+                        // download files
+                        var filesDownloaded = 0;
+                        foreach (var file in files)
                         {
-                            Progress.Message = "Checking for updates...";
-                        });
-                        // download commits, start from commit_'commitId'.json
-                        var commitFiles = FileSystem.GetFilesRemote("/commits");
-                        commitFiles = commitFiles.OrderBy(x => x).ToArray();
-
-                        var cCommit = GetCurrentCommit();
-
-                        if (cCommit == 0)
-                            cCommit = 1;
-
-                        var firstIndex = Array.FindIndex(commitFiles, x => x == "commit_" + cCommit + ".json");
-                        var lastIndex = GetCommitId(commitFiles[commitFiles.Length - 1]);
-
-                        var commits = new List<Commit>();
-                        for (var i = firstIndex + 2; i < lastIndex + 1; i++)
-                        {
-                            var commitfile = RemoteDirectory + "/commits/" + "commit_" + i + ".json";
-                            var commit = FileSystem.Client.DownloadFile(commitfile);
-                            commits.Add(Commit.FromJson(commit));
-                        }
-
-                        // calculate download list and download
-                        if (GetCurrentCommit() == 0)
-                        {
-                            // download whole project
-
-                            // get all files
-                            var files = FileSystem.GetRemoteMapping(lastIndex).Files;
-
-                            // download files
-                            var filesDownloaded = 0;
-                            foreach (var file in files)
-                            {
-                                var downloaded = filesDownloaded;
-                                TaskManager.DispathSingle(delegate
-                                {
-                                    Progress.Message = "Downlading file " + (downloaded+1) + " out of " + files.Count;
-                                });
-
-                                var fileName = file.File.Replace("%20", " ");
-
-                                var outputFile = LocalDirectory + "/data/" + fileName;
-                                var remoteFile = RemoteDirectory + "/data/" + file.File;
-                                
-                                remoteFile = PathUtils.Encode(remoteFile);
-
-                                // download
-                                try
-                                {
-                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                                }
-                                catch
-                                {
-                                    Directory.CreateDirectory(PathUtils.GetPath(outputFile));
-                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                                }
-
-                                if (fileName == ".ignore")
-                                    LoadExclusions();
-
-                                var id = 1;
-                                foreach (var commit in commits)
-                                {
-                                    var json = commit.ToJson();
-                                    File.WriteAllText(LocalDirectory + "/commits/" + "commit_" + id + ".json", json);
-                                    id++;
-                                }
-
-                                // set file mod time(version base)
-                                File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
-                                filesDownloaded++;
-                            }
-                        }
-                        else
-                        {
+                            var downloaded = filesDownloaded;
                             TaskManager.DispathSingle(delegate
                             {
-                                Progress.Message = "Saving changes...";
+                                Progress.Message = "Downlading file " + (downloaded + 1) + " out of " + files.Count;
                             });
-                            // apply the commits as local commits
-                            var cid = cCommit + 1;
+
+                            var fileName = file.File.Replace("%20", " ");
+
+                            var outputFile = LocalDirectory + "/data/" + fileName;
+                            var remoteFile = RemoteDirectory + "/data/" + file.File;
+
+                            remoteFile = PathUtils.Encode(remoteFile);
+
+                            // download
+                            try
+                            {
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+                            catch
+                            {
+                                Directory.CreateDirectory(PathUtils.GetPath(outputFile));
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+
+                            if (fileName == ".ignore")
+                                LoadExclusions();
+
+                            var id = 1;
                             foreach (var commit in commits)
                             {
                                 var json = commit.ToJson();
-                                var fileName = "commit_" + cid + ".json";
-                                File.WriteAllText(LocalDirectory + "/commits/" + fileName, json);
-                                cid++;
+                                File.WriteAllText(LocalDirectory + "/commits/" + "commit_" + id + ".json", json);
+                                id++;
                             }
 
-                            // calculate diff
-                            var files = FileSystem.GetRemoteMapping().Files;
-                            var changes = Commit.MergeChanges(commits.ToArray());
+                            // set file mod time(version base)
+                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(file.Version));
+                            filesDownloaded++;
+                        }
+                    }
+                    else
+                    {
+                        TaskManager.DispathSingle(delegate
+                        {
+                            Progress.Message = "Saving changes...";
+                        });
+                        // apply the commits as local commits
+                        var cid = cCommit + 1;
+                        foreach (var commit in commits)
+                        {
+                            var json = commit.ToJson();
+                            var fileName = "commit_" + cid + ".json";
+                            File.WriteAllText(LocalDirectory + "/commits/" + fileName, json);
+                            cid++;
+                        }
 
-                            var toDownload = changes.GetFilesToDownload();
-                            var toRemove = changes.GetFilesToRemove();
+                        // calculate diff
+                        var files = FileSystem.GetRemoteMapping().Files;
+                        var changes = Commit.MergeChanges(commits.ToArray());
 
-                            // download all changed files
-                            var filesDownloaded = 0;
-                            foreach (var file in toDownload)
-                            {
-                                var downloaded = filesDownloaded;
-                                TaskManager.DispathSingle(delegate
-                                {
-                                    Progress.Message = "Downlading file " + (downloaded + 1) + " out of " + toDownload.Length;
-                                });
+                        var toDownload = changes.GetFilesToDownload();
+                        var toRemove = changes.GetFilesToRemove();
 
-                                var outputFile = LocalDirectory + "/data/" + file;
-                                var remoteFile = RemoteDirectory + "/data/" + file;
-
-                                remoteFile = PathUtils.Encode(remoteFile);
-
-                                // download
-                                try
-                                {
-                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                                }
-                                catch
-                                {
-                                    Directory.CreateDirectory(PathUtils.GetPath(outputFile));
-                                    FileSystem.Client.DownloadFile(outputFile, remoteFile);
-                                }
-
-                                // set file mod time(version base)
-                                var fileEntry = files.FirstOrDefault(x => x.File == file);
-                                File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
-                                filesDownloaded++;
-                            }
-
+                        // download all changed files
+                        var filesDownloaded = 0;
+                        foreach (var file in toDownload)
+                        {
+                            var downloaded = filesDownloaded;
                             TaskManager.DispathSingle(delegate
                             {
-                                Progress.Message = "Finishing...";
-                                LoadExclusions();
+                                Progress.Message = "Downlading file " + (downloaded + 1) + " out of " + toDownload.Length;
                             });
 
-                            FileSystem.BuildFilemap();
+                            var outputFile = LocalDirectory + "/data/" + file;
+                            var remoteFile = RemoteDirectory + "/data/" + file;
 
-                            // remove all files
-                            foreach (var file in toRemove)
+                            remoteFile = PathUtils.Encode(remoteFile);
+
+                            // download
+                            try
                             {
-                                var path = LocalDirectory + "/data/" + file;
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
+                            catch
+                            {
+                                Directory.CreateDirectory(PathUtils.GetPath(outputFile));
+                                FileSystem.Client.DownloadFile(outputFile, remoteFile);
+                            }
 
-                                try
-                                {
-                                    File.Delete(path);
-                                }
-                                catch
-                                {
-                                    FileSystem.IgnoreChanges = false;
-                                    // ignore
-                                }
+                            // set file mod time(version base)
+                            var fileEntry = files.FirstOrDefault(x => x.File == file);
+                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
+                            filesDownloaded++;
+                        }
+
+                        TaskManager.DispathSingle(delegate
+                        {
+                            Progress.Message = "Finishing...";
+                            LoadExclusions();
+                        });
+
+                        FileSystem.BuildFilemap();
+
+                        // remove all files
+                        foreach (var file in toRemove)
+                        {
+                            var path = LocalDirectory + "/data/" + file;
+
+                            try
+                            {
+                                File.Delete(path);
+                            }
+                            catch
+                            {
+                                FileSystem.IgnoreChanges = false;
+                                // ignore
                             }
                         }
                     }
-                    
                 }
                 catch(Exception ex)
                 {
