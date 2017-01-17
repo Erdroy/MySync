@@ -80,6 +80,7 @@ namespace MySync.Client.Core
                 }
             }
             catch (UnauthorizedAccessException) { }
+            catch (DirectoryNotFoundException) { }
         }
 
         public FileMapping GetRemoteMapping(int commitId = -1)
