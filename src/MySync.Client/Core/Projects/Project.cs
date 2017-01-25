@@ -385,7 +385,7 @@ namespace MySync.Client.Core.Projects
                             var downloaded = filesDownloaded;
                             TaskManager.DispathSingle(delegate
                             {
-                                Progress.Message = "Downlading file " + (downloaded + 1) + " out of " + files.Count;
+                                Progress.Message = "Downloading file " + (downloaded + 1) + " out of " + files.Count;
                             });
 
                             var fileName = file.File.Replace("%20", " ");
