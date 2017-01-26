@@ -473,7 +473,12 @@ namespace MySync.Client.Core.Projects
 
                             // set file mod time(version base)
                             var fileEntry = files.FirstOrDefault(x => x.File == file);
-                            File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
+                            
+                            if (!string.IsNullOrEmpty(fileEntry.File))
+                            {
+                                File.SetLastWriteTime(outputFile, DateTime.FromBinary(fileEntry.Version));
+                            }
+
                             filesDownloaded++;
                         }
 

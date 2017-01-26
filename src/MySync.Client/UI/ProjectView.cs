@@ -157,6 +157,9 @@ namespace MySync.Client.UI
 
             foreach (var entry in entries)
             {
+                if (entry.Entry == ".ignore")
+                    continue;
+
                 var item = new ListViewItem(files.Groups["unstaged"])
                 {
                     Text = @"[" + entry.EntryType + @"] " + entry.Entry,

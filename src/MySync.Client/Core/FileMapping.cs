@@ -146,6 +146,9 @@ namespace MySync.Client.Core
 
                 foreach (var file in localMapping.Files)
                 {
+                    if(file.File == ".ignore")
+                        continue;
+
                     files.Add(new Commit.CommitEntry(CommitEntryType.Created, file.File));
                 }
 
@@ -159,7 +162,7 @@ namespace MySync.Client.Core
             files = changedFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Changed, file.File)).ToList();
             files.AddRange(newFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Created, file.File)));
             files.AddRange(deletedFiles.Select(file => new Commit.CommitEntry(CommitEntryType.Deleted, file.File)));
-
+            
             return files.ToArray();
         }
 
