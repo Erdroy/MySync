@@ -42,7 +42,7 @@ namespace MySync.Shared.VersionControl
         }
 
         // private
-        private readonly List<File> _files = new List<File>();
+        private List<File> _files = new List<File>();
 
         // private
         private Filemap() { }
@@ -128,8 +128,8 @@ namespace MySync.Shared.VersionControl
         /// <returns>The json filemap.</returns>
         public string ToJson()
         {
-            // serialize this object to JSON
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
+            // serialize object to JSON
+            return JsonConvert.SerializeObject(_files.ToArray(), Formatting.Indented);
         }
 
         /// <summary>
@@ -148,7 +148,11 @@ namespace MySync.Shared.VersionControl
         public static Filemap FromJson(string json)
         {
             // deserialize object from `json` string.
-            return JsonConvert.DeserializeObject<Filemap>(json);
+            var filemap = new Filemap
+            {
+                _files = new List<File>(JsonConvert.DeserializeObject<File[]>(json))
+            };
+            return filemap;
         }
 
         /// <summary>
