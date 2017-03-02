@@ -16,7 +16,10 @@ namespace MySync.Server.Core
         // private
         private readonly Dictionary<string, Action<string, HttpListenerResponse>> _requestHandles = 
             new Dictionary<string, Action<string, HttpListenerResponse>>();
-        
+
+        private readonly Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>> _downloaders =
+            new Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>>();
+
         /// <summary>
         /// Default RequestProcessor class constructor.
         /// </summary>
@@ -37,6 +40,17 @@ namespace MySync.Server.Core
         }
 
         /// <summary>
+        /// Adds server side downloader.
+        /// </summary>
+        /// <param name="path">The path, eg.: /help/getDocs </param>
+        /// <param name="action">The target downloader-method.</param>
+        public void AddDownloader(string path, Action<HttpListenerRequest, HttpListenerResponse> action)
+        {
+            // add
+            _downloaders.Add(path, action);
+        }
+
+        /// <summary>
         /// Process context.
         /// </summary>
         /// <param name="context">The context.</param>
@@ -52,6 +66,13 @@ namespace MySync.Server.Core
             response.StatusDescription = "OK";
             response.AddHeader("Content-Type", "application/json");
 
+            // try to handle by downloader
+            if (_downloaders.ContainsKey(url))
+            {
+                _downloaders[url](request, response);
+                return;
+            }
+
             // try to find handler
             Action<string, HttpListenerResponse> handler;
             if (!_requestHandles.TryGetValue(url, out handler))
@@ -62,7 +83,7 @@ namespace MySync.Server.Core
             }
 
             // handle
-            using (var body = request.InputStream) // here we have data
+            using (var body = request.InputStream)
             {
                 using (var reader = new System.IO.StreamReader(body, request.ContentEncoding))
                 {

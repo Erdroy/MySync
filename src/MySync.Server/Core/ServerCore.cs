@@ -30,7 +30,7 @@ namespace MySync.Server.Core
         internal void Run()
         {
             _isDisposed = false;
-
+            
             // initialize request processor
             _processor = new RequestProcessor();
 
@@ -82,6 +82,10 @@ namespace MySync.Server.Core
         private void LoadHandlers()
         {
             _processor.AddHandler("/authorize", RequestHandlers.Authorize.Process);
+            _processor.AddHandler("/filemap", RequestHandlers.VersionControl.GetFilemap);
+            _processor.AddHandler("/pull", RequestHandlers.VersionControl.Pull);
+
+            _processor.AddDownloader("/push", RequestHandlers.VersionControl.Push);
         }
     }
 }

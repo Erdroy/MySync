@@ -1,10 +1,9 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 using System;
+using System.IO;
 using System.Threading;
 using MySync.Client.Core;
-using MySync.Shared.VersionControl;
-using Newtonsoft.Json.Linq;
 
 namespace MySync.Client
 {
@@ -13,7 +12,7 @@ namespace MySync.Client
         private static void Main()
         {
             // initialize
-            Request.Send("http://127.0.0.1:8080/check", "", stream =>
+            /*Request.Send("http://127.0.0.1:8080/check", "", stream =>
             {
                 using (var reader = new System.IO.StreamReader(stream))
                 {
@@ -24,12 +23,24 @@ namespace MySync.Client
                         Console.WriteLine(@"MySync server is available!");
                     }
                 }
-            });
+            });*/
 
-            Console.WriteLine(@"Loading 'Sample' project...");
-            var filemap = Filemap.Build("D:\\TestProject");
+            using (var file = new FileStream("testdata.dat", FileMode.Open))
+            {
+                var dataStream = Request.BeginSend("http://127.0.0.1:8080/push", file.Length);
 
-            Console.WriteLine(@"Calculating changes...");
+                int read;
+                var buffer = new byte[64 * 1024];
+                while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    dataStream.Write(buffer, 0, read);
+                }
+
+                Request.EndSend(stream =>
+                {
+                    Console.WriteLine(@"Uploaded!");
+                });
+            }
 
             while (true)
                 Thread.Sleep(100);

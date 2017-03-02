@@ -13,6 +13,8 @@ namespace MySync.Client.Core
     /// </summary>
     public static class Request
     {
+        private static WebRequest _webRequest;
+
         /// <summary>
         /// Send HTTP POST request.
         /// </summary>
@@ -33,6 +35,25 @@ namespace MySync.Client.Core
             dataStream.Close();
 
             var response = request.GetResponse();
+            callback(response.GetResponseStream());
+        }
+
+        public static Stream BeginSend(string address, long size)
+        {
+            _webRequest = WebRequest.Create(address);
+            _webRequest.Credentials = CredentialCache.DefaultCredentials;
+            _webRequest.Method = "POST";
+            _webRequest.ContentType = "multipart/form-data";
+            _webRequest.ContentLength = size;
+
+            return _webRequest.GetRequestStream();
+        }
+
+        public static void EndSend(Action<Stream> callback)
+        {
+            _webRequest.GetRequestStream().Close();
+            
+            var response = _webRequest.GetResponse();
             callback(response.GetResponseStream());
         }
     }

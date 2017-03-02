@@ -15,7 +15,7 @@ namespace MySync.Server.Core.RequestHandlers
         public struct AuthorizeOutput
         {
             public bool Succeeded;
-            public string AccessToken;
+            public string Token;
             public string[] Projects;
         }
 
@@ -34,7 +34,7 @@ namespace MySync.Server.Core.RequestHandlers
             var output = new AuthorizeOutput
             {
                 Succeeded = true,
-                AccessToken = "ANONYMOUS_TOKEN",
+                Token = "ANONYMOUS_TOKEN",
                 Projects = new []
                 {
                     "test"
