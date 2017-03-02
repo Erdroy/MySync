@@ -31,15 +31,22 @@ namespace MySync.Server.Core
         {
             _isDisposed = false;
 
+            // initialize request processor
             _processor = new RequestProcessor();
+
+            // initialize all handlers
+            LoadHandlers();
 
             // initialize http listener
             _httpListener = new HttpListener();
-            _httpListener.Prefixes.Add("http://127.0.0.1:8080/"); 
+            _httpListener.Prefixes.Add("http://127.0.0.1:8080/");  // TODO: https!
             _httpListener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
 
             // start listening
             _httpListener.Start();
+
+            Console.WriteLine("MySync (c) 2016-2017 Damian 'Erdroy' Korczowski github.com/Erdroy");
+            Console.WriteLine("MySync server is running on 8080 port");
 
             // listener loop
             while (!_isDisposed)
@@ -58,8 +65,6 @@ namespace MySync.Server.Core
                 return;
 
             _isDisposed = true;
-
-            _processor.Dispose();
         }
         
         // private
@@ -71,6 +76,12 @@ namespace MySync.Server.Core
             _processor.Process(context);
 
             context.Response.Close();
+        }
+
+        // private
+        private void LoadHandlers()
+        {
+            _processor.AddHandler("/authorize", RequestHandlers.Authorize.Process);
         }
     }
 }

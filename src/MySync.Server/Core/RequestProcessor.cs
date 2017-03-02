@@ -11,16 +11,35 @@ namespace MySync.Server.Core
     /// RequestProcessor class.
     /// Handles and processes http requests.
     /// </summary>
-    public class RequestProcessor : IDisposable
+    public class RequestProcessor
     {
-        private readonly Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>> _requestHandles = 
-            new Dictionary<string, Action<HttpListenerRequest, HttpListenerResponse>>();
-
+        // private
+        private readonly Dictionary<string, Action<string, HttpListenerResponse>> _requestHandles = 
+            new Dictionary<string, Action<string, HttpListenerResponse>>();
+        
+        /// <summary>
+        /// Default RequestProcessor class constructor.
+        /// </summary>
         internal RequestProcessor()
         {
             _requestHandles.Add("/check", CheckHandler);
         }
 
+        /// <summary>
+        /// Adds request handler.
+        /// </summary>
+        /// <param name="path">The path, eg.: /help/getDocs </param>
+        /// <param name="action">The target handler-method.</param>
+        public void AddHandler(string path, Action<string, HttpListenerResponse> action)
+        {
+            // add
+            _requestHandles.Add(path, action);
+        }
+
+        /// <summary>
+        /// Process context.
+        /// </summary>
+        /// <param name="context">The context.</param>
         public void Process(HttpListenerContext context)
         {
             var request = context.Request;
@@ -34,7 +53,7 @@ namespace MySync.Server.Core
             response.AddHeader("Content-Type", "application/json");
 
             // try to find handler
-            Action<HttpListenerRequest, HttpListenerResponse> handler;
+            Action<string, HttpListenerResponse> handler;
             if (!_requestHandles.TryGetValue(url, out handler))
             {
                 var notfound = Encoding.UTF8.GetBytes("{\"error\":\"NOT FOUND\"}");
@@ -43,15 +62,17 @@ namespace MySync.Server.Core
             }
 
             // handle
-            handler.Invoke(request, response);
+            using (var body = request.InputStream) // here we have data
+            {
+                using (var reader = new System.IO.StreamReader(body, request.ContentEncoding))
+                {
+                    handler.Invoke(reader.ReadToEnd(), response);
+                }
+            }
         }
 
-        public void Dispose()
-        {
-
-        }
-
-        private void CheckHandler(HttpListenerRequest request, HttpListenerResponse response)
+        // private
+        private void CheckHandler(string body, HttpListenerResponse response)
         {
             var buffer = Encoding.UTF8.GetBytes("{\"status\":0}");
             response.OutputStream.Write(buffer, 0, buffer.Length);

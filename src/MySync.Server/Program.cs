@@ -8,6 +8,7 @@ namespace MySync.Server
     {
         private static void Main(string[] args)
         {
+            // run server
             using (var core = new ServerCore())
             {
                 core.Run();
