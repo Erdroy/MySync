@@ -1,0 +1,5 @@
+D:\#GIT\MySync\src\MySync.Server\obj\Debug\MySync.Server.csprojResolveAssemblyReference.cache
+D:\#GIT\MySync\bin\MySyncServer.exe
+D:\#GIT\MySync\bin\MySyncServer.pdb
+D:\#GIT\MySync\src\MySync.Server\obj\Debug\MySyncServer.exe
+D:\#GIT\MySync\src\MySync.Server\obj\Debug\MySyncServer.pdb
