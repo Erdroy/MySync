@@ -56,7 +56,7 @@ namespace MySync.Server.Core.RequestHandlers
                         File.WriteAllText("data/" + projectSettings.Name + "/filemap.json", Encoding.UTF8.GetString(filemapData));
 
                         // read data file
-                        using (var fs = File.OpenWrite("temp.zip"))
+                        using (var fs = File.Create("temp.zip"))
                         {
                             int read;
                             var buffer = new byte[64*1024];

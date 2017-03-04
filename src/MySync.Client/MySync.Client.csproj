@@ -54,6 +54,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ClientSettings.cs" />
     <Compile Include="Core\Project.cs" />
     <Compile Include="Core\Request.cs" />
     <Compile Include="Program.cs" />

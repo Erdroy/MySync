@@ -105,7 +105,7 @@ namespace MySync.Client.Core
                 var datasize = file.Length + commitData.Length + clientData.Length + filemapData.Length + 3 * sizeof(int); // <---
 
                 // begin send
-                var stream = Request.BeginSend("http://127.0.0.1:8080/push", datasize);
+                var stream = Request.BeginSend(ServerAddress + "push", datasize);
 
                 using (var writer = new BinaryWriter(stream))
                 {
@@ -207,9 +207,10 @@ namespace MySync.Client.Core
         /// <summary>
         /// Open project from directory.
         /// </summary>
+        /// <param name="address">The server address.</param>
         /// <param name="directory">The project directory.</param>
         /// <returns>The opened project or null when not found.</returns>
-        public static Project Open(string directory)
+        public static Project Open(string address, string directory)
         {
             if (!directory.EndsWith("\\"))
                 directory += "\\";
@@ -221,7 +222,8 @@ namespace MySync.Client.Core
             {
                 var project = new Project
                 {
-                    RootDir = directory
+                    RootDir = directory,
+                    ServerAddress = address
                 };
                 project.Refresh();
 
@@ -234,6 +236,8 @@ namespace MySync.Client.Core
 
 
         public ProjectAuthority Authority { get; set; }
+
+        public string ServerAddress { get; set; }
 
         public string RootDir { get; set; }
     }
