@@ -38,7 +38,16 @@ namespace MySync.Client.Core
         {
             return _lastFilemap.GetDiff(_currentFilemap);
         }
-        
+
+        /// <summary>
+        /// Gets the last filemap.
+        /// </summary>
+        /// <returns>The last commit base filemap.</returns>
+        public Filemap GetLastFilemap()
+        {
+            return _lastFilemap;
+        }
+
         /// <summary>
         /// Build commit data file.
         /// </summary>
@@ -58,6 +67,9 @@ namespace MySync.Client.Core
             {
                 foreach (var file in commit.Files)
                 {
+                    if (file.DiffType == Filemap.FileDiff.Type.Delete)
+                        continue;
+
                     var entry = zip.AddFile(dir + file.FileName); // add file
 
                     // change name
@@ -83,9 +95,14 @@ namespace MySync.Client.Core
             var clientData = Encoding.UTF8.GetBytes(Authority.ToJson());
             var commitData = Encoding.UTF8.GetBytes(commit.ToJson());
 
+            var filemap = _lastFilemap;
+            filemap.AddChanges(RootDir, commit.Files);
+            var filemapJson = filemap.ToJson();
+            var filemapData = Encoding.UTF8.GetBytes(filemapJson);
+
             using (var file = new FileStream(dataFile, FileMode.Open))
             {
-                var datasize = file.Length + commitData.Length + clientData.Length + 2 * sizeof(int);
+                var datasize = file.Length + commitData.Length + clientData.Length + filemapData.Length + 3 * sizeof(int); // <---
 
                 // begin send
                 var stream = Request.BeginSend("http://127.0.0.1:8080/push", datasize);
@@ -100,7 +117,9 @@ namespace MySync.Client.Core
                     writer.Write(commitData.Length);
                     writer.Write(commitData);
 
-                    // TODO: write filemap
+                    // write filemap
+                    writer.Write(filemapData.Length);
+                    writer.Write(filemapData);
 
                     // upload commit data file
                     int read;
@@ -119,6 +138,8 @@ namespace MySync.Client.Core
                     {
                         var message = reader.ReadString();
                         // TODO: finalize
+
+                        File.WriteAllText(RootDir + ".mysync/last_filemap.json", filemapJson);
                         Console.WriteLine(message);
                     }
                 });

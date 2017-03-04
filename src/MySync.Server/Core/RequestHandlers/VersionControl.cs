@@ -51,7 +51,9 @@ namespace MySync.Server.Core.RequestHandlers
                         var commitData = reader.ReadBytes(reader.ReadInt32());
                         var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
 
-                        // TODO: read filemap
+                        // read and save filemap
+                        var filemapData = reader.ReadBytes(reader.ReadInt32());
+                        File.WriteAllText("data/" + projectSettings.Name + "/filemap.json", Encoding.UTF8.GetString(filemapData));
 
                         // read data file
                         using (var fs = File.OpenWrite("temp.zip"))

@@ -123,6 +123,39 @@ namespace MySync.Shared.VersionControl
         }
 
         /// <summary>
+        /// Add changes.
+        /// </summary>
+        /// <param name="root">The project root directory.</param>
+        /// <param name="fileDiffs">The files diff.</param>
+        public void AddChanges(string root, FileDiff[] fileDiffs)
+        {
+            if (!root.EndsWith("\\"))
+                root += "\\";
+
+            foreach (var file in fileDiffs)
+            {
+                if (file.DiffType == FileDiff.Type.Created)
+                {
+                    // add file
+                    var fileName = root + file.FileName;
+                    var fileInfo = new FileInfo(fileName);
+                    _files.Add(new File
+                    {
+                        FileName = file.FileName,
+                        Version = fileInfo.LastWriteTime.ToBinary()
+                    });
+
+                    // next, please!
+                    continue;
+                }
+
+                // remove file
+                if (file.DiffType == FileDiff.Type.Delete)
+                    _files.Remove(_files.FirstOrDefault(x => x.FileName == file.FileName));
+            }
+        }
+
+        /// <summary>
         /// Serialze this filemap to json.
         /// </summary>
         /// <returns>The json filemap.</returns>
