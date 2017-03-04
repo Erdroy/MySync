@@ -9,6 +9,8 @@
     <Import_RootNamespace>MySync.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)RequestHeaders\ProjectAuthority.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\PasswordHasher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Commit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Filemap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\FilenameHelper.cs" />

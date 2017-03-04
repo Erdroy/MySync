@@ -55,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Project.cs" />
-    <Compile Include="Core\ProjectSettings.cs" />
     <Compile Include="Core\Request.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

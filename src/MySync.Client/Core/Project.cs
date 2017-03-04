@@ -2,12 +2,10 @@
 
 using System;
 using System.IO;
-using System.IO.Compression;
+using System.Text;
 using Ionic.Zip;
-using Ionic.Zlib;
+using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
-using CompressionLevel = Ionic.Zlib.CompressionLevel;
-using CompressionMode = Ionic.Zlib.CompressionMode;
 
 namespace MySync.Client.Core
 {
@@ -73,6 +71,60 @@ namespace MySync.Client.Core
             return tempFile;
         }
 
+        /// <summary>
+        /// Push commit to the server.
+        /// </summary>
+        /// <param name="commit">The commit.</param>
+        /// <param name="dataFile">The commit data file.</param>
+        public void PushCommit(Commit commit, string dataFile)
+        {
+            // TODO: check if data file exists
+            
+            var clientData = Encoding.UTF8.GetBytes(Authority.ToJson());
+            var commitData = Encoding.UTF8.GetBytes(commit.ToJson());
+
+            using (var file = new FileStream(dataFile, FileMode.Open))
+            {
+                var datasize = file.Length + commitData.Length + clientData.Length + 2 * sizeof(int);
+
+                // begin send
+                var stream = Request.BeginSend("http://127.0.0.1:8080/push", datasize);
+
+                using (var writer = new BinaryWriter(stream))
+                {
+                    // write client data header
+                    writer.Write(clientData.Length);
+                    writer.Write(clientData);
+
+                    // write data header
+                    writer.Write(commitData.Length);
+                    writer.Write(commitData);
+
+                    // upload commit data file
+                    int read;
+                    var buffer = new byte[64 * 1024];
+                    while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        writer.Write(buffer, 0, read);
+                    }
+                }
+
+                Request.EndSend(resp =>
+                {
+                    // done!
+                    // read response data
+                    using (var reader = new BinaryReader(resp))
+                    {
+                        var message = reader.ReadString();
+                        // TODO: finalize
+                        Console.WriteLine(message);
+                    }
+                });
+            }
+
+            // delete data file
+            File.Delete(dataFile);
+        }
 
         /// <summary>
         /// Dispose the project.
@@ -156,6 +208,9 @@ namespace MySync.Client.Core
             // nope! can't open project
             return null;
         }
+
+
+        public ProjectAuthority Authority { get; set; }
 
         public string RootDir { get; set; }
     }

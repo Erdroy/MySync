@@ -1,7 +1,10 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 using System;
+using System.IO;
 using System.Net;
+using MySync.Client.Core;
+using Newtonsoft.Json;
 
 namespace MySync.Server.Core
 {
@@ -30,7 +33,10 @@ namespace MySync.Server.Core
         internal void Run()
         {
             _isDisposed = false;
-            
+
+            // load projects settings
+            Settings = JsonConvert.DeserializeObject<ProjectsSettings>(File.ReadAllText("serversettings.json"));
+
             // initialize request processor
             _processor = new RequestProcessor();
 
@@ -82,10 +88,11 @@ namespace MySync.Server.Core
         private void LoadHandlers()
         {
             _processor.AddHandler("/authorize", RequestHandlers.Authorize.Process);
-            _processor.AddHandler("/filemap", RequestHandlers.VersionControl.GetFilemap);
             _processor.AddHandler("/pull", RequestHandlers.VersionControl.Pull);
 
             _processor.AddDownloader("/push", RequestHandlers.VersionControl.Push);
         }
+
+        public static ProjectsSettings Settings { get; private set; }
     }
 }
