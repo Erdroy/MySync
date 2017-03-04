@@ -51,6 +51,8 @@ namespace MySync.Server.Core.RequestHandlers
                         var commitData = reader.ReadBytes(reader.ReadInt32());
                         var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
 
+                        // TODO: read filemap
+
                         // read data file
                         using (var fs = File.OpenWrite("temp.zip"))
                         {
@@ -63,9 +65,11 @@ namespace MySync.Server.Core.RequestHandlers
                         }
 
                         // downloaded
+                        // now apply changes
+                        commit.Apply("data/" + projectSettings.Name, "temp.zip");
 
-                        // apply changes
-
+                        // add commit to database
+                        
                         // return message
                         writer.Write("Done!");
                         Console.WriteLine("User '" + authority.Username + "' pushed changes!");

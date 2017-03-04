@@ -100,6 +100,8 @@ namespace MySync.Client.Core
                     writer.Write(commitData.Length);
                     writer.Write(commitData);
 
+                    // TODO: write filemap
+
                     // upload commit data file
                     int read;
                     var buffer = new byte[64 * 1024];

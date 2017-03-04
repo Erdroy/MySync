@@ -1,5 +1,7 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
+using System.IO;
+using Ionic.Zip;
 using Newtonsoft.Json;
 
 namespace MySync.Shared.VersionControl
@@ -28,6 +30,27 @@ namespace MySync.Shared.VersionControl
         {
             // serialize object to JSON
             return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Apply commit changes.
+        /// </summary>
+        /// <param name="projectDir">The project directory.</param>
+        /// <param name="dataFile">The commit data file.</param>
+        public void Apply(string projectDir, string dataFile)
+        {
+            // apply data
+            using (var zip = new ZipFile(dataFile))
+            {
+                zip.ExtractAll(projectDir, ExtractExistingFileAction.OverwriteSilently);
+            }
+
+            // delete files
+            foreach (var file in Files)
+            {
+                if (file.DiffType == Filemap.FileDiff.Type.Delete)
+                    File.Delete(projectDir + "/" + file.FileName);
+            }
         }
 
         /// <summary>
