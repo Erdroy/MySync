@@ -9,6 +9,7 @@
     <Import_RootNamespace>MySync.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Commit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Filemap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\FilenameHelper.cs" />
   </ItemGroup>

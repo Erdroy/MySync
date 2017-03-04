@@ -193,6 +193,15 @@ namespace MySync.Shared.VersionControl
         }
 
         /// <summary>
+        /// Build empty filemap.
+        /// </summary>
+        /// <returns>The built filemap.</returns>
+        public static Filemap BuildEmpty()
+        {
+            return new Filemap();
+        }
+
+        /// <summary>
         /// Build empty filemap for testing.
         /// </summary>
         /// <returns>The built filemap.</returns>

@@ -31,6 +31,21 @@ namespace MySync.Shared.VersionControl
         }
 
         /// <summary>
+        /// Create commit from diff.
+        /// </summary>
+        /// <param name="diff">The files diff.</param>
+        /// <param name="desc">(optional)The commit description.</param>
+        /// <returns>The created commit.</returns>
+        public static Commit FromDiff(Filemap.FileDiff[] diff, string desc = "No message")
+        {
+            var commit = new Commit
+            {
+                Files = diff
+            };
+            return commit;
+        }
+
+        /// <summary>
         /// Create Commit from json string.
         /// </summary>
         /// <param name="json">The json string.</param>

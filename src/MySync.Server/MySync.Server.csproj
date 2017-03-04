@@ -34,6 +34,9 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\..\lib\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="LiteDB, Version=3.0.1.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
       <HintPath>..\MySync.Client\packages\LiteDB.3.0.1\lib\net35\LiteDB.dll</HintPath>
       <Private>True</Private>
