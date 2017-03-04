@@ -175,6 +175,9 @@ namespace MySync.Shared.VersionControl
             {
                 var filename = file.Replace("\\", "/").Remove(0, root.Length);
 
+                if(filename.Contains(".mysync"))
+                    continue;
+
                 // TODO: check exclusions
 
                 // check file info
