@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Net;
+using LiteDB;
 using MySync.Client.Core;
 using Newtonsoft.Json;
 
@@ -37,6 +38,9 @@ namespace MySync.Server.Core
             // load projects settings
             Settings = JsonConvert.DeserializeObject<ProjectsSettings>(File.ReadAllText("serversettings.json"));
 
+            // load database
+            Database = new LiteDatabase(@"mysync_database.db");
+            
             // initialize request processor
             _processor = new RequestProcessor();
 
@@ -71,6 +75,9 @@ namespace MySync.Server.Core
                 return;
 
             _isDisposed = true;
+
+            // dispose database
+            Database.Dispose();
         }
         
         // private
@@ -92,6 +99,8 @@ namespace MySync.Server.Core
 
             _processor.AddDownloader("/push", RequestHandlers.VersionControl.Push);
         }
+
+        public static LiteDatabase Database { get; private set; }
 
         public static ProjectsSettings Settings { get; private set; }
     }

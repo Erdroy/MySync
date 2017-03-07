@@ -39,6 +39,7 @@ namespace MySync.Shared.VersionControl
 
             public string FileName;
             public Type DiffType;
+            public long Version;
         }
 
         // private
@@ -87,7 +88,8 @@ namespace MySync.Shared.VersionControl
                     diff.Add(new FileDiff
                     {
                         FileName = file.FileName,
-                        DiffType = FileDiff.Type.Created
+                        DiffType = FileDiff.Type.Created,
+                        Version = file.Version
                     });
                     continue;
                 }
@@ -99,7 +101,8 @@ namespace MySync.Shared.VersionControl
                     diff.Add(new FileDiff
                     {
                         FileName = file.FileName,
-                        DiffType = FileDiff.Type.Changed
+                        DiffType = FileDiff.Type.Changed,
+                        Version = file.Version
                     });
                 }
             }
@@ -232,21 +235,6 @@ namespace MySync.Shared.VersionControl
         public static Filemap BuildEmpty()
         {
             return new Filemap();
-        }
-
-        /// <summary>
-        /// Build empty filemap for testing.
-        /// </summary>
-        /// <returns>The built filemap.</returns>
-        public static Filemap BuildFree()
-        {
-            var filemap = new Filemap();
-            filemap._files.Add(new File
-            {
-                FileName = "/test.txt",
-                Version = 0
-            });
-            return filemap;
         }
     }
 }

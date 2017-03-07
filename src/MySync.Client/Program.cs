@@ -53,7 +53,7 @@ namespace MySync.Client
                 Console.WriteLine(@"Select files: ");
                 foreach (var file in diffs)
                 {
-                    Console.WriteLine(file.FileName + @" - operation: " + file.DiffType + @" press [ENTER to ACCEPT] or [any key and ENTER to IGNORE]");
+                    Console.WriteLine(file.FileName + @" - operation: " + file.DiffType + @" - [ENTER to ACCEPT] or [ANY key and ENTER to IGNORE]");
                     if (Console.ReadLine().Length == 0)
                     {
                         diff.Add(file);
@@ -73,14 +73,12 @@ namespace MySync.Client
                 var commit = Commit.FromDiff(diff.ToArray());
                 var datafile = project.BuildCommit(commit);
 
-                project.PushCommit(commit, datafile);
+                project.Push(commit, datafile);
             }
             else if(op == "PULL")
             {
-                
+                project.Pull();
             }
-
-            /**/
             
             Console.WriteLine(@"Press any key to exit...");
             Console.ReadLine();

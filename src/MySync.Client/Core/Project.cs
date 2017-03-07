@@ -88,7 +88,7 @@ namespace MySync.Client.Core
         /// </summary>
         /// <param name="commit">The commit.</param>
         /// <param name="dataFile">The commit data file.</param>
-        public void PushCommit(Commit commit, string dataFile)
+        public void Push(Commit commit, string dataFile)
         {
             // TODO: check if data file exists
             
@@ -137,16 +137,25 @@ namespace MySync.Client.Core
                     using (var reader = new BinaryReader(resp))
                     {
                         var message = reader.ReadString();
+                        var commitId = reader.ReadInt32();
                         // TODO: finalize
 
                         File.WriteAllText(RootDir + ".mysync/last_filemap.json", filemapJson);
-                        Console.WriteLine(message);
+                        Console.WriteLine(message + @" commmitid: " + commitId);
                     }
                 });
             }
 
             // delete data file
             File.Delete(dataFile);
+        }
+
+        /// <summary>
+        /// Pull commits from server and apply.
+        /// </summary>
+        public void Pull()
+        {
+            
         }
 
         /// <summary>
