@@ -84,6 +84,39 @@ namespace MySync.Shared.VersionControl
                     File.Delete(projectDir + "/" + file.FileName);
             }
         }
+       
+        /// <summary>
+        /// Build commit data file.
+        /// </summary>
+        /// <returns>The data file path.</returns>
+        public string Build(string rootDir)
+        {
+            var tempFile = rootDir + ".mysync\\commit.zip";
+
+            // delete the file when exists.
+            if (File.Exists(tempFile))
+                File.Delete(tempFile);
+
+            // compress all files
+            using (var zip = new ZipFile(tempFile))
+            {
+                foreach (var file in Files)
+                {
+                    if (file.DiffType == Filemap.FileDiff.Type.Delete)
+                        continue;
+
+                    var entry = zip.AddFile(rootDir + file.FileName); // add file
+
+                    // change name
+                    entry.FileName = file.FileName;
+                }
+
+                // save
+                zip.Save();
+            }
+
+            return tempFile;
+        }
 
         /// <summary>
         /// Create commit from diff.

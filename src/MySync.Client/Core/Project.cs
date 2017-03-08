@@ -47,42 +47,7 @@ namespace MySync.Client.Core
         {
             return _lastFilemap;
         }
-
-        /// <summary>
-        /// Build commit data file.
-        /// </summary>
-        /// <param name="commit">The commit which will get it's data file.</param>
-        /// <returns>The data file path.</returns>
-        public string BuildCommit(Commit commit)
-        {
-            var dir = RootDir;
-            var tempFile = dir + ".mysync\\commit.zip";
-
-            // delete the file when exists.
-            if (File.Exists(tempFile))
-                File.Delete(tempFile);
-
-            // compress all files
-            using (var zip = new ZipFile(tempFile))
-            {
-                foreach (var file in commit.Files)
-                {
-                    if (file.DiffType == Filemap.FileDiff.Type.Delete)
-                        continue;
-
-                    var entry = zip.AddFile(dir + file.FileName); // add file
-
-                    // change name
-                    entry.FileName = file.FileName;
-                }
-
-                // save
-                zip.Save();
-            }
-
-            return tempFile;
-        }
-
+        
         /// <summary>
         /// Push commit to the server.
         /// </summary>
