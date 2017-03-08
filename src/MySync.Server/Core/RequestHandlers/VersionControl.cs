@@ -58,7 +58,7 @@ namespace MySync.Server.Core.RequestHandlers
                         File.WriteAllText("data/" + projectSettings.Name + "/filemap.json", Encoding.UTF8.GetString(filemapData));
 
                         // read data file
-                        using (var fs = File.Create("temp.zip"))
+                        using (var fs = File.Create("temp_recv.zip"))
                         {
                             int read;
                             var buffer = new byte[64*1024];
@@ -173,18 +173,25 @@ namespace MySync.Server.Core.RequestHandlers
 
                     for (var i = 1; i < commits.Count; i++)
                         commit.Add(commits[i].ToCommit());
-
-                    // delete the temp file when exists.
-                    if (File.Exists("temp_send.zip"))
-                        File.Delete("temp_send.zip");
-
+                    
                     // build commit diff data file
-                    var dir = "data/" + projectSettings.Name;
+                    var dir = "data/" + projectSettings.Name + "/";
                     commit.Build(dir, "temp_send.zip");
 
                     // send commit diff
+                    var commitJson = commit.ToJson();
+                    writer.Write(commitJson);
 
                     // send commit diff data file
+                    using (var file = new FileStream("temp_send.zip", FileMode.Open))
+                    {
+                        int read;
+                        var buffer = new byte[64 * 1024];
+                        while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            response.OutputStream.Write(buffer, 0, read);
+                        }
+                    }
                 }
                 catch
                 {

@@ -83,6 +83,9 @@ namespace MySync.Shared.VersionControl
                 if (file.DiffType == Filemap.FileDiff.Type.Delete)
                     File.Delete(projectDir + "/" + file.FileName);
             }
+            
+
+            // TODO: apply mod time
         }
        
         /// <summary>

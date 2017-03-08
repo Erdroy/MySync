@@ -3,7 +3,6 @@
 using System;
 using System.IO;
 using System.Text;
-using Ionic.Zip;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
 
@@ -107,6 +106,9 @@ namespace MySync.Client.Core
 
                         File.WriteAllText(RootDir + ".mysync/last_filemap.json", filemapJson);
                         Console.WriteLine(message + @" commmitid: " + commitId);
+
+                        // refresh
+                        Refresh();
                     }
                 });
             }
@@ -120,7 +122,51 @@ namespace MySync.Client.Core
         /// </summary>
         public void Pull()
         {
+            var dataJson = new PullInput
+            {
+                Authority = Authority,
+                CommitId = -1 // download all TODO: get current commit id
+            };
             
+            Request.Send(ServerAddress + "pull", dataJson.ToJson(), stream =>
+            {
+                using (var reader = new BinaryReader(stream))
+                {
+                    var body = reader.ReadString();
+
+                    Commit commit;
+                    try
+                    {
+                        commit = Commit.FromJson(body);
+                    }
+                    catch
+                    {
+                        Console.WriteLine(body);
+                        return;
+                    }
+
+                    var dataFile = RootDir + ".mysync/commit_recv.zip";
+                    using (var fs = File.Create(dataFile))
+                    {
+                        int read;
+                        var buffer = new byte[64 * 1024];
+                        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            fs.Write(buffer, 0, read);
+                        }
+                    }
+                    
+                    // apply the commit
+                    commit.Apply(RootDir, dataFile);
+                    
+                    // update filemap
+                    _lastFilemap.AddChanges(RootDir, commit.Files);
+                    File.WriteAllText(RootDir + ".mysync/last_filemap.json", _lastFilemap.ToJson());
+
+                    // refresh
+                    Refresh();
+                }
+            });
         }
 
         /// <summary>
