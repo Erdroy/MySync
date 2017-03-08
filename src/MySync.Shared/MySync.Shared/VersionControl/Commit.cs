@@ -1,6 +1,8 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Ionic.Zip;
 using Newtonsoft.Json;
 
@@ -30,6 +32,36 @@ namespace MySync.Shared.VersionControl
         {
             // serialize object to JSON
             return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
+
+        /// <summary>
+        /// Add commit to this commit.
+        /// </summary>
+        /// <param name="commit">The newer commit to add.</param>
+        public void Add(Commit commit)
+        {
+            // build temporary file list
+            var files = new List<Filemap.FileDiff>();
+            files.AddRange(Files);
+
+            // iterate all file changes
+            foreach (var file in commit.Files)
+            {
+                // try to replace
+                if (files.Any(x => x.FileName == file.FileName))
+                {
+                    // file exists in the file list, update
+                    var fidx = files.FindIndex(x => x.FileName == file.FileName);
+                    files[fidx] = file;
+                    continue;
+                }
+
+                // this file does not exists already, add to the list
+                files.Add(file);
+            }
+
+            // set files array to the latest one
+            Files = files.ToArray();
         }
 
         /// <summary>
