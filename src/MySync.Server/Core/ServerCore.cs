@@ -94,7 +94,6 @@ namespace MySync.Server.Core
         // private
         private void LoadHandlers()
         {
-            _processor.AddHandler("/authorize", RequestHandlers.Authorize.Process);
             _processor.AddHandler("/pull", RequestHandlers.VersionControl.Pull);
 
             _processor.AddDownloader("/push", RequestHandlers.VersionControl.Push);
