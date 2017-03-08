@@ -102,9 +102,17 @@ namespace MySync.Client.Core
                     {
                         var message = reader.ReadString();
                         var commitId = reader.ReadInt32();
-                        // TODO: finalize
 
+                        // finalize everything
+
+                        // save commit id
+                        var commitInfo = RootDir + ".mysync/commit_info.txt";
+                        File.WriteAllText(commitInfo, commitId.ToString());
+
+                        // save filemap
                         File.WriteAllText(RootDir + ".mysync/last_filemap.json", filemapJson);
+
+                        // show info
                         Console.WriteLine(message + @" commmitid: " + commitId);
 
                         // refresh
@@ -122,28 +130,39 @@ namespace MySync.Client.Core
         /// </summary>
         public void Pull()
         {
+            var commitInfo = RootDir + ".mysync/commit_info.txt";
+
+            // select current commit id
+            var currentCommitId = File.Exists(commitInfo) ? int.Parse(File.ReadAllText(commitInfo)) : -1;
+
+            // construct pull input data
             var dataJson = new PullInput
             {
                 Authority = Authority,
-                CommitId = -1 // download all TODO: get current commit id
+                CommitId = currentCommitId
             };
             
+            // send pull request
             Request.Send(ServerAddress + "pull", dataJson.ToJson(), stream =>
             {
                 using (var reader = new BinaryReader(stream))
                 {
                     var body = reader.ReadString();
 
-                    Commit commit;
+                    Console.WriteLine(body);
+
+                    Commit commit; // try convert commit data
                     try
                     {
                         commit = Commit.FromJson(body);
                     }
                     catch
                     {
-                        Console.WriteLine(body);
                         return;
                     }
+
+                    var commitId = reader.ReadInt32();
+                    Console.WriteLine(@"commit id: " + commitId);
 
                     var dataFile = RootDir + ".mysync/commit_recv.zip";
                     using (var fs = File.Create(dataFile))
@@ -162,6 +181,9 @@ namespace MySync.Client.Core
                     // update filemap
                     _lastFilemap.AddChanges(RootDir, commit.Files);
                     File.WriteAllText(RootDir + ".mysync/last_filemap.json", _lastFilemap.ToJson());
+
+                    // save commit id
+                    File.WriteAllText(commitInfo, commitId.ToString());
 
                     // refresh
                     Refresh();

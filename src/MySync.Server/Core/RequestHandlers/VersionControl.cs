@@ -182,6 +182,9 @@ namespace MySync.Server.Core.RequestHandlers
                     var commitJson = commit.ToJson();
                     writer.Write(commitJson);
 
+                    // send commit id
+                    writer.Write(commits[commits.Count - 1].CommitId);
+
                     // send commit diff data file
                     using (var file = new FileStream("temp_send.zip", FileMode.Open))
                     {
