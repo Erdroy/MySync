@@ -8,6 +8,7 @@ using System.Text;
 using MySync.Server.Core.DatabaseModels;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
+using Newtonsoft.Json;
 
 namespace MySync.Server.Core.RequestHandlers
 {
@@ -76,11 +77,11 @@ namespace MySync.Server.Core.RequestHandlers
                         {
                             // downloaded
                             // now apply changes
-                            commit.Apply("data/" + projectSettings.Name, "temp.zip");
+                            commit.Apply("data/" + projectSettings.Name, "temp_recv.zip");
 
                             // add commit to projects database
-                            var commits = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
-                            commitId = commits.Count()+1;
+                            var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
+                            commitId = projectCollection.Count()+1;
                             
                             // build commit
                             var commitModel = new CommitModel
@@ -103,7 +104,7 @@ namespace MySync.Server.Core.RequestHandlers
                             }
 
                             // insert
-                            commits.Insert(commitModel);
+                            projectCollection.Insert(commitModel);
                         }
                         catch
                         {
@@ -131,11 +132,11 @@ namespace MySync.Server.Core.RequestHandlers
             {
                 try
                 {
-                    var authority = ProjectAuthority.FromJson(body);
+                    var input = JsonConvert.DeserializeObject<PullInput>(body);
 
                     // validate project name, password and check permisions from clientData
                     var projectSettings = ServerCore.Settings.Projects.FirstOrDefault(
-                        x => x.Name == authority.ProjectName
+                        x => x.Name == input.Authority.ProjectName
                     );
 
                     // check if requested project exists
@@ -146,16 +147,43 @@ namespace MySync.Server.Core.RequestHandlers
                     }
 
                     // check if user has the authority to this project
-                    if (!projectSettings.AccessTokens.Contains(authority.AccessToken))
+                    if (!projectSettings.AccessTokens.Contains(input.Authority.AccessToken))
                     {
                         // do not tell that the project even exists
                         writer.Write("Failed - project not found!");
                         return;
                     }
 
-                    // read all commits for latest downloaded client-commit
+                    // find latest downloaded client-commit
+                    var commitId = input.CommitId + 1; // the first commit id which will be downloaded if exists
+                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
+
+                    // find all needed commits that will be used to calculate diff
+                    var commits = projectCollection.Find(x => x.CommitId >= commitId).OrderBy(x => x.CommitId).ToList();
+
+                    // check if there is at least one commit, if not, break the pull request
+                    if (!commits.Any())
+                    {
+                        writer.Write("No files to download.");
+                        return;
+                    }
+                    
                     // diff all commits
+                    var commit = commits[0].ToCommit();
+
+                    for (var i = 1; i < commits.Count; i++)
+                        commit.Add(commits[i].ToCommit());
+
+                    // delete the temp file when exists.
+                    if (File.Exists("temp_send.zip"))
+                        File.Delete("temp_send.zip");
+
+                    // build commit diff data file
+                    var dir = "data/" + projectSettings.Name;
+                    commit.Build(dir, "temp_send.zip");
+
                     // send commit diff
+
                     // send commit diff data file
                 }
                 catch
@@ -166,3 +194,4 @@ namespace MySync.Server.Core.RequestHandlers
         }
     }
 }
+

@@ -89,10 +89,8 @@ namespace MySync.Shared.VersionControl
         /// Build commit data file.
         /// </summary>
         /// <returns>The data file path.</returns>
-        public string Build(string rootDir)
+        public string Build(string rootDir, string tempFile)
         {
-            var tempFile = rootDir + ".mysync\\commit.zip";
-
             // delete the file when exists.
             if (File.Exists(tempFile))
                 File.Delete(tempFile);

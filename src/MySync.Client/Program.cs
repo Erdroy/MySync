@@ -71,7 +71,7 @@ namespace MySync.Client
                 Console.ReadLine();
 
                 var commit = Commit.FromDiff(diff.ToArray());
-                var datafile = project.BuildCommit(commit);
+                var datafile = commit.Build(project.RootDir, project.RootDir + ".mysync\\commit.zip");
 
                 project.Push(commit, datafile);
             }

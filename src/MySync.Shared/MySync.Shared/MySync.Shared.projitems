@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)RequestHeaders\ProjectAuthority.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RequestHeaders\PullInput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\PasswordHasher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Commit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Filemap.cs" />
