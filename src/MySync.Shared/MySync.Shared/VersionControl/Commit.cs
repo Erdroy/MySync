@@ -1,5 +1,6 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -71,6 +72,8 @@ namespace MySync.Shared.VersionControl
         /// <param name="dataFile">The commit data file.</param>
         public void Apply(string projectDir, string dataFile)
         {
+            Console.WriteLine("Apply commit: " + projectDir + ", " + dataFile);
+
             // apply data
             using (var zip = new ZipFile(dataFile))
             {

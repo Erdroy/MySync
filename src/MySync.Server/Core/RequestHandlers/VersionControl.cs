@@ -106,9 +106,9 @@ namespace MySync.Server.Core.RequestHandlers
                             // insert
                             projectCollection.Insert(commitModel);
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            writer.Write("#RESTORE Failed - error when updating project!");
+                            writer.Write("#RESTORE Failed - error when updating project! Error: " + ex);
                         }
                         
                         // ok, we are out of the danger zone.
@@ -118,9 +118,9 @@ namespace MySync.Server.Core.RequestHandlers
                         writer.Write(commitId);
                         Console.WriteLine("User '" + authority.Username + "' pushed changes!");
                     }
-                    catch
+                    catch(Exception ex)
                     {
-                        writer.Write("Failed - invalid protocol/connection error!");
+                        writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
                     }
                 }
             }
