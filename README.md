@@ -1,18 +1,38 @@
 # MySync
-MySync - File synchronization software with GIT-like PUSH/PULL/COMMIT, aka. SFTP client on steroids.
+MySync - File synchronization software with GIT-like PUSH/PULL.
 Under AGPL-3.0 license.
 
-UNDER DEVELOPMENT! EARLY PROTOTYPE.
+*** UNDER DEVELOPMENT! ***
+For current progress, see trello or/and my Discord server, links below in the Contact section.
 -----------------
 
-Short description:
+# Short description
 Whole project is about to simplify the synchronization of project's content(audio, textures, maps etc.) for both small and big teams.
-Application uses SSH and SFTP protocols to manage files and has build-in very fast versioning engine(File mapping based on edit-time).
-Designed - as I said - for Content synchronization, not code(there will be exclusions so you will be able to join MS with GIT/Mercurial).
+Designed for Content synchronization, supports all types of files, syncing code is not recommended(you can exclude folder with code and use some github/other hosting for other Version Control software - GIT/Mercurial/SVN etc.).
 
+Client and Server application is designed to work on every platform that supports .NET 4.5 with Mono(Some day, I'll use .NET Core).
+However, server is easiest to install on Linux with Mono(And it is recommended, you don't need to worry about IP's etc.).
+
+# Features
+* Main Feature - GIT-like push, pull, discard etc.,
+* Supported binary files,
+* Built-in commit compression - you do not need to wait long minutes waiting for large files to upload,
+* Fast client-side version control,
+* Fast HTTP download/upload,
+* Custom port support,
+* Own custom request API based on HTTP-POST(state-less),
+* Fancy Metro-like UI(WIP).
+
+# Planned features
+* Collision detection(this will prevent overriding your changes by commit, this is currently common and requires some attention),
+* Users(partially implemented),
+* Permisions system,
+* Web Dashboard,
+* SSL support.
+
+# Contribution/Contact
 Feel free to contribute, there is a lot of work to do(see https://trello.com/b/NxN9L6Gf/mysync), 
-also you can join my Discord server and suggest some features: https://discordapp.com/invite/0kfQL9KtL4XfOK7G
-Currently only Windows on .NET 4.5 is officialy supported, more platforms will be added later.
+also you can join my Discord server and suggest some features, talk with me: https://discordapp.com/invite/0kfQL9KtL4XfOK7G
 
 ---
 
