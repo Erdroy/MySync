@@ -83,12 +83,23 @@ namespace MySync.Shared.VersionControl
             // delete files
             foreach (var file in Files)
             {
+                var fileName = projectDir + "/" + file.FileName;
                 if (file.DiffType == Filemap.FileDiff.Type.Delete)
-                    File.Delete(projectDir + "/" + file.FileName);
+                {
+                    File.Delete(fileName);
+                }
+                else
+                {
+#if !SERVER
+                    // Apply file modification time,
+                    // but only on client.
+                    // This is already done by the zip file extraction, 
+                    // but there may be some critical issues that will need this. 
+                    // Just do it and prevent them all.
+                    File.SetLastWriteTime(fileName, DateTime.FromBinary(file.Version));
+#endif
+                }
             }
-            
-
-            // TODO: apply mod time
         }
        
         /// <summary>
