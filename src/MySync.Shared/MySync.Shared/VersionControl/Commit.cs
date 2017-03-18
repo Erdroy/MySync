@@ -53,6 +53,11 @@ namespace MySync.Shared.VersionControl
                 {
                     // file exists in the file list, update
                     var fidx = files.FindIndex(x => x.FileName == file.FileName);
+                    
+                    // if file was created and it is not deleted, do not set it as changed
+                    if (files[fidx].DiffType == Filemap.FileDiff.Type.Created && file.DiffType != Filemap.FileDiff.Type.Delete)
+                        continue;
+
                     files[fidx] = file;
                     continue;
                 }
