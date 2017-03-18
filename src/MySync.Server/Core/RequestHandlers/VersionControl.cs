@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MySync.Server.Core.DatabaseModels;
 using MySync.Shared.RequestHeaders;
@@ -64,7 +63,6 @@ namespace MySync.Server.Core.RequestHandlers
                             {
                                 fs.Write(buffer, 0, read);
                             }
-                            Console.WriteLine(fs.Length);
                         }
 
                         // --- from now - this part CAN'T fail, if so, the whole project may be incorrect after this!
@@ -202,6 +200,7 @@ namespace MySync.Server.Core.RequestHandlers
                             response.OutputStream.Write(buffer, 0, read);
                         }
                     }
+                    File.Delete("temp_send.zip");
                 }
                 catch (Exception ex)
                 {

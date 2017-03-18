@@ -179,7 +179,10 @@ namespace MySync.Client.Core
                     
                     // apply the commit
                     commit.Apply(RootDir, dataFile);
-                    
+
+                    // remove data file
+                    File.Delete(dataFile);
+
                     // update filemap
                     _lastFilemap.AddChanges(RootDir, commit.Files);
                     File.WriteAllText(RootDir + ".mysync/last_filemap.json", _lastFilemap.ToJson());
