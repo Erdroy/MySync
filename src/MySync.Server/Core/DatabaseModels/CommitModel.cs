@@ -1,5 +1,8 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
+using System;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MySync.Shared.VersionControl;
 
 namespace MySync.Server.Core.DatabaseModels
@@ -7,9 +10,11 @@ namespace MySync.Server.Core.DatabaseModels
     /// <summary>
     /// Commit structure model for database.
     /// </summary>
+    [Serializable]
     public class CommitModel
     {
-        public struct FileDiff
+        [Serializable]
+        public class FileDiff
         {
             public string Name { get; set; }
 
@@ -17,6 +22,9 @@ namespace MySync.Server.Core.DatabaseModels
 
             public long Version { get; set; }
         }
+
+        [BsonElement("_id")]
+        public ObjectId Id { get; set; }
 
         public int CommitId { get; set; }
 

@@ -62,11 +62,10 @@ namespace MySync.Client.Core
             var filemap = _lastFilemap;
             filemap.AddChanges(RootDir, commit.Files);
             var filemapJson = filemap.ToJson();
-            var filemapData = Encoding.UTF8.GetBytes(filemapJson);
 
             using (var file = new FileStream(dataFile, FileMode.Open))
             {
-                var datasize = file.Length + commitData.Length + clientData.Length + filemapData.Length + 3 * sizeof(int); // <---
+                var datasize = file.Length + clientData.Length + commitData.Length + 2 * sizeof(int); // <---
 
                 // begin send
                 var stream = Request.BeginSend(ServerAddress + "push", datasize);
@@ -80,11 +79,7 @@ namespace MySync.Client.Core
                     // write data header
                     writer.Write(commitData.Length);
                     writer.Write(commitData);
-
-                    // write filemap
-                    writer.Write(filemapData.Length);
-                    writer.Write(filemapData);
-
+                    
                     // upload commit data file
                     int read;
                     var buffer = new byte[64 * 1024];
@@ -92,7 +87,7 @@ namespace MySync.Client.Core
                     {
                         writer.Write(buffer, 0, read);
                     }
-                }
+                    Console.WriteLine(file.Length);
 
                 Request.EndSend(resp =>
                 {
@@ -101,9 +96,15 @@ namespace MySync.Client.Core
                     using (var reader = new BinaryReader(resp))
                     {
                         var message = reader.ReadString();
-                        var commitId = reader.ReadInt32();
 
                         // finalize everything
+                        if (message.StartsWith("#RESTORE"))
+                        {
+                            Console.WriteLine(@"Commit failed error: " + message);
+                            return;
+                        }
+
+                        var commitId = reader.ReadInt32();
 
                         // save commit id
                         var commitInfo = RootDir + ".mysync/commit_info.txt";
@@ -119,6 +120,7 @@ namespace MySync.Client.Core
                         Refresh();
                     }
                 });
+                }
             }
 
             // delete data file

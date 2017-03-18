@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using System.Net;
-using LiteDB;
+using MongoDB.Driver;
 using MySync.Client.Core;
 using Newtonsoft.Json;
 
@@ -39,8 +39,9 @@ namespace MySync.Server.Core
             Settings = JsonConvert.DeserializeObject<ProjectsSettings>(File.ReadAllText("serversettings.json"));
 
             // load database
-            Database = new LiteDatabase(@"mysync_database.db");
-            
+            MongoClient = new MongoClient();
+            Database = MongoClient.GetDatabase("mysync");
+
             // initialize request processor
             _processor = new RequestProcessor();
 
@@ -75,9 +76,6 @@ namespace MySync.Server.Core
                 return;
 
             _isDisposed = true;
-
-            // dispose database
-            Database.Dispose();
         }
         
         // private
@@ -99,7 +97,9 @@ namespace MySync.Server.Core
             _processor.AddDownloader("/push", RequestHandlers.VersionControl.Push);
         }
 
-        public static LiteDatabase Database { get; private set; }
+        public static IMongoDatabase Database { get; private set; }
+
+        public static MongoClient MongoClient { get; private set; }
 
         public static ProjectsSettings Settings { get; private set; }
     }

@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using MySync.Server.Core.DatabaseModels;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
@@ -52,11 +54,7 @@ namespace MySync.Server.Core.RequestHandlers
                         // read commit
                         var commitData = reader.ReadBytes(reader.ReadInt32());
                         var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
-
-                        // read and save filemap
-                        var filemapData = reader.ReadBytes(reader.ReadInt32());
-                        File.WriteAllText("data/" + projectSettings.Name + "/filemap.json", Encoding.UTF8.GetString(filemapData));
-
+                        
                         // read data file
                         using (var fs = File.Create("temp_recv.zip"))
                         {
@@ -66,13 +64,14 @@ namespace MySync.Server.Core.RequestHandlers
                             {
                                 fs.Write(buffer, 0, read);
                             }
+                            Console.WriteLine(fs.Length);
                         }
 
                         // --- from now - this part CAN'T fail, if so, the whole project may be incorrect after this!
 
-                        // TODO: make commited files backups and restore when failed to unpack the commit
+                        // TODO: make commited files backup and restore when failed to unpack the commit
 
-                        var commitId = 0;
+                        int commitId;
                         try
                         {
                             // downloaded
@@ -81,7 +80,7 @@ namespace MySync.Server.Core.RequestHandlers
 
                             // add commit to projects database
                             var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
-                            commitId = projectCollection.Count()+1;
+                            commitId = (int)projectCollection.Count(FilterDefinition<CommitModel>.Empty) +1;
                             
                             // build commit
                             var commitModel = new CommitModel
@@ -104,11 +103,19 @@ namespace MySync.Server.Core.RequestHandlers
                             }
 
                             // insert
-                            projectCollection.Insert(commitModel);
+                            projectCollection.InsertOne(commitModel);
+
+                            // delete zip file
+                            File.Delete("temp_recv.zip");
                         }
                         catch (Exception ex)
                         {
+                            Console.WriteLine("Failed to apply commit from user '" + authority.Username + "'");
                             writer.Write("#RESTORE Failed - error when updating project! Error: " + ex);
+
+                            // TODO: restore backup
+
+                            return;
                         }
                         
                         // ok, we are out of the danger zone.
@@ -159,7 +166,7 @@ namespace MySync.Server.Core.RequestHandlers
                     var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
 
                     // find all needed commits that will be used to calculate diff
-                    var commits = projectCollection.Find(x => x.CommitId >= commitId).OrderBy(x => x.CommitId).ToList();
+                    var commits = projectCollection.Find(x => x.CommitId >= commitId).ToList();
 
                     // check if there is at least one commit, if not, break the pull request
                     if (!commits.Any())
@@ -196,9 +203,9 @@ namespace MySync.Server.Core.RequestHandlers
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    writer.Write("Failed - invalid protocol/connection error!");
+                    writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
                 }
             }
         }
