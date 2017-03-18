@@ -54,6 +54,8 @@ namespace MySync.Server.Core.RequestHandlers
                         var commitData = reader.ReadBytes(reader.ReadInt32());
                         var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
                         
+                        Console.WriteLine("Receiving file...");
+
                         // read data file
                         using (var fs = File.Create("temp_recv.zip"))
                         {
@@ -74,7 +76,7 @@ namespace MySync.Server.Core.RequestHandlers
                         {
                             // downloaded
                             // now apply changes
-                            commit.Apply("data/" + projectSettings.Name, "temp_recv.zip");
+                            commit.Apply("data/" + projectSettings.Name, "temp_recv.zip", ?);
 
                             // add commit to projects database
                             var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
@@ -189,10 +191,13 @@ namespace MySync.Server.Core.RequestHandlers
 
                     // send commit id
                     writer.Write(commits[commits.Count - 1].CommitId);
-
+                    
                     // send commit diff data file
                     using (var file = new FileStream("temp_send.zip", FileMode.Open))
                     {
+                        // write file size
+                        writer.Write(file.Length);
+
                         int read;
                         var buffer = new byte[64 * 1024];
                         while ((read = file.Read(buffer, 0, buffer.Length)) > 0)

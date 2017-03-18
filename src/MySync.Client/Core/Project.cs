@@ -65,7 +65,7 @@ namespace MySync.Client.Core
 
             using (var file = new FileStream(dataFile, FileMode.Open))
             {
-                var datasize = file.Length + clientData.Length + commitData.Length + 2 * sizeof(int); // <---
+                var datasize = file.Length + clientData.Length + commitData.Length + 2 * sizeof(int) + sizeof(long); // <---
 
                 // begin send
                 var stream = Request.BeginSend(ServerAddress + "push", datasize);
@@ -79,13 +79,25 @@ namespace MySync.Client.Core
                     // write data header
                     writer.Write(commitData.Length);
                     writer.Write(commitData);
-                    
+
+                    // file length
+                    writer.Write(file.Length);
+
                     // upload commit data file
+                    var start = Console.CursorTop;
+
+                    var byteCount = 0L;
                     int read;
                     var buffer = new byte[64 * 1024];
                     while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
                     {
+                        Console.CursorTop = start;
+                        Console.CursorLeft = 0;
+                        var progress = (byteCount / (float)file.Length)*100;
+                        Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
+
                         writer.Write(buffer, 0, read);
+                        byteCount += read;
                     }
                     Console.WriteLine(file.Length);
 
@@ -165,20 +177,30 @@ namespace MySync.Client.Core
 
                     var commitId = reader.ReadInt32();
                     Console.WriteLine(@"commit id: " + commitId);
-
+                    
                     var dataFile = RootDir + ".mysync/commit_recv.zip";
                     using (var fs = File.Create(dataFile))
                     {
+                        var fileLength = reader.ReadInt64();
+                        var start = Console.CursorTop;
+                        var byteCount = 0L;
+
                         int read;
                         var buffer = new byte[64 * 1024];
                         while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
                         {
+                            Console.CursorTop = start;
+                            Console.CursorLeft = 0;
+                            var progress = (byteCount / (float)fileLength) * 100;
+                            Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
+
                             fs.Write(buffer, 0, read);
+                            byteCount += read;
                         }
                     }
                     
                     // apply the commit
-                    commit.Apply(RootDir, dataFile);
+                    commit.Apply(RootDir, dataFile, ?);
 
                     // remove data file
                     File.Delete(dataFile);

@@ -52,7 +52,7 @@ namespace MySync.Server.Core
             _httpListener = new HttpListener();
             _httpListener.Prefixes.Add("http://+:8080/");  // TODO: https! http://stackoverflow.com/questions/11403333/httplistener-with-https-support
             _httpListener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
-
+            
             // start listening
             _httpListener.Start();
 

@@ -75,14 +75,18 @@ namespace MySync.Shared.VersionControl
         /// </summary>
         /// <param name="projectDir">The project directory.</param>
         /// <param name="dataFile">The commit data file.</param>
-        public void Apply(string projectDir, string dataFile)
+        /// <param name="deflate">Unpack the data file?</param>
+        public void Apply(string projectDir, string dataFile, bool deflate)
         {
             Console.WriteLine("Apply commit: " + projectDir + ", " + dataFile);
 
             // apply data
-            using (var zip = new ZipFile(dataFile))
+            if (File.Exists(dataFile) && deflate)
             {
-                zip.ExtractAll(projectDir, ExtractExistingFileAction.OverwriteSilently);
+                using (var zip = new ZipFile(dataFile))
+                {
+                    zip.ExtractAll(projectDir, ExtractExistingFileAction.OverwriteSilently);
+                }
             }
 
             // delete files
@@ -120,6 +124,8 @@ namespace MySync.Shared.VersionControl
             // compress all files
             using (var zip = new ZipFile(tempFile))
             {
+                zip.ParallelDeflateThreshold = -1;
+
                 foreach (var file in Files)
                 {
                     if (file.DiffType == Filemap.FileDiff.Type.Delete)

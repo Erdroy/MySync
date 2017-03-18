@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 
 namespace MySync.Client.Core
 {
@@ -13,7 +14,7 @@ namespace MySync.Client.Core
     /// </summary>
     public static class Request
     {
-        private static WebRequest _webRequest;
+        private static HttpWebRequest _webRequest;
 
         /// <summary>
         /// Send HTTP POST request.
@@ -40,11 +41,13 @@ namespace MySync.Client.Core
 
         public static Stream BeginSend(string address, long size)
         {
-            _webRequest = WebRequest.Create(address);
+            _webRequest = (HttpWebRequest)WebRequest.Create(address);
             _webRequest.Credentials = CredentialCache.DefaultCredentials;
             _webRequest.Method = "POST";
             _webRequest.ContentType = "multipart/form-data";
             _webRequest.ContentLength = size;
+            _webRequest.KeepAlive = true;
+            _webRequest.Timeout = Timeout.Infinite;
 
             return _webRequest.GetRequestStream();
         }
