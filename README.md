@@ -3,10 +3,11 @@ MySync - Binary file synchronization software with GIT-like PUSH/PULL.
 Under AGPL-3.0 license.
 
 # UNDER DEVELOPMENT!
-For current progress, see trello or/and my Discord server, links below in the Contact section.
------------------
+For current progress - see trello, also you can join to my Discord server, links are below, in the Contact section.
 
-# Short description
+---
+
+# Description
 Whole project is about to simplify the synchronization of project's content(audio, textures, maps etc.) for both small and big teams.
 Designed for *content* synchronization, supports all types of files, syncing code is *not recommended*(you can exclude folder with code and use some github/other hosting for other Version Control software - GIT/Mercurial/SVN etc.).
 
@@ -29,9 +30,10 @@ Client and Server application is designed to work on every platform that support
 * Web Dashboard,
 * SSL support.
 
-# Tutorials
-TODO
----
+# TODO: Tutorials
+1. Installing server on Windows
+2. Installing server on Linux
+3. ???
 
 # Contributing/Contact
 Feel free to contribute, there is a lot of work to do(see https://trello.com/b/NxN9L6Gf/mysync), 
