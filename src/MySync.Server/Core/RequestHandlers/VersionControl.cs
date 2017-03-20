@@ -53,31 +53,36 @@ namespace MySync.Server.Core.RequestHandlers
                         // read commit
                         var commitData = reader.ReadBytes(reader.ReadInt32());
                         var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
-                        
-                        Console.WriteLine("Receiving file...");
 
-                        // read data file
-                        using (var fs = File.Create("temp_recv.zip"))
+                        var hasFile = reader.ReadBoolean();
+                        
+                        if (hasFile)
                         {
-                            int read;
-                            var buffer = new byte[64*1024];
-                            while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                            Console.WriteLine("Receiving file...");
+
+                            // read data file
+                            using (var fs = File.Create("temp_recv.zip"))
                             {
-                                fs.Write(buffer, 0, read);
+                                int read;
+                                var buffer = new byte[64*1024];
+                                while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    fs.Write(buffer, 0, read);
+                                }
                             }
                         }
 
                         // --- from now - this part CAN'T fail, if so, the whole project may be incorrect after this!
 
                         // TODO: make commited files backup and restore when failed to unpack the commit
-
+                        
                         int commitId;
                         try
                         {
                             // downloaded
                             // now apply changes
-                            commit.Apply("data/" + projectSettings.Name, "temp_recv.zip", ?);
-
+                            commit.Apply("data/" + projectSettings.Name, "temp_recv.zip", hasFile);
+                            
                             // add commit to projects database
                             var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
                             commitId = (int)projectCollection.Count(FilterDefinition<CommitModel>.Empty) +1;
@@ -104,9 +109,10 @@ namespace MySync.Server.Core.RequestHandlers
 
                             // insert
                             projectCollection.InsertOne(commitModel);
-
-                            // delete zip file
-                            File.Delete("temp_recv.zip");
+                            
+                            // delete zip file if exists
+                            if (hasFile)
+                                File.Delete("temp_recv.zip");
                         }
                         catch (Exception ex)
                         {
@@ -174,16 +180,21 @@ namespace MySync.Server.Core.RequestHandlers
                         writer.Write("No files to download.");
                         return;
                     }
-                    
+
                     // diff all commits
                     var commit = commits[0].ToCommit();
 
                     for (var i = 1; i < commits.Count; i++)
                         commit.Add(commits[i].ToCommit());
-                    
+
+
+                    var fileNeeded = commit.IsUploadNeeded();
+
                     // build commit diff data file
                     var dir = "data/" + projectSettings.Name + "/";
-                    commit.Build(dir, "temp_send.zip");
+
+                    if(fileNeeded) // build commit zip if needed
+                        commit.Build(dir, "temp_send.zip");
 
                     // send commit diff
                     var commitJson = commit.ToJson();
@@ -191,21 +202,27 @@ namespace MySync.Server.Core.RequestHandlers
 
                     // send commit id
                     writer.Write(commits[commits.Count - 1].CommitId);
-                    
-                    // send commit diff data file
-                    using (var file = new FileStream("temp_send.zip", FileMode.Open))
-                    {
-                        // write file size
-                        writer.Write(file.Length);
 
-                        int read;
-                        var buffer = new byte[64 * 1024];
-                        while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                    // write file upload indicator
+                    writer.Write(fileNeeded);
+
+                    if (fileNeeded)
+                    {
+                        // send commit diff data file
+                        using (var file = new FileStream("temp_send.zip", FileMode.Open))
                         {
-                            response.OutputStream.Write(buffer, 0, read);
+                            // write file size
+                            writer.Write(file.Length);
+
+                            int read;
+                            var buffer = new byte[64*1024];
+                            while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                response.OutputStream.Write(buffer, 0, read);
+                            }
                         }
+                        File.Delete("temp_send.zip");
                     }
-                    File.Delete("temp_send.zip");
                 }
                 catch (Exception ex)
                 {

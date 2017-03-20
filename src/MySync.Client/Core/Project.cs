@@ -54,8 +54,6 @@ namespace MySync.Client.Core
         /// <param name="dataFile">The commit data file.</param>
         public void Push(Commit commit, string dataFile)
         {
-            // TODO: check if data file exists
-            
             var clientData = Encoding.UTF8.GetBytes(Authority.ToJson());
             var commitData = Encoding.UTF8.GetBytes(commit.ToJson());
 
@@ -65,7 +63,8 @@ namespace MySync.Client.Core
 
             using (var file = new FileStream(dataFile, FileMode.Open))
             {
-                var datasize = file.Length + clientData.Length + commitData.Length + 2 * sizeof(int) + sizeof(long); // <---
+                var fileNeeded = commit.IsUploadNeeded();
+                var datasize = (fileNeeded ? file.Length : 0) + clientData.Length + commitData.Length + 2 * sizeof(int) + sizeof(bool); // <---
 
                 // begin send
                 var stream = Request.BeginSend(ServerAddress + "push", datasize);
@@ -80,58 +79,60 @@ namespace MySync.Client.Core
                     writer.Write(commitData.Length);
                     writer.Write(commitData);
 
-                    // file length
-                    writer.Write(file.Length);
+                    writer.Write(fileNeeded);
 
-                    // upload commit data file
-                    var start = Console.CursorTop;
-
-                    var byteCount = 0L;
-                    int read;
-                    var buffer = new byte[64 * 1024];
-                    while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                    if (fileNeeded)
                     {
-                        Console.CursorTop = start;
-                        Console.CursorLeft = 0;
-                        var progress = (byteCount / (float)file.Length)*100;
-                        Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
+                        // upload commit data file
+                        var start = Console.CursorTop;
 
-                        writer.Write(buffer, 0, read);
-                        byteCount += read;
-                    }
-                    Console.WriteLine(file.Length);
-
-                Request.EndSend(resp =>
-                {
-                    // done!
-                    // read response data
-                    using (var reader = new BinaryReader(resp))
-                    {
-                        var message = reader.ReadString();
-
-                        // finalize everything
-                        if (message.StartsWith("#RESTORE"))
+                        var byteCount = 0L;
+                        int read;
+                        var buffer = new byte[64 * 1024];
+                        while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
                         {
-                            Console.WriteLine(@"Commit failed error: " + message);
-                            return;
+                            Console.CursorTop = start;
+                            Console.CursorLeft = 0;
+                            var progress = (byteCount / (float)file.Length) * 100;
+                            Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
+
+                            writer.Write(buffer, 0, read);
+                            byteCount += read;
                         }
-
-                        var commitId = reader.ReadInt32();
-
-                        // save commit id
-                        var commitInfo = RootDir + ".mysync/commit_info.txt";
-                        File.WriteAllText(commitInfo, commitId.ToString());
-
-                        // save filemap
-                        File.WriteAllText(RootDir + ".mysync/last_filemap.json", filemapJson);
-
-                        // show info
-                        Console.WriteLine(message + @" commmitid: " + commitId);
-
-                        // refresh
-                        Refresh();
+                        Console.WriteLine(file.Length);
                     }
-                });
+
+                    Request.EndSend(resp =>
+                    {
+                        // done!
+                        // read response data
+                        using (var reader = new BinaryReader(resp))
+                        {
+                            var message = reader.ReadString();
+
+                            // finalize everything
+                            if (message.StartsWith("#RESTORE"))
+                            {
+                                Console.WriteLine(@"Commit failed error: " + message);
+                                return;
+                            }
+
+                            var commitId = reader.ReadInt32();
+
+                            // save commit id
+                            var commitInfo = RootDir + ".mysync/commit_info.txt";
+                            File.WriteAllText(commitInfo, commitId.ToString());
+
+                            // save filemap
+                            File.WriteAllText(RootDir + ".mysync/last_filemap.json", filemapJson);
+
+                            // show info
+                            Console.WriteLine(message + @" commmitid: " + commitId);
+
+                            // refresh
+                            Refresh();
+                        }
+                    });
                 }
             }
 
@@ -177,33 +178,40 @@ namespace MySync.Client.Core
 
                     var commitId = reader.ReadInt32();
                     Console.WriteLine(@"commit id: " + commitId);
-                    
+
+                    var hasFile = reader.ReadBoolean();
+
                     var dataFile = RootDir + ".mysync/commit_recv.zip";
-                    using (var fs = File.Create(dataFile))
+
+                    if (hasFile)
                     {
-                        var fileLength = reader.ReadInt64();
-                        var start = Console.CursorTop;
-                        var byteCount = 0L;
-
-                        int read;
-                        var buffer = new byte[64 * 1024];
-                        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                        using (var fs = File.Create(dataFile))
                         {
-                            Console.CursorTop = start;
-                            Console.CursorLeft = 0;
-                            var progress = (byteCount / (float)fileLength) * 100;
-                            Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
+                            var fileLength = reader.ReadInt64();
+                            var start = Console.CursorTop;
+                            var byteCount = 0L;
 
-                            fs.Write(buffer, 0, read);
-                            byteCount += read;
+                            int read;
+                            var buffer = new byte[64*1024];
+                            while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                Console.CursorTop = start;
+                                Console.CursorLeft = 0;
+                                var progress = (byteCount/(float) fileLength)*100;
+                                Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
+
+                                fs.Write(buffer, 0, read);
+                                byteCount += read;
+                            }
                         }
                     }
-                    
+
                     // apply the commit
-                    commit.Apply(RootDir, dataFile, ?);
+                    commit.Apply(RootDir, dataFile, hasFile);
 
                     // remove data file
-                    File.Delete(dataFile);
+                    if(hasFile)
+                        File.Delete(dataFile);
 
                     // update filemap
                     _lastFilemap.AddChanges(RootDir, commit.Files);
