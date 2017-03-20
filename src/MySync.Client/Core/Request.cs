@@ -54,8 +54,6 @@ namespace MySync.Client.Core
 
         public static void EndSend(Action<Stream> callback)
         {
-            _webRequest.GetRequestStream().Close();
-            
             var response = _webRequest.GetResponse();
             callback(response.GetResponseStream());
         }
