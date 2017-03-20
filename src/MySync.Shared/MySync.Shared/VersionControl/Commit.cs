@@ -78,8 +78,6 @@ namespace MySync.Shared.VersionControl
         /// <param name="deflate">Unpack the data file?</param>
         public void Apply(string projectDir, string dataFile, bool deflate)
         {
-            Console.WriteLine("Apply commit: " + projectDir + ", " + dataFile);
-
             // apply data
             if (File.Exists(dataFile) && deflate)
             {
@@ -110,7 +108,24 @@ namespace MySync.Shared.VersionControl
                 }
             }
         }
-       
+
+        /// <summary>
+        /// Check if the upload is really needed.
+        /// This will indicate true when there is no any CREATED or CHANGED files, 
+        /// but there may be DELETED files because they do not need upload.
+        /// </summary>
+        /// <returns>True when upload is needed.</returns>
+        public bool IsUploadNeeded()
+        {
+            foreach (var file in Files)
+            {
+                if (file.DiffType != Filemap.FileDiff.Type.Delete)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Build commit data file.
         /// </summary>
