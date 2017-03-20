@@ -233,3 +233,45 @@ namespace MySync.Server.Core.RequestHandlers
     }
 }
 
+        public static void GetCommit(string body, HttpListenerResponse response)
+        {
+            using (var writer = new BinaryWriter(response.OutputStream))
+            {
+                try
+                {
+                    var input = JsonConvert.DeserializeObject<PullInput>(body);
+                    
+                    // validate project name, password and check permisions from clientData
+                    var projectSettings = ServerCore.Settings.Projects.FirstOrDefault(
+                        x => x.Name == input.Authority.ProjectName
+                    );
+
+                    // check if requested project exists
+                    if (projectSettings == null)
+                    {
+                        writer.Write("Failed - project not found!");
+                        return;
+                    }
+
+                    // check if user has the authority to this project
+                    if (!projectSettings.AccessTokens.Contains(input.Authority.AccessToken))
+                    {
+                        // do not tell that the project even exists
+                        writer.Write("Failed - project not found!");
+                        return;
+                    }
+                    
+                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
+                    var lastCommit = projectCollection.Find(x => true).SortByDescending(d => d.CommitId).Limit(1).FirstOrDefault();
+
+                    writer.Write("Done");
+                    writer.Write(lastCommit.CommitId);
+                }
+                catch (Exception ex)
+                {
+                    writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                }
+            }
+        }
+    }
+}
