@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MySync.Server.Core.DatabaseModels;
 using MySync.Shared.RequestHeaders;
@@ -21,6 +20,8 @@ namespace MySync.Server.Core.RequestHandlers
     {
         public static void Push(HttpListenerRequest request, HttpListenerResponse response)
         {
+            var projectName = "";
+
             using (var reader = new BinaryReader(request.InputStream))
             {
                 using (var writer = new BinaryWriter(response.OutputStream))
@@ -48,6 +49,15 @@ namespace MySync.Server.Core.RequestHandlers
                         {
                             // do not tell that the project even exists
                             writer.Write("Failed - project not found!");
+                            return;
+                        }
+
+                        projectName = projectSettings.Name;
+
+                        // request project lock
+                        if (ProjectLock.TryLock(projectSettings.Name, ProjectLock.LockMode.Upload) != ProjectLock.LockMode.None)
+                        {
+                            writer.Write("Failed - project is locked!");
                             return;
                         }
 
@@ -122,6 +132,8 @@ namespace MySync.Server.Core.RequestHandlers
 
                             // TODO: restore backup
 
+                            // UNLOCK
+                            ProjectLock.Unlock(projectSettings.Name);
                             return;
                         }
 
@@ -138,10 +150,13 @@ namespace MySync.Server.Core.RequestHandlers
                     }
                 }
             }
+
+            ProjectLock.Unlock(projectName);
         }
 
         public static void Pull(string body, HttpListenerResponse response)
         {
+            var projectName = "";
             using (var writer = new BinaryWriter(response.OutputStream))
             {
                 try
@@ -168,6 +183,15 @@ namespace MySync.Server.Core.RequestHandlers
                         return;
                     }
 
+                    projectName = projectSettings.Name;
+
+                    // request project lock
+                    if (ProjectLock.TryLock(projectSettings.Name, ProjectLock.LockMode.Upload) == ProjectLock.LockMode.Any)
+                    {
+                        writer.Write("Failed - project is locked!");
+                        return;
+                    }
+
                     // find latest downloaded client-commit
                     var commitId = input.CommitId + 1; // the first commit id which will be downloaded if exists
                     var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
@@ -179,6 +203,8 @@ namespace MySync.Server.Core.RequestHandlers
                     if (!commits.Any())
                     {
                         writer.Write("No files to download.");
+                        // UNLOCK
+                        ProjectLock.Unlock(projectSettings.Name);
                         return;
                     }
 
@@ -194,8 +220,10 @@ namespace MySync.Server.Core.RequestHandlers
                     // build commit diff data file
                     var dir = "data/" + projectSettings.Name + "/";
 
+                    var tempDataFile = "temp_send_"+ input .Authority.Username+ ".zip";
+
                     if (fileNeeded) // build commit zip if needed
-                        commit.Build(dir, "temp_send.zip");
+                        commit.Build(dir, tempDataFile);
 
                     // send commit diff
                     var commitJson = commit.ToJson();
@@ -210,7 +238,7 @@ namespace MySync.Server.Core.RequestHandlers
                     if (fileNeeded)
                     {
                         // send commit diff data file
-                        using (var file = new FileStream("temp_send.zip", FileMode.Open))
+                        using (var file = new FileStream(tempDataFile, FileMode.Open))
                         {
                             // write file size
                             writer.Write(file.Length);
@@ -222,7 +250,7 @@ namespace MySync.Server.Core.RequestHandlers
                                 response.OutputStream.Write(buffer, 0, read);
                             }
                         }
-                        File.Delete("temp_send.zip");
+                        File.Delete(tempDataFile);
                     }
                 }
                 catch (Exception ex)
@@ -230,6 +258,7 @@ namespace MySync.Server.Core.RequestHandlers
                     writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
                 }
             }
+            ProjectLock.Unlock(projectName);
         }
 
         public static void GetCommit(string body, HttpListenerResponse response)

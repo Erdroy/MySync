@@ -133,7 +133,13 @@ namespace MySync.Client.Core
                             // finalize everything
                             if (message.StartsWith("#RESTORE"))
                             {
-                                Console.WriteLine(@"Commit failed error: " + message);
+                                Console.WriteLine(@"Commit failed, error: " + message);
+                                return;
+                            }
+
+                            if (message.StartsWith("Failed"))
+                            {
+                                Console.WriteLine(@"Commit failed, error: " + message);
                                 return;
                             }
 
