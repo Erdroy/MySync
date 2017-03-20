@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MySync.Server.Core.DatabaseModels;
 using MySync.Shared.RequestHeaders;
@@ -55,7 +56,7 @@ namespace MySync.Server.Core.RequestHandlers
                         var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
 
                         var hasFile = reader.ReadBoolean();
-                        
+
                         if (hasFile)
                         {
                             Console.WriteLine("Receiving file...");
@@ -75,18 +76,18 @@ namespace MySync.Server.Core.RequestHandlers
                         // --- from now - this part CAN'T fail, if so, the whole project may be incorrect after this!
 
                         // TODO: make commited files backup and restore when failed to unpack the commit
-                        
+
                         int commitId;
                         try
                         {
                             // downloaded
                             // now apply changes
                             commit.Apply("data/" + projectSettings.Name, "temp_recv.zip", hasFile);
-                            
+
                             // add commit to projects database
                             var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
-                            commitId = (int)projectCollection.Count(FilterDefinition<CommitModel>.Empty) +1;
-                            
+                            commitId = (int) projectCollection.Count(FilterDefinition<CommitModel>.Empty) + 1;
+
                             // build commit
                             var commitModel = new CommitModel
                             {
@@ -109,7 +110,7 @@ namespace MySync.Server.Core.RequestHandlers
 
                             // insert
                             projectCollection.InsertOne(commitModel);
-                            
+
                             // delete zip file if exists
                             if (hasFile)
                                 File.Delete("temp_recv.zip");
@@ -123,7 +124,7 @@ namespace MySync.Server.Core.RequestHandlers
 
                             return;
                         }
-                        
+
                         // ok, we are out of the danger zone.
 
                         // return message
@@ -131,7 +132,7 @@ namespace MySync.Server.Core.RequestHandlers
                         writer.Write(commitId);
                         Console.WriteLine("User '" + authority.Username + "' pushed changes!");
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
                     }
@@ -193,7 +194,7 @@ namespace MySync.Server.Core.RequestHandlers
                     // build commit diff data file
                     var dir = "data/" + projectSettings.Name + "/";
 
-                    if(fileNeeded) // build commit zip if needed
+                    if (fileNeeded) // build commit zip if needed
                         commit.Build(dir, "temp_send.zip");
 
                     // send commit diff
@@ -230,8 +231,6 @@ namespace MySync.Server.Core.RequestHandlers
                 }
             }
         }
-    }
-}
 
         public static void GetCommit(string body, HttpListenerResponse response)
         {

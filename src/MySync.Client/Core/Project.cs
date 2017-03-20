@@ -54,6 +54,35 @@ namespace MySync.Client.Core
         /// <param name="dataFile">The commit data file.</param>
         public void Push(Commit commit, string dataFile)
         {
+            // construct pull input data
+            var dataJson = new PullInput
+            {
+                Authority = Authority
+            };
+            var lastCommitId = -1;
+            Request.Send(ServerAddress + "getcommit", dataJson.ToJson(), stream =>
+            {
+                using (var reader = new BinaryReader(stream))
+                {
+                    var message = reader.ReadString();
+
+                    if (message == "Done")
+                    {
+                        lastCommitId = reader.ReadInt32();
+                    }
+                }
+            });
+
+            // select current commit id
+            var commitInfo = RootDir + ".mysync/commit_info.txt";
+            var currentCommitId = File.Exists(commitInfo) ? int.Parse(File.ReadAllText(commitInfo)) : -1;
+
+            if (lastCommitId > currentCommitId)
+            {
+                Console.WriteLine(@"Project is not up-to-date.");
+                return;
+            }
+
             var clientData = Encoding.UTF8.GetBytes(Authority.ToJson());
             var commitData = Encoding.UTF8.GetBytes(commit.ToJson());
 
@@ -84,20 +113,11 @@ namespace MySync.Client.Core
                     if (fileNeeded)
                     {
                         // upload commit data file
-                        var start = Console.CursorTop;
-
-                        var byteCount = 0L;
                         int read;
                         var buffer = new byte[64 * 1024];
                         while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
                         {
-                            Console.CursorTop = start;
-                            Console.CursorLeft = 0;
-                            var progress = (byteCount / (float)file.Length) * 100;
-                            Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
-
                             writer.Write(buffer, 0, read);
-                            byteCount += read;
                         }
                         Console.WriteLine(file.Length);
                     }
@@ -120,7 +140,6 @@ namespace MySync.Client.Core
                             var commitId = reader.ReadInt32();
 
                             // save commit id
-                            var commitInfo = RootDir + ".mysync/commit_info.txt";
                             File.WriteAllText(commitInfo, commitId.ToString());
 
                             // save filemap
@@ -188,20 +207,12 @@ namespace MySync.Client.Core
                         using (var fs = File.Create(dataFile))
                         {
                             var fileLength = reader.ReadInt64();
-                            var start = Console.CursorTop;
-                            var byteCount = 0L;
 
                             int read;
                             var buffer = new byte[64*1024];
                             while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
                             {
-                                Console.CursorTop = start;
-                                Console.CursorLeft = 0;
-                                var progress = (byteCount/(float) fileLength)*100;
-                                Console.Write(@"Progress: " + progress.ToString("f1") + @"%\n");
-
                                 fs.Write(buffer, 0, read);
-                                byteCount += read;
                             }
                         }
                     }

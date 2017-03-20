@@ -93,6 +93,7 @@ namespace MySync.Server.Core
         private void LoadHandlers()
         {
             _processor.AddHandler("/pull", RequestHandlers.VersionControl.Pull);
+            _processor.AddHandler("/getcommit", RequestHandlers.VersionControl.GetCommit);
 
             _processor.AddDownloader("/push", RequestHandlers.VersionControl.Push);
         }
