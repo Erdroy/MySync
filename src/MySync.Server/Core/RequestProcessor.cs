@@ -69,9 +69,7 @@ namespace MySync.Server.Core
             // try to handle by downloader
             if (_downloaders.ContainsKey(url))
             {
-                Console.WriteLine("t0");
                 _downloaders[url](request, response);
-                Console.WriteLine("t2");
                 return;
             }
 

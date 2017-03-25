@@ -22,133 +22,155 @@ namespace MySync.Server.Core.RequestHandlers
         {
             var projectName = "";
 
-            using (var reader = new BinaryReader(request.InputStream))
+            try
             {
-                using (var writer = new BinaryWriter(response.OutputStream))
+                using (var reader = new BinaryReader(request.InputStream))
                 {
-                    try
+                    using (var writer = new BinaryWriter(response.OutputStream))
                     {
-                        var authority = ProjectAuthority.FromJson(Encoding.UTF8.GetString(
-                            reader.ReadBytes(reader.ReadInt32())
-                        ));
-
-                        // validate project name, password and check permisions from clientData
-                        var projectSettings = ServerCore.Settings.Projects.FirstOrDefault(
-                            x => x.Name == authority.ProjectName
-                        );
-
-                        // check if requested project exists
-                        if (projectSettings == null)
-                        {
-                            writer.Write("Failed - project not found!");
-                            return;
-                        }
-
-                        // check if user has the authority to this project
-                        if (!projectSettings.AccessTokens.Contains(authority.AccessToken))
-                        {
-                            // do not tell that the project even exists
-                            writer.Write("Failed - project not found!");
-                            return;
-                        }
-
-                        projectName = projectSettings.Name;
-
-                        // request project lock
-                        if (ProjectLock.TryLock(projectSettings.Name, ProjectLock.LockMode.Upload) != ProjectLock.LockMode.None)
-                        {
-                            writer.Write("Failed - project is locked!");
-                            return;
-                        }
-
-                        // read commit
-                        var commitData = reader.ReadBytes(reader.ReadInt32());
-                        var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
-
-                        var hasFile = reader.ReadBoolean();
-
-                        if (hasFile)
-                        {
-                            Console.WriteLine("Receiving file...");
-
-                            // read data file
-                            using (var fs = File.Create("temp_recv.zip"))
-                            {
-                                int read;
-                                var buffer = new byte[64*1024];
-                                while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
-                                {
-                                    fs.Write(buffer, 0, read);
-                                }
-                            }
-                        }
-
-                        // --- from now - this part CAN'T fail, if so, the whole project may be incorrect after this!
-
-                        // TODO: make commited files backup and restore when failed to unpack the commit
-
-                        int commitId;
                         try
                         {
-                            // downloaded
-                            // now apply changes
-                            commit.Apply("data/" + projectSettings.Name, "temp_recv.zip", hasFile);
+                            var authority = ProjectAuthority.FromJson(Encoding.UTF8.GetString(
+                                reader.ReadBytes(reader.ReadInt32())
+                            ));
 
-                            // add commit to projects database
-                            var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
-                            commitId = (int) projectCollection.Count(FilterDefinition<CommitModel>.Empty) + 1;
+                            // validate project name, password and check permisions from clientData
+                            var projectSettings = ServerCore.Settings.Projects.FirstOrDefault(
+                                x => x.Name == authority.ProjectName
+                            );
 
-                            // build commit
-                            var commitModel = new CommitModel
+                            // check if requested project exists
+                            if (projectSettings == null)
                             {
-                                CommitId = commitId,
-                                CommitDescription = commit.Description,
-                                Files = new CommitModel.FileDiff[commit.Files.Length]
-                            };
-
-                            for (var i = 0; i < commit.Files.Length; i++)
-                            {
-                                var file = commit.Files[i];
-
-                                commitModel.Files[i] = new CommitModel.FileDiff
-                                {
-                                    Name = file.FileName,
-                                    Version = file.Version,
-                                    Operation = (int) file.DiffType
-                                };
+                                writer.Write("Failed - project not found!");
+                                return;
                             }
 
-                            // insert
-                            projectCollection.InsertOne(commitModel);
+                            // check if user has the authority to this project
+                            if (!projectSettings.AccessTokens.Contains(authority.AccessToken))
+                            {
+                                // do not tell that the project even exists
+                                writer.Write("Failed - project not found!");
+                                return;
+                            }
 
-                            // delete zip file if exists
+                            projectName = projectSettings.Name;
+
+                            // request project lock
+                            if (ProjectLock.TryLock(projectSettings.Name, ProjectLock.LockMode.Upload) !=
+                                ProjectLock.LockMode.None)
+                            {
+                                writer.Write("Failed - project is locked!");
+                                return;
+                            }
+
+                            // read commit
+                            var commitData = reader.ReadBytes(reader.ReadInt32());
+                            var commit = Commit.FromJson(Encoding.UTF8.GetString(commitData));
+
+                            var hasFile = reader.ReadBoolean();
+
                             if (hasFile)
-                                File.Delete("temp_recv.zip");
+                            {
+                                Console.WriteLine("Receiving file...");
+
+                                // read data file
+                                using (var fs = File.Create("temp_recv.zip"))
+                                {
+                                    try
+                                    {
+                                        int read;
+                                        var buffer = new byte[64*1024];
+                                        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                                        {
+                                            fs.Write(buffer, 0, read);
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        // user lost connection or closed the client 
+                                        // before the whole data file arrived
+                                        Console.WriteLine("User '" + authority.Username + "' canceled commit upload.");
+                                        ProjectLock.Unlock(projectName);
+                                        return;
+                                    }
+                                }
+                            }
+
+                            // --- from now - this part CAN'T fail, if so, the whole project may be incorrect after this!
+
+                            // TODO: make commited files backup and restore when failed to unpack the commit
+
+                            int commitId;
+                            try
+                            {
+                                // downloaded
+                                // now apply changes
+                                commit.Apply("data/" + projectSettings.Name, "temp_recv.zip", hasFile);
+
+                                // add commit to projects database
+                                var projectCollection =
+                                    ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
+                                commitId = (int) projectCollection.Count(FilterDefinition<CommitModel>.Empty) + 1;
+
+                                // build commit
+                                var commitModel = new CommitModel
+                                {
+                                    CommitId = commitId,
+                                    CommitDescription = commit.Description,
+                                    Files = new CommitModel.FileDiff[commit.Files.Length]
+                                };
+
+                                for (var i = 0; i < commit.Files.Length; i++)
+                                {
+                                    var file = commit.Files[i];
+
+                                    commitModel.Files[i] = new CommitModel.FileDiff
+                                    {
+                                        Name = file.FileName,
+                                        Version = file.Version,
+                                        Operation = (int) file.DiffType
+                                    };
+                                }
+
+                                // insert
+                                projectCollection.InsertOne(commitModel);
+
+                                // delete zip file if exists
+                                if (hasFile)
+                                    File.Delete("temp_recv.zip");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("Failed to apply commit from user '" + authority.Username + "'");
+                                writer.Write("#RESTORE Failed - error when updating project! Error: " + ex);
+
+                                // TODO: restore backup
+
+                                // UNLOCK
+                                ProjectLock.Unlock(projectSettings.Name);
+                                return;
+                            }
+
+                            // ok, we are out of the danger zone.
+
+                            // return message
+                            writer.Write("Done!");
+                            writer.Write(commitId);
+                            Console.WriteLine("User '" + authority.Username + "' pushed changes!");
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine("Failed to apply commit from user '" + authority.Username + "'");
-                            writer.Write("#RESTORE Failed - error when updating project! Error: " + ex);
-
-                            // TODO: restore backup
-
-                            // UNLOCK
-                            ProjectLock.Unlock(projectSettings.Name);
-                            return;
+                            writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
                         }
-
-                        // ok, we are out of the danger zone.
-
-                        // return message
-                        writer.Write("Done!");
-                        writer.Write(commitId);
-                        Console.WriteLine("User '" + authority.Username + "' pushed changes!");
-                    }
-                    catch (Exception ex)
-                    {
-                        writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
                     }
                 }
+            }
+            catch
+            {
+                // this shouldn't be possible, 
+                // but anyway handle exceptions here
+                Console.WriteLine("PUSH failed");
             }
 
             ProjectLock.Unlock(projectName);
@@ -245,9 +267,20 @@ namespace MySync.Server.Core.RequestHandlers
 
                             int read;
                             var buffer = new byte[64*1024];
-                            while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                            try
                             {
-                                response.OutputStream.Write(buffer, 0, read);
+                                while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    response.OutputStream.Write(buffer, 0, read);
+                                }
+                            }
+                            catch
+                            {
+                                // user lost connection or closed the client 
+                                // before the whole data file is sent
+                                Console.WriteLine("User '" + input.Authority.Username + "' canceled commit download.");
+                                ProjectLock.Unlock(projectName);
+                                return;
                             }
                         }
                         File.Delete(tempDataFile);
