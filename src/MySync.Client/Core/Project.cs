@@ -304,7 +304,7 @@ namespace MySync.Client.Core
         /// <param name="address">The server address.</param>
         /// <param name="directory">The project directory.</param>
         /// <returns>The opened project or null when not found.</returns>
-        public static Project Open(string address, string directory)
+        public static Project OpenWorkingCopy(string address, string directory)
         {
             if (!directory.EndsWith("\\"))
                 directory += "\\";
@@ -312,27 +312,98 @@ namespace MySync.Client.Core
             var mysyncDataDir = directory + ".mysync";
 
             // check if this is mysync-project directory.
-            if (Directory.Exists(mysyncDataDir))
-            {
-                var project = new Project
-                {
-                    RootDir = directory,
-                    ServerAddress = address
-                };
-                project.Refresh();
+            if (!Directory.Exists(mysyncDataDir))
+                return null; // nope! can't open project
 
-                return project;
-            }
-            
-            // nope! can't open project
-            return null;
+            var project = new Project
+            {
+                RootDir = directory,
+                ServerAddress = address
+            };
+            project.Refresh();
+
+            return project;
         }
 
+        public static Project OpenProject(string address, string name, string username, string accesstoken, string directory)
+        {
+            if (!directory.EndsWith("\\"))
+                directory += "\\";
 
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            var dir = Directory.GetFiles(directory, "*.*");
+
+            if (dir.Length > 0)
+                return null;
+
+            var authority = new ProjectAuthority
+            {
+                ProjectName = name,
+                Username = username,
+                AccessToken = accesstoken
+            };
+
+            // send project authority request
+            Request.Send(address + "pull", authority.ToJson(), stream => { });
+
+            // create local project
+            var project = new Project
+            {
+                RootDir = directory
+            };
+
+            var mysyncDataDir = directory + ".mysync";
+            var msDir = Directory.CreateDirectory(mysyncDataDir);
+
+            // hide the directory
+            msDir.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+
+            // build empty for 'last commit'.
+            var emptyFilemap = Filemap.BuildEmpty();
+            project._lastFilemap = emptyFilemap;
+
+            // save
+            File.WriteAllText(mysyncDataDir + "\\last_filemap.json", emptyFilemap.ToJson());
+
+            // refresh the changes
+            project.Refresh();
+
+            // download all files
+            project.Pull();
+            
+            return project;
+        }
+        
+        public static void CreateProject(string address, string name, string directory)
+        {
+            if (!directory.EndsWith("\\"))
+                directory += "\\";
+
+            if (Directory.Exists(directory))
+                return; // nope! can't create project
+
+
+            // send request
+            // create local project
+        }
+
+        /// <summary>
+        /// Project authority,
+        /// contains all information about the authority of this project,
+        /// for current user.
+        /// </summary>
         public ProjectAuthority Authority { get; set; }
 
+        /// <summary>
+        /// The project server address.
+        /// </summary>
         public string ServerAddress { get; set; }
 
+        /// <summary>
+        /// The local project directory.
+        /// </summary>
         public string RootDir { get; set; }
     }
 }

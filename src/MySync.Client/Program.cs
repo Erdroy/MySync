@@ -33,7 +33,7 @@ namespace MySync.Client
             var projectSettings = settings.Projects[int.Parse(Console.ReadLine())];
 
             Console.WriteLine(@"Using project: " + projectSettings.Name);
-            var project = Project.Open(projectSettings.Address, projectSettings.RootDir);
+            var project = Project.OpenWorkingCopy(projectSettings.Address, projectSettings.RootDir);
 
             project.Authority = new ProjectAuthority
             {
