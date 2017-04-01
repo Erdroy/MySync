@@ -39,6 +39,28 @@ namespace MySync.Client.Core
             callback(response.GetResponseStream());
         }
 
+        /// <summary>
+        /// Send HTTP POST request.
+        /// </summary>
+        /// <param name="address">The full URL addres.</param>
+        /// <param name="body">The JSON body.</param>
+        public static Stream Send(string address, string body)
+        {
+            var request = WebRequest.Create(address);
+            request.Credentials = CredentialCache.DefaultCredentials;
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            var data = Encoding.UTF8.GetBytes(body);
+            request.ContentLength = data.Length;
+            var dataStream = request.GetRequestStream();
+            dataStream.Write(data, 0, data.Length);
+            dataStream.Close();
+
+            var response = request.GetResponse();
+            return response.GetResponseStream();
+        }
+
         public static Stream BeginSend(string address, long size)
         {
             _webRequest = (HttpWebRequest)WebRequest.Create(address);
