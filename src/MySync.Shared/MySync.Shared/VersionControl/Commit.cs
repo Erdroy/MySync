@@ -78,6 +78,16 @@ namespace MySync.Shared.VersionControl
         /// <param name="deflate">Unpack the data file?</param>
         public void Apply(string projectDir, string dataFile, bool deflate)
         {
+            // delete files
+            foreach (var file in Files)
+            {
+                var fileName = projectDir + "/" + file.FileName;
+                if (file.DiffType == Filemap.FileDiff.Type.Delete)
+                {
+                    File.Delete(fileName);
+                }
+            }
+
             // apply data
             if (File.Exists(dataFile) && deflate)
             {
@@ -87,25 +97,22 @@ namespace MySync.Shared.VersionControl
                 }
             }
 
-            // delete files
+            // apply mod time
             foreach (var file in Files)
             {
-                var fileName = projectDir + "/" + file.FileName;
-                if (file.DiffType == Filemap.FileDiff.Type.Delete)
-                {
-                    File.Delete(fileName);
-                }
-                else
-                {
 #if !SERVER
+                if (file.DiffType != Filemap.FileDiff.Type.Delete) // apply only for existing files
+                {
+                    var fileName = projectDir + "/" + file.FileName;
+
                     // Apply file modification time,
                     // but only on client.
                     // This is already done by the zip file extraction, 
                     // but there may be some critical issues that will need this. 
                     // Just do it and prevent them all.
                     File.SetLastWriteTime(fileName, DateTime.FromBinary(file.Version));
-#endif
                 }
+#endif
             }
         }
 
