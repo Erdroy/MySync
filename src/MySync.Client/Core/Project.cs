@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
+using Newtonsoft.Json.Linq;
 
 namespace MySync.Client.Core
 {
@@ -325,19 +326,17 @@ namespace MySync.Client.Core
             return project;
         }
 
+        /// <summary>
+        /// Open remote project.
+        /// </summary>
+        /// <param name="address">The server address.</param>
+        /// <param name="name">The project name.</param>
+        /// <param name="username">Username that will be used to download the project.</param>
+        /// <param name="accesstoken">Password that will be used to download the project.</param>
+        /// <param name="directory">The directory when the project will be downloaded.</param>
+        /// <returns>The project, null when something failed.</returns>
         public static Project OpenProject(string address, string name, string username, string accesstoken, string directory)
         {
-            if (!directory.EndsWith("\\"))
-                directory += "\\";
-
-            if (!Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
-
-            var dir = Directory.GetFiles(directory, "*.*");
-
-            if (dir.Length > 0)
-                return null;
-
             var authority = new ProjectAuthority
             {
                 ProjectName = name,
@@ -346,12 +345,37 @@ namespace MySync.Client.Core
             };
 
             // send project authority request
-            Request.Send(address + "pull", authority.ToJson(), stream => { });
+            var response = Request.Send(address + "authorize", authority.ToJson());
+            string responseBody;
+            using (var sr = new BinaryReader(response))
+            {
+                responseBody = sr.ReadString();
+            }
 
+            var authResult = JObject.Parse(responseBody);
+            var authorized = authResult["auth"].ToObject<bool>();
+
+            if (!authorized)
+                return null;
+
+            // setup directory
+            if (!directory.EndsWith("\\"))
+                directory += "\\";
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            var dir = Directory.GetFiles(directory, "*.*");
+
+            if (dir.Length > 0) // directory is not empty!
+                return null;
+            
             // create local project
             var project = new Project
             {
-                RootDir = directory
+                RootDir = directory,
+                ServerAddress = address,
+                Authority = authority
             };
 
             var mysyncDataDir = directory + ".mysync";
