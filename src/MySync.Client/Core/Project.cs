@@ -1,7 +1,9 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
@@ -47,7 +49,31 @@ namespace MySync.Client.Core
         {
             return _lastFilemap;
         }
-        
+
+        /// <summary>
+        /// Discard selected files.
+        /// </summary>
+        /// <param name="files">Files selected for discard.</param>
+        public void Discard(Filemap.FileDiff[] files)
+        {
+            // select all files that are not 'created'
+            var filesToDownload = files.Where(file => file.DiffType != Filemap.FileDiff.Type.Created).ToList();
+
+            // download original files from server
+            Request.Send(ServerAddress + "discard", Authority.ToJson(), stream =>
+            {
+            });
+
+            // remove new files
+            foreach (var file in files)
+            {
+                if (file.DiffType == Filemap.FileDiff.Type.Created) // delete all 'created' files
+                {
+                    // TODO: delete file
+                }
+            }
+        }
+
         /// <summary>
         /// Push commit to the server.
         /// </summary>
