@@ -1,6 +1,7 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -149,6 +150,7 @@ namespace MySync.Server.Core.RequestHandlers
                         catch (Exception ex)
                         {
                             writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                            ProjectLock.Unlock(projectName);
                         }
                     }
                 }
@@ -158,6 +160,7 @@ namespace MySync.Server.Core.RequestHandlers
                 // this shouldn't be possible, 
                 // but anyway handle exceptions here
                 Console.WriteLine("PUSH failed");
+                ProjectLock.Unlock(projectName);
             }
 
             ProjectLock.Unlock(projectName);
@@ -261,6 +264,7 @@ namespace MySync.Server.Core.RequestHandlers
                 catch (Exception ex)
                 {
                     writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                    ProjectLock.Unlock(projectName);
                 }
             }
             ProjectLock.Unlock(projectName);
@@ -295,18 +299,84 @@ namespace MySync.Server.Core.RequestHandlers
 
         public static void Discard(string body, HttpListenerResponse response)
         {
+            var projectName = "";
+
             using (var writer = new BinaryWriter(response.OutputStream))
             {
                 try
                 {
                     var input = DiscardInput.FromJson(body);
+                    
+                    projectName = input.Authority.ProjectName;
+                    if (!Authorization.HasAuthority(input.Authority.AccessToken, projectName))
+                    {
+                        writer.Write("Failed - project not found!");
+                        return;
+                    }
 
+                    // request project lock
+                    if (ProjectLock.TryLock(projectName, ProjectLock.LockMode.Upload) == ProjectLock.LockMode.Any)
+                    {
+                        writer.Write("Failed - project is locked!");
+                        return;
+                    }
+
+                    // select files then pack them
+                    // and send to the client
+                    var diff = input.Files.Select(file => new Filemap.FileDiff
+                    {
+                        FileName = file.FileName,
+                        DiffType = Filemap.FileDiff.Type.Changed
+                    }).ToArray();
+
+                    if (diff.Length == 0)
+                    {
+                        writer.Write("Failed - no files to discard!");
+                        return;
+                    }
+
+                    var commit = Commit.FromDiff(diff);
+                    
+                    // TODO: build valid commit with modtime
+
+                    // build commit diff data file
+                    var dir = "data/" + projectName + "/";
+                    var tempDataFile = "temp_send_" + input.Authority.Username + ".zip";
+                    commit.Build(dir, tempDataFile);
+                    
+                    // send commit diff data file
+                    using (var file = new FileStream(tempDataFile, FileMode.Open))
+                    {
+                        // write file size
+                        writer.Write(file.Length);
+
+                        int read;
+                        var buffer = new byte[64 * 1024];
+                        try
+                        {
+                            while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                response.OutputStream.Write(buffer, 0, read);
+                            }
+                        }
+                        catch
+                        {
+                            // user lost connection or closed the client 
+                            // before the whole data file is sent
+                            Console.WriteLine("User '" + input.Authority.Username + "' canceled commit download.");
+                            ProjectLock.Unlock(projectName);
+                            return;
+                        }
+                    }
+                    File.Delete(tempDataFile);
                 }
                 catch (Exception ex)
                 {
                     writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                    ProjectLock.Unlock(projectName);
                 }
             }
+            ProjectLock.Unlock(projectName);
         }
     }
 }

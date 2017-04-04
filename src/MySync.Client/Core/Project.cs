@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
@@ -56,6 +55,8 @@ namespace MySync.Client.Core
         /// <param name="files">Files selected for discard.</param>
         public void Discard(Filemap.FileDiff[] files)
         {
+            // TODO: check if there are files only for download or delete
+
             // select all files that are not 'created'
             var filesToDownload = new List<Filemap.File>();
 
@@ -79,6 +80,26 @@ namespace MySync.Client.Core
             // download original files from server
             Request.Send(ServerAddress + "discard", input.ToJson(), stream =>
             {
+                using (var reader = new BinaryReader(stream))
+                {
+                    // TODO: read commit
+
+                    // download
+                    var dataFile = RootDir + ".mysync/commit_recv.zip";
+                    using (var fs = File.Create(dataFile))
+                    {
+                        var fileLength = reader.ReadInt64();
+
+                        int read;
+                        var buffer = new byte[64*1024];
+                        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            fs.Write(buffer, 0, read);
+                        }
+                    }
+
+                    // TODO: apply commit
+                }
             });
 
             // remove new files
@@ -443,7 +464,7 @@ namespace MySync.Client.Core
             return project;
         }
         
-        public static void CreateProject(string address, string name, string directory)
+        /*public static void CreateProject(string address, string name, string directory)
         {
             if (!directory.EndsWith("\\"))
                 directory += "\\";
@@ -454,7 +475,7 @@ namespace MySync.Client.Core
 
             // send request
             // create local project
-        }
+        }*/
 
         /// <summary>
         /// Project authority,

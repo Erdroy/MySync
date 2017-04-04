@@ -26,10 +26,10 @@ namespace MySync.Shared.RequestHeaders
         /// </summary>
         /// <param name="json">The json string.</param>
         /// <returns>The built DiscardInput.</returns>
-        public static PullInput FromJson(string json)
+        public static DiscardInput FromJson(string json)
         {
             // deserialize object from `json` string.
-            return JsonConvert.DeserializeObject<PullInput>(json);
+            return JsonConvert.DeserializeObject<DiscardInput>(json);
         }
     }
 }
