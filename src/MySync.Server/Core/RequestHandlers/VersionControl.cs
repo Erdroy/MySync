@@ -292,5 +292,21 @@ namespace MySync.Server.Core.RequestHandlers
                 }
             }
         }
+
+        public static void Discard(string body, HttpListenerResponse response)
+        {
+            using (var writer = new BinaryWriter(response.OutputStream))
+            {
+                try
+                {
+                    var input = DiscardInput.FromJson(body);
+
+                }
+                catch (Exception ex)
+                {
+                    writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                }
+            }
+        }
     }
 }

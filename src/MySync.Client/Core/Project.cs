@@ -57,10 +57,27 @@ namespace MySync.Client.Core
         public void Discard(Filemap.FileDiff[] files)
         {
             // select all files that are not 'created'
-            var filesToDownload = files.Where(file => file.DiffType != Filemap.FileDiff.Type.Created).ToList();
+            var filesToDownload = new List<Filemap.File>();
+
+            foreach (var file in files)
+            {
+                if (file.DiffType != Filemap.FileDiff.Type.Created)
+                {
+                    filesToDownload.Add(new Filemap.File
+                    {
+                        FileName = file.FileName
+                    });
+                }
+            }
+
+            var input = new DiscardInput
+            {
+                Authority = Authority,
+                Files = filesToDownload.ToArray()
+            };
 
             // download original files from server
-            Request.Send(ServerAddress + "discard", Authority.ToJson(), stream =>
+            Request.Send(ServerAddress + "discard", input.ToJson(), stream =>
             {
             });
 
