@@ -64,6 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Authorization.cs" />
     <Compile Include="Core\DatabaseModels\CommitModel.cs" />
     <Compile Include="Core\ProjectLock.cs" />
     <Compile Include="Core\ProjectSettings.cs" />

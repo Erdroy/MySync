@@ -33,31 +33,18 @@ namespace MySync.Server.Core.RequestHandlers
                             var authority = ProjectAuthority.FromJson(Encoding.UTF8.GetString(
                                 reader.ReadBytes(reader.ReadInt32())
                             ));
+                            
+                            projectName = authority.ProjectName;
 
                             // validate project name, password and check permisions from clientData
-                            var projectSettings = ServerCore.Settings.Projects.FirstOrDefault(
-                                x => x.Name == authority.ProjectName
-                            );
-
-                            // check if requested project exists
-                            if (projectSettings == null)
+                            if (!Authorization.HasAuthority(authority.AccessToken, projectName))
                             {
                                 writer.Write("Failed - project not found!");
                                 return;
                             }
-
-                            // check if user has the authority to this project
-                            if (!projectSettings.AccessTokens.Contains(authority.AccessToken))
-                            {
-                                // do not tell that the project even exists
-                                writer.Write("Failed - project not found!");
-                                return;
-                            }
-
-                            projectName = projectSettings.Name;
 
                             // request project lock
-                            if (ProjectLock.TryLock(projectSettings.Name, ProjectLock.LockMode.Upload) !=
+                            if (ProjectLock.TryLock(projectName, ProjectLock.LockMode.Upload) !=
                                 ProjectLock.LockMode.None)
                             {
                                 writer.Write("Failed - project is locked!");
@@ -106,11 +93,11 @@ namespace MySync.Server.Core.RequestHandlers
                             {
                                 // downloaded
                                 // now apply changes
-                                commit.Apply("data/" + projectSettings.Name, "temp_recv.zip", hasFile);
+                                commit.Apply("data/" + projectName, "temp_recv.zip", hasFile);
 
                                 // add commit to projects database
                                 var projectCollection =
-                                    ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
+                                    ServerCore.Database.GetCollection<CommitModel>(projectName);
                                 commitId = (int) projectCollection.Count(FilterDefinition<CommitModel>.Empty) + 1;
 
                                 // build commit
@@ -148,7 +135,7 @@ namespace MySync.Server.Core.RequestHandlers
                                 // TODO: restore backup
 
                                 // UNLOCK
-                                ProjectLock.Unlock(projectSettings.Name);
+                                ProjectLock.Unlock(projectName);
                                 return;
                             }
 
@@ -184,31 +171,16 @@ namespace MySync.Server.Core.RequestHandlers
                 try
                 {
                     var input = JsonConvert.DeserializeObject<PullInput>(body);
+                    projectName = input.Authority.ProjectName;
 
-                    // validate project name, password and check permisions from clientData
-                    var projectSettings = ServerCore.Settings.Projects.FirstOrDefault(
-                        x => x.Name == input.Authority.ProjectName
-                    );
-
-                    // check if requested project exists
-                    if (projectSettings == null)
+                    if (!Authorization.HasAuthority(input.Authority.AccessToken, projectName))
                     {
                         writer.Write("Failed - project not found!");
                         return;
                     }
-
-                    // check if user has the authority to this project
-                    if (!projectSettings.AccessTokens.Contains(input.Authority.AccessToken))
-                    {
-                        // do not tell that the project even exists
-                        writer.Write("Failed - project not found!");
-                        return;
-                    }
-
-                    projectName = projectSettings.Name;
 
                     // request project lock
-                    if (ProjectLock.TryLock(projectSettings.Name, ProjectLock.LockMode.Upload) == ProjectLock.LockMode.Any)
+                    if (ProjectLock.TryLock(projectName, ProjectLock.LockMode.Upload) == ProjectLock.LockMode.Any)
                     {
                         writer.Write("Failed - project is locked!");
                         return;
@@ -216,7 +188,7 @@ namespace MySync.Server.Core.RequestHandlers
 
                     // find latest downloaded client-commit
                     var commitId = input.CommitId + 1; // the first commit id which will be downloaded if exists
-                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
+                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectName);
 
                     // find all needed commits that will be used to calculate diff
                     var commits = projectCollection.Find(x => x.CommitId >= commitId).ToList();
@@ -226,7 +198,7 @@ namespace MySync.Server.Core.RequestHandlers
                     {
                         writer.Write("No files to download.");
                         // UNLOCK
-                        ProjectLock.Unlock(projectSettings.Name);
+                        ProjectLock.Unlock(projectName);
                         return;
                     }
 
@@ -240,7 +212,7 @@ namespace MySync.Server.Core.RequestHandlers
                     var fileNeeded = commit.IsUploadNeeded();
 
                     // build commit diff data file
-                    var dir = "data/" + projectSettings.Name + "/";
+                    var dir = "data/" + projectName + "/";
 
                     var tempDataFile = "temp_send_"+ input .Authority.Username+ ".zip";
 
@@ -293,7 +265,7 @@ namespace MySync.Server.Core.RequestHandlers
             }
             ProjectLock.Unlock(projectName);
         }
-
+        
         public static void GetCommit(string body, HttpListenerResponse response)
         {
             using (var writer = new BinaryWriter(response.OutputStream))
@@ -301,28 +273,14 @@ namespace MySync.Server.Core.RequestHandlers
                 try
                 {
                     var input = JsonConvert.DeserializeObject<PullInput>(body);
-                    
-                    // validate project name, password and check permisions from clientData
-                    var projectSettings = ServerCore.Settings.Projects.FirstOrDefault(
-                        x => x.Name == input.Authority.ProjectName
-                    );
 
-                    // check if requested project exists
-                    if (projectSettings == null)
+                    if (!Authorization.HasAuthority(input.Authority.AccessToken, input.Authority.ProjectName))
                     {
                         writer.Write("Failed - project not found!");
                         return;
                     }
 
-                    // check if user has the authority to this project
-                    if (!projectSettings.AccessTokens.Contains(input.Authority.AccessToken))
-                    {
-                        // do not tell that the project even exists
-                        writer.Write("Failed - project not found!");
-                        return;
-                    }
-                    
-                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectSettings.Name);
+                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(input.Authority.ProjectName);
                     var lastCommit = projectCollection.Find(x => true).SortByDescending(d => d.CommitId).Limit(1).FirstOrDefault();
 
                     writer.Write("Done");
