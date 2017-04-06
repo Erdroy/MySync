@@ -71,6 +71,49 @@ namespace MySync.Shared.VersionControl
         }
 
         /// <summary>
+        /// Makes commit file backup.
+        /// </summary>
+        /// <param name="projectDir">The project dir.</param>
+        public void Backup(string projectDir)
+        {
+            var backupDir = projectDir + "/_backups/";
+            Directory.CreateDirectory(backupDir);
+            foreach (var file in Files)
+            {
+                if (file.DiffType != Filemap.FileDiff.Type.Created)
+                {
+                    // copy
+                    File.Copy(projectDir + "/" + file.FileName, backupDir + Path.GetFileName(file.FileName), true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Restores commit backup files.
+        /// </summary>
+        /// <param name="projectDir">The project dir.</param>
+        public void RestoreBackup(string projectDir)
+        {
+            var backupDir = projectDir + "/_backups/";
+
+            foreach (var file in Files)
+            {
+                if (file.DiffType != Filemap.FileDiff.Type.Created)
+                {
+                    // copy
+                    File.Copy(backupDir + Path.GetFileName(file.FileName), projectDir + "/" + file.FileName, true);
+                }
+                else
+                {
+                    // delete if exists
+                    if (File.Exists(projectDir + "/" + file.FileName))
+                        File.Delete(projectDir + "/" + file.FileName);
+                }
+            }
+            Directory.Delete(backupDir, true);
+        }
+
+        /// <summary>
         /// Apply commit changes.
         /// </summary>
         /// <param name="projectDir">The project directory.</param>
@@ -117,23 +160,6 @@ namespace MySync.Shared.VersionControl
         }
 
         /// <summary>
-        /// Check if the upload is really needed.
-        /// This will indicate true when there is no any CREATED or CHANGED files, 
-        /// but there may be DELETED files because they do not need upload.
-        /// </summary>
-        /// <returns>True when upload is needed.</returns>
-        public bool IsUploadNeeded()
-        {
-            foreach (var file in Files)
-            {
-                if (file.DiffType != Filemap.FileDiff.Type.Delete)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Build commit data file.
         /// </summary>
         /// <returns>The data file path.</returns>
@@ -164,6 +190,17 @@ namespace MySync.Shared.VersionControl
             }
 
             return tempFile;
+        }
+
+        /// <summary>
+        /// Check if the upload is really needed.
+        /// This will indicate true when there is no any CREATED or CHANGED files, 
+        /// but there may be DELETED files because they do not need upload.
+        /// </summary>
+        /// <returns>True when upload is needed.</returns>
+        public bool IsUploadNeeded()
+        {
+            return Files.Any(file => file.DiffType != Filemap.FileDiff.Type.Delete);
         }
 
         /// <summary>

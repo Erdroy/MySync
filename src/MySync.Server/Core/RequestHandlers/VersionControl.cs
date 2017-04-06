@@ -87,14 +87,17 @@ namespace MySync.Server.Core.RequestHandlers
 
                             // --- from now - this part CAN'T fail, if so, the whole project may be incorrect after this!
 
-                            // TODO: make commited files backup and restore when failed to unpack the commit
+                            var projectDir = "data/" + projectName;
+
+                            // make commited files backup
+                            commit.Backup(projectDir);
 
                             int commitId;
                             try
                             {
                                 // downloaded
                                 // now apply changes
-                                commit.Apply("data/" + projectName, "temp_recv.zip", hasFile);
+                                commit.Apply(projectDir, "temp_recv.zip", hasFile);
 
                                 // add commit to projects database
                                 var projectCollection =
@@ -133,7 +136,8 @@ namespace MySync.Server.Core.RequestHandlers
                                 Console.WriteLine("Failed to apply commit from user '" + authority.Username + "'");
                                 writer.Write("#RESTORE Failed - error when updating project! Error: " + ex);
 
-                                // TODO: restore backup
+                                // restore backup
+                                commit.RestoreBackup(projectDir);
 
                                 // UNLOCK
                                 ProjectLock.Unlock(projectName);
