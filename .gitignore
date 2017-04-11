@@ -5,3 +5,4 @@ bin/
 src/MySync.Client/packages/
 sh.exe.stackdump
 src/MySync.Server/obj/
+src/MySync/obj/
