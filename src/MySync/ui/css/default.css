@@ -80,6 +80,11 @@ body
     height: calc(100% - 20px); /* -20px, the header*/
 }
 
+/* Common class for disabling selection */
+.noselect {
+    -webkit-user-select: none;
+}
+
 /* Common base for views */
 .view {
     float: left;

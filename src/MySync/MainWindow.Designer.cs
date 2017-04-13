@@ -37,6 +37,7 @@
             this.ClientSize = new System.Drawing.Size(784, 561);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "MainWindow";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MySync";
             this.Load += new System.EventHandler(this.MainWindow_Load);
             this.ResumeLayout(false);
