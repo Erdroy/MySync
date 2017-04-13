@@ -83,6 +83,7 @@ body
 /* Common class for disabling selection */
 .noselect {
     -webkit-user-select: none;
+    /*enable by: -webkit-user-select: text;*/
 }
 
 /* Common base for views */
@@ -125,7 +126,14 @@ body
 }
 
 .projects_list {
-    height: 100%;
+    height: calc(100% - 45px); /* -45px, make some space for projects_list_buttons */
+}
+
+.projects_list_buttons {
+    height: 20px;
+    font-size: 12px;
+
+    padding-left: 6px;
 }
 
 /* Files View */
