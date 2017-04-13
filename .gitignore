@@ -6,3 +6,6 @@ src/MySync.Client/packages/
 sh.exe.stackdump
 src/MySync.Server/obj/
 src/MySync/obj/
+src/MySync/.vs/
+src/packages/
+src/.vs/

@@ -117,7 +117,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -130,15 +129,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\bin\ui\assets\css\default.css">
-      <Link>ui\assets\css\default.css</Link>
-    </Content>
-    <Content Include="..\..\bin\ui\assets\js\main.js">
-      <Link>ui\assets\js\main.js</Link>
-    </Content>
-    <Content Include="..\..\bin\ui\index.html">
-      <Link>ui\index.html</Link>
-    </Content>
+    <Content Include="ui\css\default.css" />
+    <Content Include="ui\img\delete.png" />
+    <Content Include="ui\img\exit.png" />
+    <Content Include="ui\img\maximize.png" />
+    <Content Include="ui\img\minimize.png" />
+    <Content Include="ui\index.html" />
+    <Content Include="ui\js\main.js" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -157,6 +154,9 @@
   <Import Project="..\MySync.Client\packages\cef.redist.x86.3.2883.1552\build\cef.redist.x86.targets" Condition="Exists('..\MySync.Client\packages\cef.redist.x86.3.2883.1552\build\cef.redist.x86.targets')" />
   <Import Project="..\MySync.Client\packages\CefSharp.Common.55.0.0\build\CefSharp.Common.targets" Condition="Exists('..\MySync.Client\packages\CefSharp.Common.55.0.0\build\CefSharp.Common.targets')" />
   <Import Project="..\MySync.Client\packages\CefSharp.WinForms.55.0.0\build\CefSharp.WinForms.targets" Condition="Exists('..\MySync.Client\packages\CefSharp.WinForms.55.0.0\build\CefSharp.WinForms.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>call $(ProjectDir)copy_ui.bat $(ProjectDir)</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

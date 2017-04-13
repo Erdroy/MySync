@@ -1,0 +1,173 @@
+﻿html {
+    height: 100%;
+}
+
+body
+{
+    background-color: rgb(35, 35, 35);
+    margin: 0;
+
+    height: 100%;
+
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    color: rgb(200, 200, 200);
+
+    overflow: hidden;
+}
+
+/* Windows HEADER / Caption */
+#header {
+    background-color: rgb(25, 25, 25);
+    width: 100%;
+    height: 20px;
+    text-align: center;
+
+    display: inline-block;
+    line-height: 20px;
+}
+
+#header .header_icon_exit {
+    display: inline-block;
+    float: right;
+
+    width: 20px;
+    height: 20px;
+
+    margin-top: 5px;
+
+    background-image: url("../img/exit.png");
+    -ms-background-repeat: no-repeat;
+    background-repeat: no-repeat;
+}
+
+#header .header_icon_minimize {
+    display: inline-block;
+    float: right;
+
+    width: 20px;
+    height: 20px;
+
+    margin-top: 5px;
+
+    background-image: url("../img/minimize.png");
+    -ms-background-repeat: no-repeat;
+    background-repeat: no-repeat;
+}
+
+#header .header_icon_maximize {
+    display: inline-block;
+    float: right;
+
+    width: 20px;
+    height: 20px;
+
+    margin-top: 5px;
+
+    background-image: url("../img/maximize.png");
+    -ms-background-repeat: no-repeat;
+    background-repeat: no-repeat;
+}
+
+.header_logo {
+    display: inline-block;
+    font-weight: 300;
+    font-size: 16px;
+}
+
+#wrapper {
+    width: 100%;
+    height: calc(100% - 20px); /* -20px, the header*/
+}
+
+/* Common base for views */
+.view {
+    float: left;
+    height: 100%;
+}
+
+/* Common menu for views */
+.view .view_menu {
+    width: calc(100% - 20px); /* -20px, the padding*/
+    height: 25px;
+    line-height: 25px;
+    
+    padding-left: 10px;
+    padding-right: 10px;
+
+    background-color: rgb(40, 40, 40);
+
+    font-weight: 300;
+    font-size: 12px;
+}
+
+.view .view_menu .view_menu_button {
+    display: inline-block;
+    float: right;
+    height: 20px;
+
+    padding-left: 8px;
+
+    font-weight: 400;
+}
+
+/* Project View */
+#projects_view {
+    width: 149px; /* - 1px because the border*/
+
+    border-right: 1px solid;
+    border-right-color: rgb(48, 48, 48);
+}
+
+.projects_list {
+    height: 100%;
+}
+
+/* Files View */
+#files_view {
+    width: calc(100% - 150px);
+}
+
+.files_list {
+    height: 100%;
+}
+
+.projects_list_item {
+    padding-left: 5px;
+    margin-bottom: 2px;
+    height: 35px;
+}
+
+.projects_list_item_active 
+{
+    border-left: 2px solid;
+    border-left-color: rgb(255, 105, 0);
+}
+
+.projects_list_item_notactive 
+{
+    border-left: 2px solid;
+    border-left-color: rgb(150, 120, 0);
+}
+
+.projects_list_item_title {
+    
+}
+
+.projects_list_item_chcount {
+    font-weight: 300;
+    font-size: 12px;
+}
+.projects_list_item_delete {
+    float: right;
+
+    margin-top: calc(-35px / 2);
+    margin-right: 2px;
+
+    width: 6px;
+    height: 6px;
+    
+    background-image: url("../img/delete.png");
+    -ms-background-repeat: no-repeat;
+    background-repeat: no-repeat;
+}

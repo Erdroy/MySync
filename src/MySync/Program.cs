@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Security.Policy;
 using System.Windows.Forms;
 using CefSharp;
@@ -41,7 +42,8 @@ namespace MySync
             var uri = uriBuilder.Uri.ToString();
             Browser = new ChromiumWebBrowser(uri)
             {
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                BackColor = Color.FromArgb(35, 35, 35)
             };
 
             Application.Run(new MainWindow());

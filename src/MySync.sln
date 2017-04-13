@@ -3,19 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySync.Client", "MySync.Client.csproj", "{76AC2EB2-6FC8-4758-807A-F451D5673ACF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySync.Client", "MySync.Client\MySync.Client.csproj", "{76AC2EB2-6FC8-4758-807A-F451D5673ACF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySync.Server", "..\MySync.Server\MySync.Server.csproj", "{423E30AA-4795-46E2-A211-B86E18E2280B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySync.Server", "MySync.Server\MySync.Server.csproj", "{423E30AA-4795-46E2-A211-B86E18E2280B}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MySync.Shared", "..\MySync.Shared\MySync.Shared\MySync.Shared.shproj", "{3E5EE558-C9A6-4790-961C-B0F4D8AC12CD}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MySync.Shared", "MySync.Shared\MySync.Shared\MySync.Shared.shproj", "{3E5EE558-C9A6-4790-961C-B0F4D8AC12CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySync", "..\MySync\MySync.csproj", "{664A17D6-E7A6-4080-A31E-F6A33713C627}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySync", "MySync\MySync.csproj", "{664A17D6-E7A6-4080-A31E-F6A33713C627}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\MySync.Shared\MySync.Shared\MySync.Shared.projitems*{3e5ee558-c9a6-4790-961c-b0f4d8ac12cd}*SharedItemsImports = 13
-		..\MySync.Shared\MySync.Shared\MySync.Shared.projitems*{423e30aa-4795-46e2-a211-b86e18e2280b}*SharedItemsImports = 4
-		..\MySync.Shared\MySync.Shared\MySync.Shared.projitems*{76ac2eb2-6fc8-4758-807a-f451d5673acf}*SharedItemsImports = 4
+		MySync.Shared\MySync.Shared\MySync.Shared.projitems*{3e5ee558-c9a6-4790-961c-b0f4d8ac12cd}*SharedItemsImports = 13
+		MySync.Shared\MySync.Shared\MySync.Shared.projitems*{423e30aa-4795-46e2-a211-b86e18e2280b}*SharedItemsImports = 4
+		MySync.Shared\MySync.Shared\MySync.Shared.projitems*{76ac2eb2-6fc8-4758-807a-f451d5673acf}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
