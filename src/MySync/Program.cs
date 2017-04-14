@@ -1,4 +1,6 @@
-﻿using System;
+﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
+
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using CefSharp;
@@ -76,7 +78,7 @@ namespace MySync
             };
 
             Browser.RegisterJsObject("jswindow", new JsWindow(), BindingOptions.DefaultBinder);
-
+            
             Application.Run(new MainWindow());
         }
 
