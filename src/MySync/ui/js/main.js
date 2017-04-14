@@ -68,11 +68,11 @@ function addFileChange(name, state) {
     var elem = document.getElementById("files_list_view");
     
     if (state === 0) {
-        elem.innerHTML += `<div id='c_${name}' class='files_list_item files_list_item_new' onclick='toggleFileStage(\"${name}\");'> ${name} </div>`;
+        elem.innerHTML += `<div id='c_${name}' class='files_list_item files_list_item_new' onclick='toggleFileStage(\"${name}\");'>${name}</div>`;
     } else if (state === 1) {
-        elem.innerHTML += `<div id='c_${name}' class='files_list_item files_list_item_changed' onclick='toggleFileStage(\"${name}\");'> ${name} </div>`;
+        elem.innerHTML += `<div id='c_${name}' class='files_list_item files_list_item_changed' onclick='toggleFileStage(\"${name}\");'>${name}</div>`;
     } else {
-        elem.innerHTML += `<div id='c_${name}' class='files_list_item files_list_item_deleted' onclick='toggleFileStage(\"${name}\");'> ${name} </div>`;
+        elem.innerHTML += `<div id='c_${name}' class='files_list_item files_list_item_deleted' onclick='toggleFileStage(\"${name}\");'>${name}</div>`;
     }
 }
 
@@ -88,6 +88,16 @@ function toggleFileStage(name) {
 
 function getSelectedFiles() {
     var elem = document.getElementById("files_list_view");
-    
+    var nodes = elem.childNodes;
 
+    var selected = [];
+
+    nodes.forEach(function(item, index) {
+        if (item.className.endsWith("files_list_item_selected")) {
+            // this is selected
+            selected.push(item.innerHTML);
+        }
+    });
+
+    return selected;
 }
