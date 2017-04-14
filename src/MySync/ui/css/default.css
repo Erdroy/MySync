@@ -12,7 +12,7 @@ body
     font-family: 'Lato', sans-serif;
     font-size: 14px;
     color: rgb(200, 200, 200);
-
+    cursor:default;
     overflow: hidden;
 }
 
@@ -36,6 +36,8 @@ body
 
     margin-top: 5px;
 
+    cursor: pointer;
+
     background-image: url("../img/exit.png");
     -ms-background-repeat: no-repeat;
     background-repeat: no-repeat;
@@ -49,6 +51,8 @@ body
     height: 20px;
 
     margin-top: 5px;
+
+    cursor: pointer;
 
     background-image: url("../img/minimize.png");
     -ms-background-repeat: no-repeat;
@@ -64,13 +68,14 @@ body
 
     margin-top: 5px;
 
+    cursor: pointer;
+
     background-image: url("../img/maximize.png");
     -ms-background-repeat: no-repeat;
     background-repeat: no-repeat;
 }
 
-.header_logo {
-    display: inline-block;
+#header .header_logo {
     font-weight: 300;
     font-size: 16px;
 }
@@ -114,7 +119,13 @@ body
 
     padding-left: 8px;
 
+    cursor: pointer;
+
     font-weight: 400;
+}
+
+.view_menu_button:hover {
+    color: rgb(225, 225, 225);
 }
 
 /* Project View */
@@ -136,13 +147,12 @@ body
     padding-left: 6px;
 }
 
-/* Files View */
-#files_view {
-    width: calc(100% - 150px);
+.projects_list_button {
+    cursor: pointer;
 }
 
-.files_list {
-    height: 100%;
+.projects_list_button:hover {
+    color: rgb(225, 225, 225);
 }
 
 .projects_list_item {
@@ -171,6 +181,7 @@ body
     font-weight: 300;
     font-size: 12px;
 }
+
 .projects_list_item_delete {
     float: right;
 
@@ -183,4 +194,45 @@ body
     background-image: url("../img/delete.png");
     -ms-background-repeat: no-repeat;
     background-repeat: no-repeat;
+}
+
+.projects_list_item_delete:hover {
+    cursor: pointer;
+}
+
+/* Files View */
+#files_view {
+    width: calc(100% - 150px);
+}
+
+.files_list {
+    height: 100%;
+}
+
+.files_list_item {
+    margin-top: 1px;
+
+    padding-left: 10px;
+
+    height: 25px;
+    line-height: 25px;
+}
+
+.files_list_item_selected {
+    background-color: rgb(48, 48, 50);
+}
+
+.files_list_item_new {
+    border-left: 2px solid;
+    border-left-color: rgb(35, 255, 35);
+}
+
+.files_list_item_changed {
+    border-left: 2px solid;
+    border-left-color: rgb(255, 215, 0);
+}
+
+.files_list_item_deleted {
+    border-left: 2px solid;
+    border-left-color: rgb(255, 35, 35);
 }
