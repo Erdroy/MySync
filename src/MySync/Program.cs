@@ -39,7 +39,7 @@ namespace MySync
                 return false;
             }
         }
-
+        
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -73,7 +73,9 @@ namespace MySync
                 Dock = DockStyle.Fill,
                 BackColor = Color.FromArgb(35, 35, 35),
                 MenuHandler = new CustomContextHandler()
-        };
+            };
+
+            Browser.RegisterJsObject("jswindow", new JsWindow(), BindingOptions.DefaultBinder);
 
             Application.Run(new MainWindow());
         }
