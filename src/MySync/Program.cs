@@ -78,7 +78,8 @@ namespace MySync
             };
 
             Browser.RegisterJsObject("jswindow", new JsWindow(), BindingOptions.DefaultBinder);
-            
+            Browser.RegisterJsObject("projects", new Projects(), BindingOptions.DefaultBinder);
+
             Application.Run(new MainWindow());
         }
 
