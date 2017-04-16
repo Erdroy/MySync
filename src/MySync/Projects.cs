@@ -1,6 +1,5 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
-using System;
 using CefSharp;
 
 namespace MySync
@@ -8,7 +7,7 @@ namespace MySync
     public class Projects
     {
         private IFrame _frame;
-
+        
         private static void RunJs(string js)
         {
             Program.Browser.GetBrowser().MainFrame.ExecuteJavaScriptAsync(js);
@@ -23,7 +22,9 @@ namespace MySync
 
         public void SelectProject(string projectName)
         {
-            
+            // close old project
+            // open project and calculate changes
+
         }
         
         public void Discard()
