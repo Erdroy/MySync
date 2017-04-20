@@ -157,6 +157,21 @@ function hideMessage() {
     document.getElementById("message_overlay").style = "display: none;";
 }
 
+
+// modal windows management methods
+
+function showProgress() {
+    document.getElementById("progress_overlay").style = "display: block;";
+}
+
+function setProgressMesssage(message) {
+    document.getElementById("progress_overlay_window").innerHTML = message;
+}
+
+function hideProgress() {
+    document.getElementById("progress_overlay").style = "display: none;";
+}
+
 // run main
 main();
 

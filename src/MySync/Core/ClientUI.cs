@@ -18,20 +18,31 @@ namespace MySync.Core
             Javascript.Run("showMessage('" + message + "', " + isError.ToString().ToLower() + ");");
         }
 
-        public static void ShowProgress(string message, int initialValue = 0)
+        /// <summary>
+        /// Shows progress window.
+        /// </summary>
+        /// <param name="message">The progress message.</param>
+        public static void ShowProgress(string message)
         {
-            SetProgress(initialValue);
-
+            SetProgress(message);
+            Javascript.Run("showProgress();");
         }
 
-        public static void SetProgress(int value)
+        /// <summary>
+        /// Sets progress window message.
+        /// </summary>
+        /// <param name="message">The progress message.</param>
+        public static void SetProgress(string message)
         {
-            
+            Javascript.Run("setProgressMesssage('" + message + "');");
         }
 
+        /// <summary>
+        /// Closes progress window.
+        /// </summary>
         public static void HideProgress()
         {
-            
+            Javascript.Run("hideProgress();");
         }
     }
 }
