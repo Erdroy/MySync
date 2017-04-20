@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using MySync.Client.Core;
+using MySync.Core;
 
 namespace MySync.Projects
 {
@@ -10,30 +11,64 @@ namespace MySync.Projects
     /// </summary>
     public class ProjectManager
     {
-
+        /// <summary>
+        /// Loads all available projects and selects last opened project.
+        /// </summary>
         public void LoadAll()
         {
             
         }
         
+        /// <summary>
+        /// Selects project by name, also refreshes the files changes.
+        /// </summary>
+        /// <param name="projectName">The project name.</param>
         public void Select(string projectName)
         {
+            if (CheckProjects())
+                return;
 
         }
 
+        /// <summary>
+        /// Pulls all changes on the selected project.
+        /// </summary>
         public void Pull()
         {
+            if (CheckProjects())
+                return;
 
         }
-        
+
+        /// <summary>
+        /// Pueshes selected changes from the selected project.
+        /// </summary>
         public void Push(string[] files)
         {
+            if (CheckProjects())
+                return;
 
         }
 
+        /// <summary>
+        /// Discards selected changes from the selected project.
+        /// </summary>
         public void Discard(string[] files)
         {
+            if (CheckProjects())
+                return;
+        }
 
+        // private
+        private bool CheckProjects()
+        {
+            if (CurrentProject == null || AllProjects.Count == 0)
+            {
+                ClientUI.ShowMessage("You have no any project, create or open new one.", true);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

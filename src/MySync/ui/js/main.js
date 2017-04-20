@@ -1,28 +1,57 @@
 ﻿var selectedProject = null;
 
-// handle window drag
-window.onmousemove = function() {
-    window.windowEvents.mouseMove();
-};
+function main() {
+    // handle window drag
+    window.onmousemove = function () {
+        window.windowEvents.mouseMove();
+    };
 
-Element.prototype.remove = function () {
-    this.parentElement.removeChild(this);
-}
-NodeList.prototype.remove = HTMLCollection.prototype.remove = function () {
-    for (var i = this.length - 1; i >= 0; i--) {
-        if (this[i] && this[i].parentElement) {
-            this[i].parentElement.removeChild(this[i]);
+    Element.prototype.remove = function () {
+        this.parentElement.removeChild(this);
+    }
+    NodeList.prototype.remove = HTMLCollection.prototype.remove = function () {
+        for (var i = this.length - 1; i >= 0; i--) {
+            if (this[i] && this[i].parentElement) {
+                this[i].parentElement.removeChild(this[i]);
+            }
         }
     }
+
+    // load projects
+    window.projectEvents.loadProjects();
 }
 
+function tests() {
+    addProject("MURDERSHADOW");
+    addProject("Test");
+    addProject("SampleProject");
+
+    selectProject("MURDERSHADOW");
+
+    addFileChange("README.md", 0);
+    addFileChange("readme.md", 2);
+    addFileChange("assets/models/characters/char_default.fbx", 1);
+    addFileChange("assets/materials/characters/char_default.mat", 1);
+    addFileChange("assets/materials/characters/char_default_body.mat", 1);
+    addFileChange("assets/materials/characters/char_default_eyes.mat", 1);
+    addFileChange("assets/materials/characters/char_default_clothes.mat", 1);
+    addFileChange("assets/materials/characters/char_default_clothes1.mat", 2);
+    addFileChange("assets/textures/characters/char_default_body.tga", 1);
+    addFileChange("assets/textures/characters/char_default_eyes.tga", 1);
+    addFileChange("assets/textures/characters/char_default_clothes.tga", 1);
+    addFileChange("assets/resources/weapons.asset", 1);
+    addFileChange("assets/scenes/loading.unity", 0);
+    addFileChange("assets/scenes/main.unity", 2);
+
+    setChangeCount("MURDERSHADOW", 14);
+
+    toggleFileStage("README.md");
+    toggleFileStage("readme.md");
+    toggleFileStage("assets/scenes/loading.unity");
+    toggleFileStage("assets/scenes/main.unity");
+}
 
 // project management methods
-
-// load projects
-window.projectEvents.loadProjects();
-
-
 function addProject(projectname) {
     var view = document.getElementById("projects_list_view");
 
@@ -103,3 +132,26 @@ function getSelectedFiles() {
 
     return selected;
 }
+
+
+// modal windows management methods
+
+function showMessage(message, isError) {
+    if (isError) {
+        document.getElementById("message_overlay_window").className = "message_overlay_window message_overlay_window_error";
+    } else {
+        document.getElementById("message_overlay_window").className = "message_overlay_window";
+    }
+
+    document.getElementById("message_overlay").style = "display: block;";
+    document.getElementById("message_overlay_message").innerHTML = message;
+}
+
+function hideMessage() {
+    document.getElementById("message_overlay").style = "display: none;";
+}
+
+// run main
+main();
+
+//tests();

@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\ClientManager.cs" />
+    <Compile Include="Core\ClientUI.cs" />
     <Compile Include="Core\Javascript.cs" />
     <Compile Include="Callbacks\ProjectCallbacks.cs" />
     <Compile Include="Callbacks\WindowCallbacks.cs" />

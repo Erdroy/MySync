@@ -1,4 +1,6 @@
-﻿html {
+﻿/* ReSharper disable CssBrowserCompatibility */
+
+html {
     height: 100%;
 }
 
@@ -83,6 +85,69 @@ body
 #wrapper {
     width: 100%;
     height: calc(100% - 20px); /* -20px, the header*/
+}
+
+/* Message classes */
+#message_overlay {
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    background-color: #232323;
+    background-color: rgba(35, 35, 35, 0.3);
+
+    color: rgb(15, 15, 25);
+    font-size: 14px;
+    font-family: 'Lato', sans-serif;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 20;
+}
+
+.message_overlay_window {
+    position: fixed;
+
+    left: calc(50% - (350px / 2));
+    top: calc(50% - (100px / 2));
+
+    background-color: rgb(230, 230, 235);
+    
+    padding: 10px;
+    border-radius: 5px;
+
+    text-align: center;
+
+    width: 350px;
+    height: 100px;
+}
+
+.message_overlay_window_error {
+    border-top: 5px solid;
+    border-top-color: red;
+}
+
+.message_overlay_window_button {
+    border-radius: 2px;
+
+    position: absolute;
+
+    right: 5px;
+    bottom: 5px;
+
+    font-size: 12px;
+    
+    background-color: rgb(230, 230, 235);
+
+    border: 1px solid;
+    border-color: rgb(150, 150, 150);
+}
+
+.message_overlay_window_button:hover {
+    border-color: rgb(160, 160, 160);
+    color: rgb(25, 25, 25);
+    cursor: pointer;
 }
 
 /* Common class for disabling selection */
