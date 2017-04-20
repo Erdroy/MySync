@@ -67,7 +67,6 @@ namespace MySync.Projects
 
                 CurrentProject.Refresh();
                 var diff = CurrentProject.BuildDiff();
-
                 var filesJs = diff.Aggregate("", (current, file) => current + ("addFileChange('" + file.FileName + "', " + (int) file.DiffType) + ");");
 
                 Javascript.Run(filesJs);
@@ -97,7 +96,7 @@ namespace MySync.Projects
             catch (Exception ex)
             {
                 ClientUI.HideProgress();
-                ClientUI.ShowMessage("Error when pulling, message: <br>" + ex.Message, true);
+                ClientUI.ShowMessage("Error when pulling, no changes were pulled, message: <br>" + ex.Message, true);
             }
         }
 
@@ -108,6 +107,12 @@ namespace MySync.Projects
         {
             if (CheckProjects())
                 return;
+
+            if (files.Length == 0)
+            {
+                ClientUI.ShowMessage("No file changes selected, select some.");
+                return;
+            }
 
             try
             {
@@ -131,7 +136,7 @@ namespace MySync.Projects
             catch (Exception ex)
             {
                 ClientUI.HideProgress();
-                ClientUI.ShowMessage("Error when pushing, message: <br>" + ex.Message, true);
+                ClientUI.ShowMessage("Error when pushing, no changes were pushed, message: <br>" + ex.Message, true);
             }
         }
 
