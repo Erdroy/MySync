@@ -55,6 +55,8 @@ namespace MySync.Client.Core
         /// <param name="files">Files selected for discard.</param>
         public void Discard(Filemap.FileDiff[] files)
         {
+            throw new Exception("Discard method is not implemented, yet.");
+
             // select all files that are not 'created'
             var filesToDownload = new List<Filemap.File>();
 
@@ -88,7 +90,9 @@ namespace MySync.Client.Core
             
             // check if there are files only for delete
             if (toDelete == files.Length)
+            {
                 return;
+            }
 
             // download original files from server
             Request.Send(ServerAddress + "discard", input.ToJson(), stream =>
@@ -148,8 +152,7 @@ namespace MySync.Client.Core
 
             if (lastCommitId > currentCommitId)
             {
-                Console.WriteLine(@"Project is not up-to-date.");
-                return;
+                throw new Exception("Cannot push, project is not up-to-date!");
             }
 
             var clientData = Encoding.UTF8.GetBytes(Authority.ToJson());
@@ -188,7 +191,6 @@ namespace MySync.Client.Core
                         {
                             writer.Write(buffer, 0, read);
                         }
-                        Console.WriteLine(file.Length);
                     }
 
                     Request.EndSend(resp =>
@@ -202,14 +204,12 @@ namespace MySync.Client.Core
                             // finalize everything
                             if (message.StartsWith("#RESTORE"))
                             {
-                                Console.WriteLine(@"Commit failed, error: " + message);
-                                return;
+                                throw new Exception("Commit failed, error: " + message);
                             }
 
                             if (message.StartsWith("Failed"))
                             {
-                                Console.WriteLine(@"Commit failed, error: " + message);
-                                return;
+                                throw new Exception("Commit failed, error: " + message);
                             }
 
                             var commitId = reader.ReadInt32();
@@ -219,10 +219,7 @@ namespace MySync.Client.Core
 
                             // save filemap
                             File.WriteAllText(RootDir + ".mysync/last_filemap.json", filemapJson);
-
-                            // show info
-                            Console.WriteLine(message + @" commmitid: " + commitId);
-
+                            
                             // refresh
                             Refresh();
                         }
@@ -232,6 +229,8 @@ namespace MySync.Client.Core
 
             // delete data file
             File.Delete(dataFile);
+
+            // ok
         }
 
         /// <summary>
@@ -267,7 +266,7 @@ namespace MySync.Client.Core
                     }
                     catch
                     {
-                        return;
+                        throw new Exception("Failed to read commit data.");
                     }
 
                     var commitId = reader.ReadInt32();

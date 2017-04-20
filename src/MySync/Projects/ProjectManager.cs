@@ -1,10 +1,12 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MySync.Client.Core;
 using MySync.Core;
+using MySync.Shared.VersionControl;
 using Newtonsoft.Json;
 
 namespace MySync.Projects
@@ -85,6 +87,18 @@ namespace MySync.Projects
             if (CheckProjects())
                 return;
 
+            try
+            {
+                ClientUI.ShowProgress("Pulling changes...");
+                CurrentProject.Pull();
+                ClientUI.HideProgress();
+                ClientUI.ShowMessage("Pulling done!");
+            }
+            catch (Exception ex)
+            {
+                ClientUI.HideProgress();
+                ClientUI.ShowMessage("Error when pulling, message: <br>" + ex.Message, true);
+            }
         }
 
         /// <summary>
@@ -95,6 +109,30 @@ namespace MySync.Projects
             if (CheckProjects())
                 return;
 
+            try
+            {
+                var diffs = CurrentProject.BuildDiff();
+                var diff = diffs.Where(file => files.Any(x => x == file.FileName)).ToList();
+
+                if (diff.Count == 0)
+                {
+                    ClientUI.ShowMessage("No file changes selected, select some.");
+                    return;
+                }
+
+                var commit = Commit.FromDiff(diff.ToArray());
+                var datafile = commit.Build(CurrentProject.RootDir, CurrentProject.RootDir + ".mysync\\commit.zip");
+
+                ClientUI.ShowProgress("Pushing " + diff.Count + " change(s).");
+                CurrentProject.Push(commit, datafile);
+                ClientUI.HideProgress();
+                ClientUI.ShowMessage("Push done!");
+            }
+            catch (Exception ex)
+            {
+                ClientUI.HideProgress();
+                ClientUI.ShowMessage("Error when pushing, message: <br>" + ex.Message, true);
+            }
         }
 
         /// <summary>
@@ -104,6 +142,8 @@ namespace MySync.Projects
         {
             if (CheckProjects())
                 return;
+
+            ClientUI.ShowMessage("Discard is not implemented, yet!");
         }
 
         // private
@@ -135,3 +175,4 @@ namespace MySync.Projects
         private static ProjectManager _instance;
     }
 }
+
