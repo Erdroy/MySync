@@ -51,12 +51,14 @@ function tests() {
     toggleFileStage("assets/scenes/main.unity");
 }
 
+
 // project management methods
+
 function addProject(projectname) {
     var view = document.getElementById("projects_list_view");
 
     var html =
-        "<div id='proj_"+projectname+"' onclick=\"selectProject('"+projectname+"');\" class='projects_list_item projects_list_item_notactive'>" +
+        "<div id='proj_"+projectname+"' onclick=\"selectProject('"+projectname+"', true);\" class='projects_list_item projects_list_item_notactive'>" +
         "<div class='projects_list_item_title'>"+projectname+"</div>" +
         "<div id='proj_" + projectname + "_chcount' class='projects_list_item_chcount'>0 change(s)</div>" +
         "<div class='projects_list_item_delete'></div>" +
@@ -75,7 +77,7 @@ function setChangeCount(projectname, changecount) {
     elem.innerHTML = changecount + " change(s)";
 }
 
-function selectProject(projectname) {
+function selectProject(projectname, local) {
     if (selectedProject != null) {
         selectedProject.className = "projects_list_item projects_list_item_notactive";
     }
@@ -83,8 +85,12 @@ function selectProject(projectname) {
     selectedProject = document.getElementById(`proj_${projectname}`);
     selectedProject.className = "projects_list_item projects_list_item_active";
 
+    // clear file changes
+    clearFileChanges();
+
     // send c# callback
-    window.projectEvents.selectProject(projectname);
+    if (local)
+        window.projectEvents.selectProject(projectname);
 }
 
 

@@ -17,5 +17,7 @@ namespace MySync.Client.Core
         }
 
         public ProjectSettings[] Projects { get; set; }
+
+        public string Selected { get; set; }
     }
 }

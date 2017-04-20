@@ -26,7 +26,7 @@ namespace MySync.Callbacks
         /// </summary>
         public void SelectProject(string projectName)
         {
-            ProjectManager.Instance.Select(projectName);
+            ProjectManager.Instance.Select(projectName, true);
         }
 
         /// <summary>

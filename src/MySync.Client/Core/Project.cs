@@ -371,9 +371,10 @@ namespace MySync.Client.Core
         /// Open project from directory.
         /// </summary>
         /// <param name="address">The server address.</param>
+        /// <param name="name">The project name.</param>
         /// <param name="directory">The project directory.</param>
         /// <returns>The opened project or null when not found.</returns>
-        public static Project OpenWorkingCopy(string address, string directory)
+        public static Project OpenWorkingCopy(string address, string name, string directory)
         {
             if (!directory.EndsWith("\\"))
                 directory += "\\";
@@ -387,7 +388,8 @@ namespace MySync.Client.Core
             var project = new Project
             {
                 RootDir = directory,
-                ServerAddress = address
+                ServerAddress = address,
+                ProjectName = name
             };
             project.Refresh();
 
@@ -492,6 +494,11 @@ namespace MySync.Client.Core
         /// The project server address.
         /// </summary>
         public string ServerAddress { get; set; }
+
+        /// <summary>
+        /// The project name.
+        /// </summary>
+        public string ProjectName { get; set; }
 
         /// <summary>
         /// The local project directory.
