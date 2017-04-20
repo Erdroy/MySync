@@ -92,10 +92,12 @@ function getSelectedFiles() {
 
     var selected = [];
 
-    nodes.forEach(function(item, index) {
-        if (item.className.endsWith("files_list_item_selected")) {
-            // this is selected
-            selected.push(item.innerHTML);
+    nodes.forEach(function (item, index) {
+        if (item != null && item.className != undefined) {
+            if (item.className.endsWith("files_list_item_selected")) {
+                // this is selected
+                selected.push(item.innerHTML);
+            }
         }
     });
 

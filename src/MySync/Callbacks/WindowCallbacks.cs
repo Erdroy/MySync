@@ -6,17 +6,26 @@ using System.Windows.Forms;
 
 namespace MySync.Callbacks
 {
+    /// <summary>
+    /// The window callbacks class.
+    /// </summary>
     public class WindowCallbacks
     {
         private bool _drag;
         private Point _dragStart;
         private Point _dragStartLocation;
 
+        /// <summary>
+        /// JS Callback
+        /// </summary>
         public void CloseWindow()
         {
             Application.Exit();
         }
 
+        /// <summary>
+        /// JS Callback
+        /// </summary>
         public void MaximizeWindow()
         {
             MainWindow.Current.BeginInvoke((Action) (() => // invoke at main thread
@@ -25,6 +34,9 @@ namespace MySync.Callbacks
             }));
         }
 
+        /// <summary>
+        /// JS Callback
+        /// </summary>
         public void MinimizeWindow()
         {
             MainWindow.Current.BeginInvoke((Action)(() => // invoke at main thread
@@ -33,6 +45,9 @@ namespace MySync.Callbacks
             }));
         }
 
+        /// <summary>
+        /// JS Callback
+        /// </summary>
         public void MouseMove()
         {
             if (Control.MouseButtons == MouseButtons.Left && MainWindow.Current.WindowState != FormWindowState.Maximized)
