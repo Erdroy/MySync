@@ -2,6 +2,7 @@
 
 using System;
 using System.Windows.Forms;
+using MySync.Core;
 
 namespace MySync
 {
@@ -16,7 +17,7 @@ namespace MySync
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
-            Controls.Add(Program.Browser);
+            Controls.Add(ClientManager.Instance.Browser);
             MaximizedBounds = Screen.GetWorkingArea(this);
             
         }

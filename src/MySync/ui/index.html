@@ -14,9 +14,9 @@
 <div id="header">
     <span class="header_logo">MySYNC</span>
 
-    <div class="header_icon_exit" onclick="jswindow.closeWindow();"></div>
-    <div class="header_icon_maximize" onclick="jswindow.maximizeWindow();"></div>
-    <div class="header_icon_minimize" onclick="jswindow.minimizeWindow();"></div>
+    <div class="header_icon_exit" onclick="windowEvents.closeWindow();"></div>
+    <div class="header_icon_maximize" onclick="windowEvents.maximizeWindow();"></div>
+    <div class="header_icon_minimize" onclick="windowEvents.minimizeWindow();"></div>
 </div>
 
 <!-- Window content -->
@@ -36,9 +36,9 @@
     <div id="files_view" class="view">
         <div class="view_menu">
             Your file changes
-            <div class="view_menu_button" onclick="projects.discard();">DISCARD</div>
-            <div class="view_menu_button" onclick="projects.push();">PUSH</div>
-            <div class="view_menu_button" onclick="projects.pull();">PULL</div>
+            <div class="view_menu_button" onclick="projectEvents.discard();">DISCARD</div>
+            <div class="view_menu_button" onclick="projectEvents.push();">PUSH</div>
+            <div class="view_menu_button" onclick="projectEvents.pull();">PULL</div>
         </div>
         <div id="files_list_view" class="files_list">
             <!-- Project file changes will be inserted here -->

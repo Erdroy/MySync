@@ -2,7 +2,7 @@
 
 // handle window drag
 window.onmousemove = function() {
-    window.jswindow.mouseMove();
+    window.windowEvents.mouseMove();
 };
 
 Element.prototype.remove = function () {
@@ -20,7 +20,7 @@ NodeList.prototype.remove = HTMLCollection.prototype.remove = function () {
 // project management methods
 
 // load projects
-window.projects.loadProjects();
+window.projectEvents.loadProjects();
 
 
 function addProject(projectname) {
@@ -55,7 +55,7 @@ function selectProject(projectname) {
     selectedProject.className = "projects_list_item projects_list_item_active";
 
     // send c# callback
-    window.projects.selectProject(projectname);
+    window.projectEvents.selectProject(projectname);
 }
 
 

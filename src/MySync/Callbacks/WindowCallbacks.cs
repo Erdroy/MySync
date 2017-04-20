@@ -4,9 +4,9 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace MySync
+namespace MySync.Callbacks
 {
-    public class JsWindow
+    public class WindowCallbacks
     {
         private bool _drag;
         private Point _dragStart;

@@ -96,8 +96,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Projects.cs" />
-    <Compile Include="JsWindow.cs" />
+    <Compile Include="Core\ClientManager.cs" />
+    <Compile Include="Core\Javascript.cs" />
+    <Compile Include="Callbacks\ProjectCallbacks.cs" />
+    <Compile Include="Callbacks\WindowCallbacks.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
