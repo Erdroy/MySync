@@ -289,10 +289,23 @@ namespace MySync.Server.Core.RequestHandlers
                     }
 
                     var projectCollection = ServerCore.Database.GetCollection<CommitModel>(input.Authority.ProjectName);
-                    var lastCommit = projectCollection.Find(x => true).SortByDescending(d => d.CommitId).Limit(1).FirstOrDefault();
 
-                    writer.Write("Done");
-                    writer.Write(lastCommit.CommitId);
+                    if (projectCollection.Count(x => x != null) > 0)
+                    {
+                        var lastCommit =
+                            projectCollection.Find(x => true)
+                                .SortByDescending(d => d.CommitId)
+                                .Limit(1)
+                                .FirstOrDefault();
+
+                        writer.Write("Done");
+                        writer.Write(lastCommit.CommitId);
+                    }
+                    else
+                    {
+                        writer.Write("Done");
+                        writer.Write(0);
+                    }
                 }
                 catch (Exception ex)
                 {
