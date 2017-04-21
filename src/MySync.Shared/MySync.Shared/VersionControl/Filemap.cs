@@ -152,6 +152,23 @@ namespace MySync.Shared.VersionControl
                     continue;
                 }
 
+                if (file.DiffType == FileDiff.Type.Changed)
+                {
+                    // update mod time
+                    foreach (var f in _files)
+                    {
+                        if (f.FileName != file.FileName)
+                            continue;
+
+                        _files[_files.IndexOf(f)] = new File
+                        {
+                            FileName = f.FileName,
+                            Version = file.Version
+                        };
+                        break;
+                    }
+                }
+
                 // remove file
                 if (file.DiffType == FileDiff.Type.Delete)
                     _files.Remove(_files.FirstOrDefault(x => x.FileName == file.FileName));
