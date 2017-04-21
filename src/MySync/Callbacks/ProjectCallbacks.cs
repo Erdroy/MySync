@@ -17,8 +17,7 @@ namespace MySync.Callbacks
         /// </summary>
         public void LoadProjects()
         {
-            // load all projects
-            ProjectManager.Instance.LoadAll();
+            
         }
 
         /// <summary>
