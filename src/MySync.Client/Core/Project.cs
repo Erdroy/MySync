@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using MySync.Shared.RequestHeaders;
@@ -266,7 +267,7 @@ namespace MySync.Client.Core
                     }
                     catch
                     {
-                        throw new Exception("Failed to read commit data.");
+                        throw new WarningException("There is no any changes to download.");
                     }
 
                     var commitId = reader.ReadInt32();

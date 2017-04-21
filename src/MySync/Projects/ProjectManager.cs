@@ -2,10 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using MySync.Client.Core;
 using MySync.Core;
+using MySync.Shared.RequestHeaders;
+using MySync.Shared.Utilities;
 using MySync.Shared.VersionControl;
 using Newtonsoft.Json;
 
@@ -23,6 +26,7 @@ namespace MySync.Projects
         {
             if (File.Exists("client.json"))
             {
+                ClientUI.ShowProgress("Loading projects...");
                 var config = JsonConvert.DeserializeObject<ClientSettings>(File.ReadAllText("client.json"));
 
                 foreach (var project in config.Projects)
@@ -41,6 +45,8 @@ namespace MySync.Projects
                 // select
                 if(!string.IsNullOrEmpty(config.Selected))
                     Select(config.Selected);
+
+                ClientUI.HideProgress();
             }
         }
 
@@ -92,6 +98,11 @@ namespace MySync.Projects
                 CurrentProject.Pull();
                 ClientUI.HideProgress();
                 ClientUI.ShowMessage("Pulling done!");
+            }
+            catch (WarningException ex)
+            {
+                ClientUI.HideProgress();
+                ClientUI.ShowMessage(ex.Message);
             }
             catch (Exception ex)
             {
