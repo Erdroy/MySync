@@ -144,6 +144,10 @@ namespace MySync.Client.Core
                     {
                         lastCommitId = reader.ReadInt32();
                     }
+                    else
+                    {
+                        throw new Exception("Cannot push, Error: <br>" + message);
+                    }
                 }
             });
 
