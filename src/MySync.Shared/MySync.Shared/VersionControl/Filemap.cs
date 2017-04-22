@@ -167,6 +167,9 @@ namespace MySync.Shared.VersionControl
                         };
                         break;
                     }
+
+                    // next, please!
+                    continue;
                 }
 
                 // remove file

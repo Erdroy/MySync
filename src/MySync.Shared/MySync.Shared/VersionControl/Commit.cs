@@ -127,7 +127,14 @@ namespace MySync.Shared.VersionControl
                 var fileName = projectDir + "/" + file.FileName;
                 if (file.DiffType == Filemap.FileDiff.Type.Delete)
                 {
-                    File.Delete(fileName);
+                    try
+                    {
+                        File.Delete(fileName);
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
                 }
             }
 
