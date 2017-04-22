@@ -289,8 +289,9 @@ namespace MySync.Server.Core.RequestHandlers
                     }
 
                     var projectCollection = ServerCore.Database.GetCollection<CommitModel>(input.Authority.ProjectName);
+                    var itemCount = projectCollection.Count(FilterDefinition<CommitModel>.Empty);
 
-                    if (projectCollection.Count(x => x != null) > 0)
+                    if (itemCount > 0)
                     {
                         var lastCommit =
                             projectCollection.Find(x => true)
