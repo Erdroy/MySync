@@ -212,9 +212,10 @@ namespace MySync.Server.Core.RequestHandlers
                     // diff all commits
                     var commit = commits[0].ToCommit();
 
-                    for (var i = 1; i < commits.Count; i++)
-                        commit.Add(commits[i].ToCommit());
-
+                    foreach (var t in commits)
+                    {
+                        commit.Add(t.ToCommit());
+                    }
 
                     var fileNeeded = commit.IsUploadNeeded();
 

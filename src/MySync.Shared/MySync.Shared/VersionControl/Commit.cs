@@ -58,6 +58,14 @@ namespace MySync.Shared.VersionControl
                     if (files[fidx].DiffType == Filemap.FileDiff.Type.Created && file.DiffType != Filemap.FileDiff.Type.Delete)
                         continue;
 
+                    // if file was created and now it is deleted, remove this file from commit
+                    if (files[fidx].DiffType == Filemap.FileDiff.Type.Created && file.DiffType == Filemap.FileDiff.Type.Delete)
+                    {
+                        files.RemoveAt(fidx);
+                        continue;
+                    }
+
+                    // file was created in some previous commits, not in this pulling, change the file to changed or deleted.
                     files[fidx] = file;
                     continue;
                 }
