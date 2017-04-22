@@ -32,7 +32,12 @@ namespace MySync.Projects
                 foreach (var project in config.Projects)
                 {
                     var projInst = Project.OpenWorkingCopy(project.Address, project.Name, project.RootDir);
-                    
+                    projInst.Authority = new ProjectAuthority
+                    {
+                        ProjectName = project.Name,
+                        Username = project.Username,
+                        AccessToken = PasswordHasher.Hash(project.Username, project.Password)
+                    };
                     projInst.Refresh();
                     var diff = projInst.BuildDiff();
 

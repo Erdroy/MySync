@@ -14,6 +14,10 @@ namespace MySync.Client.Core
             public string Name { get; set; }
 
             public string RootDir { get; set; }
+
+            public string Username { get; set; } // TEMPORARY
+
+            public string Password { get; set; } // TEMPORARY
         }
 
         public ProjectSettings[] Projects { get; set; }
