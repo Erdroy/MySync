@@ -139,6 +139,33 @@ function getSelectedFiles() {
     return selected;
 }
 
+function selectAll() {
+    var elem = document.getElementById("files_list_view");
+    var nodes = elem.childNodes;
+
+    nodes.forEach(function (item) {
+        if (item != null && item.className != undefined) {
+            if (!item.className.endsWith("files_list_item_selected")) {
+                // this is selected
+                item.className += " files_list_item_selected";
+            }
+        }
+    });
+}
+
+function unselectAll() {
+    var elem = document.getElementById("files_list_view");
+    var nodes = elem.childNodes;
+
+    nodes.forEach(function (item) {
+        if (item != null && item.className != undefined) {
+            if (item.className.endsWith("files_list_item_selected")) {
+                // this is selected
+                item.className = item.className.replace(" files_list_item_selected", "");
+            }
+        }
+    });
+}
 
 // modal windows management methods
 

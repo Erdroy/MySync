@@ -239,6 +239,16 @@ body
     color: rgb(225, 225, 225);
 }
 
+.view .view_menu .view_menu_text {
+    display: inline-block;
+    float: right;
+    height: 20px;
+
+    padding-left: 8px;
+
+    font-weight: 400;
+}
+
 /* Project View */
 #projects_view {
     width: 149px; /* - 1px because the border*/
@@ -313,7 +323,7 @@ body
 }
 
 .files_list {
-    height: 100%;
+    height: calc(100% - 50px); /* make space for lower menu */
 }
 
 .files_list_item {
