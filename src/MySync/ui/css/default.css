@@ -18,6 +18,23 @@ body
     overflow: hidden;
 }
 
+/* Scrollbars style */
+::-webkit-scrollbar
+{
+    width: 10px;
+    margin-right: -10px;
+}
+
+::-webkit-scrollbar-track
+{
+    background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb
+{
+    background: rgba(0, 0, 0, 0.5);
+}
+
 /* Windows HEADER / Caption */
 #header {
     background-color: rgb(25, 25, 25);
@@ -323,7 +340,10 @@ body
 }
 
 .files_list {
+    overflow-y: auto;
+
     height: calc(100% - 50px); /* make space for lower menu */
+    width: 100%;
 }
 
 .files_list_item {
