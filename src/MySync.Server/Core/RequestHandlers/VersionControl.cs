@@ -60,9 +60,10 @@ namespace MySync.Server.Core.RequestHandlers
                             if (hasFile)
                             {
                                 Console.WriteLine("Receiving file...");
-
-                                // read data file
-                                using (var fs = File.Create("temp_recv.zip"))
+                                try
+                                {
+                                    // read data file
+                                    using (var fs = File.Create("temp_recv.zip"))
                                 {
                                     try
                                     {
@@ -81,6 +82,15 @@ namespace MySync.Server.Core.RequestHandlers
                                         ProjectLock.Unlock(projectName);
                                         return;
                                     }
+                                    }
+                                }
+                                catch
+                                {
+                                    // user lost connection or closed the client 
+                                    // before the whole data file arrived
+                                    Console.WriteLine("User '" + authority.Username + "' commit upload failed.");
+                                    ProjectLock.Unlock(projectName);
+                                    return;
                                 }
                             }
 
