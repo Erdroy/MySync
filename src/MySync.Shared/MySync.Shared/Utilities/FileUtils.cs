@@ -17,6 +17,9 @@ namespace MySync.Shared.Utilities
         {
             fileName = fileName.Replace("\\", "/");
 
+            if (exclusions == null || exclusions.Length == 0)
+                return false;
+
             foreach (var exclude in exclusions)
             {
                 if (exclude.Length < 2) // validate
