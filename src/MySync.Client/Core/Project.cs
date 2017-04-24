@@ -24,12 +24,15 @@ namespace MySync.Client.Core
         /// </summary>
         public void Refresh()
         {
+            // update ignore files
+            UpdateIgnores();
+
             // load last filemap
             var filemapData = File.ReadAllText(RootDir + ".mysync\\last_filemap.json");
             _lastFilemap = Filemap.FromJson(filemapData);
 
             // build current filemap
-            _currentFilemap = Filemap.Build(RootDir);
+            _currentFilemap = Filemap.Build(RootDir, Ignores);
         }
 
         /// <summary>
@@ -342,6 +345,24 @@ namespace MySync.Client.Core
             // ?
         }
 
+        // private
+        private void UpdateIgnores()
+        {
+            if (!File.Exists(RootDir + "/.ignores"))
+                return;
+
+            var contents = File.ReadAllText(RootDir + "/.ignores");
+            Ignores = contents.Split('\n');
+
+            // trim all ignores
+            var i = 0;
+            foreach (var ignore in Ignores)
+            {
+                Ignores[i] = ignore.Trim(); 
+                i++;
+            }
+        }
+
         /// <summary>
         /// Create new project.
         /// </summary>
@@ -492,25 +513,17 @@ namespace MySync.Client.Core
             return project;
         }
         
-        /*public static void CreateProject(string address, string name, string directory)
-        {
-            if (!directory.EndsWith("\\"))
-                directory += "\\";
-
-            if (Directory.Exists(directory))
-                return; // nope! can't create project
-
-
-            // send request
-            // create local project
-        }*/
-
         /// <summary>
         /// Project authority,
         /// contains all information about the authority of this project,
         /// for current user.
         /// </summary>
         public ProjectAuthority Authority { get; set; }
+
+        /// <summary>
+        /// The project ignored files/directories list.
+        /// </summary>
+        public string[] Ignores { get; private set; }
 
         /// <summary>
         /// The project server address.
