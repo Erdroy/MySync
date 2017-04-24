@@ -30,10 +30,8 @@ Client and Server application is designed to work on every platform that support
 * Web Dashboard,
 * SSL support.
 
-# TODO: Tutorials
-1. Installing server on Windows
-2. Installing server on Linux
-3. ???
+# Tutorials
+1. Server and project setup, see wiki: https://github.com/Erdroy/MySync/wiki/
 
 # Contributing/Contact
 Feel free to contribute, there is a lot of work to do(see https://trello.com/b/NxN9L6Gf/mysync), 
