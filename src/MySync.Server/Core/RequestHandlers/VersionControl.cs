@@ -148,11 +148,16 @@ namespace MySync.Server.Core.RequestHandlers
                             // return message
                             writer.Write("Done!");
                             writer.Write(commitId);
+
+                            // clean backups
+                            commit.CleanBackups(projectDir);
+
                             Console.WriteLine("User '" + authority.Username + "' pushed changes!");
                         }
                         catch (Exception ex)
                         {
                             writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                            Console.WriteLine("PUSH failed");
                             ProjectLock.Unlock(projectName);
                         }
                     }
@@ -166,6 +171,7 @@ namespace MySync.Server.Core.RequestHandlers
                 ProjectLock.Unlock(projectName);
             }
 
+            Console.WriteLine("Push done");
             ProjectLock.Unlock(projectName);
         }
 

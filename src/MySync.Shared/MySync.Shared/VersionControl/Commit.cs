@@ -122,6 +122,16 @@ namespace MySync.Shared.VersionControl
         }
 
         /// <summary>
+        /// Cleans commit backup files.
+        /// </summary>
+        /// <param name="projectDir">The project dir.</param>
+        public void CleanBackups(string projectDir)
+        {
+            var backupDir = projectDir + "/_backups/";
+            Directory.Delete(backupDir, true);
+        }
+
+        /// <summary>
         /// Apply commit changes.
         /// </summary>
         /// <param name="projectDir">The project directory.</param>
