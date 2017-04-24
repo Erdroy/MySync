@@ -15,6 +15,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\PasswordHasher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Commit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VersionControl\Filemap.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)VersionControl\FilenameHelper.cs" />
   </ItemGroup>
 </Project>
