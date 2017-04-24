@@ -321,7 +321,7 @@ namespace MySync.Server.Core.RequestHandlers
                     else
                     {
                         writer.Write("Done");
-                        writer.Write(0);
+                        writer.Write(-1);
                     }
                 }
                 catch (Exception ex)
