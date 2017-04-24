@@ -100,7 +100,10 @@ namespace MySync.Projects
             try
             {
                 ClientUI.ShowProgress("Pulling changes...");
-                CurrentProject.Pull();
+                CurrentProject.Pull(x =>
+                {
+                    ClientUI.SetProgress("Pulling changes..." + x + "%");
+                });
                 ClientUI.HideProgress();
                 ClientUI.ShowMessage("Pulling done!");
             }
@@ -132,6 +135,8 @@ namespace MySync.Projects
 
             try
             {
+                ClientUI.ShowProgress("Building commit...");
+
                 var diffs = CurrentProject.BuildDiff();
                 var diff = diffs.Where(file => files.Any(x => x == file.FileName)).ToList();
 
@@ -142,10 +147,17 @@ namespace MySync.Projects
                 }
 
                 var commit = Commit.FromDiff(diff.ToArray());
-                var datafile = commit.Build(CurrentProject.RootDir, CurrentProject.RootDir + ".mysync\\commit.zip");
-
-                ClientUI.ShowProgress("Pushing " + diff.Count + " change(s).");
-                CurrentProject.Push(commit, datafile);
+                var datafile = commit.Build(CurrentProject.RootDir, CurrentProject.RootDir + ".mysync\\commit.zip",
+                    x =>
+                    {
+                        ClientUI.SetProgress("Building commit... " + x + "%");
+                    });
+                ClientUI.SetProgress("Pushing " + diff.Count + " change(s).");
+                CurrentProject.Push(commit, datafile,
+                    x =>
+                    {
+                        ClientUI.SetProgress("Pushing " + diff.Count + " change(s). " + x + "%");
+                    });
                 ClientUI.HideProgress();
                 ClientUI.ShowMessage("Push done!");
             }

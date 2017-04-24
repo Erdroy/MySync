@@ -178,7 +178,7 @@ namespace MySync.Shared.VersionControl
         /// Build commit data file.
         /// </summary>
         /// <returns>The data file path.</returns>
-        public string Build(string rootDir, string tempFile)
+        public string Build(string rootDir, string tempFile, Action<int> onProgress = null)
         {
             // delete the file when exists.
             if (File.Exists(tempFile))
@@ -200,13 +200,22 @@ namespace MySync.Shared.VersionControl
                     entry.FileName = file.FileName;
                 }
 
+                if (onProgress != null)
+                {
+                    zip.SaveProgress += (sender, args) =>
+                    {
+                        var progress = (int)((float)args.BytesTransferred / args.TotalBytesToTransfer * 100.0f);
+                        onProgress(progress);
+                    };
+                }
+
                 // save
                 zip.Save();
             }
 
             return tempFile;
         }
-
+        
         /// <summary>
         /// Check if the upload is really needed.
         /// This will indicate true when there is no any CREATED or CHANGED files, 

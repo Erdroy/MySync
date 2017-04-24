@@ -126,7 +126,8 @@ namespace MySync.Client.Core
         /// </summary>
         /// <param name="commit">The commit.</param>
         /// <param name="dataFile">The commit data file.</param>
-        public void Push(Commit commit, string dataFile)
+        /// <param name="onProgress">This is called when there is some progress made.</param>
+        public void Push(Commit commit, string dataFile, Action<int> onProgress)
         {
             // construct pull input data
             var dataJson = new PullInput
@@ -190,13 +191,23 @@ namespace MySync.Client.Core
                     if (fileNeeded)
                     {
                         // upload commit data file
+                        var readbytes = 0;
+                        var totalbytes = (int)file.Length;
                         int read;
                         var buffer = new byte[64 * 1024];
                         while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
                         {
                             writer.Write(buffer, 0, read);
+                            
+                            readbytes += read;
+
+                            var prc = (float)readbytes / totalbytes;
+                            prc *= 100.0f;
+                            onProgress((int)prc);
                         }
                     }
+
+                    onProgress(100);
 
                     Request.EndSend(resp =>
                     {
@@ -241,7 +252,8 @@ namespace MySync.Client.Core
         /// <summary>
         /// Pull commits from server and apply.
         /// </summary>
-        public void Pull()
+        /// <param name="onProgress">This is called when there is some progress made.</param>
+        public void Pull(Action<int> onProgress)
         {
             var commitInfo = RootDir + ".mysync/commit_info.txt";
 
@@ -285,13 +297,19 @@ namespace MySync.Client.Core
                     {
                         using (var fs = File.Create(dataFile))
                         {
-                            var fileLength = reader.ReadInt64();
+                            var totalbytes = reader.ReadInt64();
 
+                            var readbytes = 0;
                             int read;
                             var buffer = new byte[64*1024];
                             while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
                             {
                                 fs.Write(buffer, 0, read);
+
+                                readbytes += read;
+                                var prc = (float)readbytes / totalbytes;
+                                prc *= 100.0f;
+                                onProgress((int)prc);
                             }
                         }
                     }
@@ -469,7 +487,7 @@ namespace MySync.Client.Core
             project.Refresh();
 
             // download all files
-            project.Pull();
+            project.Pull(x => { }); // TODO: progress
             
             return project;
         }
