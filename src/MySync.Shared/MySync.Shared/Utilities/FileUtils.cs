@@ -1,7 +1,5 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
-using System.Linq;
-
 namespace MySync.Shared.Utilities
 {
     /// <summary>
