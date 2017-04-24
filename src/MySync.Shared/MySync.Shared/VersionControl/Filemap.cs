@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MySync.Shared.Utilities;
 using Newtonsoft.Json;
 
 namespace MySync.Shared.VersionControl
@@ -215,8 +216,9 @@ namespace MySync.Shared.VersionControl
         /// Build filemap for `root` directory.
         /// </summary>
         /// <param name="root">The root directory.</param>
+        /// <param name="ignores">The ignore files.</param>
         /// <returns>The built filemap.</returns>
-        public static Filemap Build(string root)
+        public static Filemap Build(string root, string[] ignores)
         {
             var filemap = new Filemap();
 
@@ -229,13 +231,22 @@ namespace MySync.Shared.VersionControl
             // build file version map
             foreach (var file in files)
             {
+                // build relative file name
                 var filename = file.Replace("\\", "/").Remove(0, root.Length);
 
-                if(filename.Contains(".mysync"))
+                // check if file is excluded
+                if (FileUtils.IsExcluded(filename, ignores))
                     continue;
 
-                // TODO: check exclusions
+                if (filename.Contains(".mysync"))
+                    continue;
 
+                // check exclusions
+                if (ignores != null)
+                {
+                    
+                }
+                
                 // check file info
                 var fileinfo = new FileInfo(file);
                 filemap._files.Add(new File
