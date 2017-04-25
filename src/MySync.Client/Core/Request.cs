@@ -70,6 +70,7 @@ namespace MySync.Client.Core
             _webRequest.ContentLength = size;
             _webRequest.KeepAlive = true;
             _webRequest.Timeout = Timeout.Infinite;
+            _webRequest.AllowWriteStreamBuffering = false;
 
             return _webRequest.GetRequestStream();
         }
