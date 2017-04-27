@@ -52,7 +52,10 @@ namespace MySync.Callbacks
         /// </summary>
         public void Pull()
         {
-            ProjectManager.Instance.Pull();
+            Javascript.Run("getSelectedFiles();", files =>
+            {
+                ProjectManager.Instance.Pull();
+            });
         }
 
         /// <summary>

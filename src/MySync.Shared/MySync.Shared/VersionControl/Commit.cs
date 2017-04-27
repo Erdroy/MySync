@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Ionic.Zip;
+using Ionic.Zlib;
 using Newtonsoft.Json;
 
 namespace MySync.Shared.VersionControl
@@ -161,6 +162,7 @@ namespace MySync.Shared.VersionControl
             {
                 using (var zip = new ZipFile(dataFile))
                 {
+                    zip.CompressionLevel = CompressionLevel.BestSpeed;
                     zip.ExtractAll(projectDir, ExtractExistingFileAction.OverwriteSilently);
                 }
             }
@@ -197,6 +199,7 @@ namespace MySync.Shared.VersionControl
             // compress all files
             using (var zip = new ZipFile(tempFile))
             {
+                zip.CompressionLevel = CompressionLevel.BestSpeed;
                 zip.ParallelDeflateThreshold = -1;
 
                 foreach (var file in Files)
@@ -209,13 +212,12 @@ namespace MySync.Shared.VersionControl
                     // change name
                     entry.FileName = file.FileName;
                 }
-
+                
                 if (onProgress != null)
                 {
                     zip.SaveProgress += (sender, args) =>
                     {
-                        var progress = (int)((float)args.BytesTransferred / args.TotalBytesToTransfer * 100.0f);
-                        onProgress(progress);
+                        onProgress((int)((float)args.EntriesSaved / args.EntriesTotal * 100.0f));
                     };
                 }
 

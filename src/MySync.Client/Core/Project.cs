@@ -130,7 +130,7 @@ namespace MySync.Client.Core
         /// <param name="commit">The commit.</param>
         /// <param name="dataFile">The commit data file.</param>
         /// <param name="onProgress">This is called when there is some progress made.</param>
-        public void Push(Commit commit, string dataFile, Action<int> onProgress)
+        public void Push(Commit commit, string dataFile, Action<string> onProgress)
         {
             // construct pull input data
             var dataJson = new PullInput
@@ -256,7 +256,7 @@ namespace MySync.Client.Core
         /// Pull commits from server and apply.
         /// </summary>
         /// <param name="onProgress">This is called when there is some progress made.</param>
-        public void Pull(Action<int> onProgress)
+        public void Pull(Action<string> onProgress)
         {
             var commitInfo = RootDir + ".mysync/commit_info.txt";
 
@@ -275,6 +275,12 @@ namespace MySync.Client.Core
             {
                 using (var reader = new BinaryReader(stream))
                 {
+                    if (!reader.ReadBoolean())
+                    {
+                        // error!
+                        throw new WarningException(reader.ReadString());
+                    }
+                    
                     var body = reader.ReadString();
 
                     Console.WriteLine(body);

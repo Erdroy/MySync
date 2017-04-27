@@ -197,6 +197,7 @@ namespace MySync.Server.Core.RequestHandlers
 
                     if (!Authorization.HasAuthority(input.Authority.AccessToken, projectName))
                     {
+                        writer.Write(false);
                         writer.Write("Failed - project not found!");
                         return;
                     }
@@ -204,6 +205,7 @@ namespace MySync.Server.Core.RequestHandlers
                     // request project lock
                     if (ProjectLock.TryLock(projectName, ProjectLock.LockMode.Upload) == ProjectLock.LockMode.Any)
                     {
+                        writer.Write(false);
                         writer.Write("Failed - project is locked!");
                         return;
                     }
@@ -218,11 +220,14 @@ namespace MySync.Server.Core.RequestHandlers
                     // check if there is at least one commit, if not, break the pull request
                     if (!commits.Any())
                     {
+                        writer.Write(false);
                         writer.Write("No files to download.");
                         // UNLOCK
                         ProjectLock.Unlock(projectName);
                         return;
                     }
+
+                    writer.Write(true);
 
                     // diff all commits
                     var commit = commits[0].ToCommit();
