@@ -206,12 +206,10 @@ namespace MySync.Client.Core
 
                             var prc = (float)readbytes / totalbytes;
                             prc *= 100.0f;
-                            onProgress((int)prc);
+                            onProgress("Pushing changes... Uploading - " + prc + "%");
                         }
                     }
-
-                    onProgress(100);
-
+                    
                     Request.EndSend(resp =>
                     {
                         // done!
@@ -280,7 +278,15 @@ namespace MySync.Client.Core
                         // error!
                         throw new WarningException(reader.ReadString());
                     }
-                    
+
+                    while (!reader.ReadBoolean())
+                    {
+                        var progress = reader.ReadInt32();
+
+                        if (progress >= 0)
+                            onProgress("Pulling changes... Building commit - " + progress + "%");
+                    }
+
                     var body = reader.ReadString();
 
                     Console.WriteLine(body);
@@ -318,7 +324,9 @@ namespace MySync.Client.Core
                                 readbytes += read;
                                 var prc = (float)readbytes / totalbytes;
                                 prc *= 100.0f;
-                                onProgress((int)prc);
+
+                                if(prc >= 0)
+                                    onProgress("Pulling changes... Downloading - " + prc + "%");
                             }
                         }
                     }

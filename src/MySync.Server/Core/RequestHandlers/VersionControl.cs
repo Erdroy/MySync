@@ -245,7 +245,19 @@ namespace MySync.Server.Core.RequestHandlers
                     var tempDataFile = "temp_send_"+ input .Authority.Username+ ".zip";
 
                     if (fileNeeded) // build commit zip if needed
-                        commit.Build(dir, tempDataFile);
+                    {
+                        var lastSend = DateTime.Now;
+                        commit.Build(dir, tempDataFile, delegate (int progress)
+                        {
+                            if ((DateTime.Now - lastSend).TotalSeconds >= 1.0f)
+                            {
+                                writer.Write(false);
+                                writer.Write(progress);
+                            }
+                        });
+                    }
+
+                    writer.Write(true);
 
                     // send commit diff
                     var commitJson = commit.ToJson();

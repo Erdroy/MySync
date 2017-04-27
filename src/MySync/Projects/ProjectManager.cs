@@ -100,10 +100,7 @@ namespace MySync.Projects
             try
             {
                 ClientUI.ShowProgress("Pulling changes...");
-                CurrentProject.Pull(x =>
-                {
-                    ClientUI.SetProgress("Pulling changes..." + x + "%");
-                });
+                CurrentProject.Pull(ClientUI.SetProgress);
                 ClientUI.HideProgress();
                 ClientUI.ShowMessage("Pulling done!");
             }
@@ -156,7 +153,7 @@ namespace MySync.Projects
                 CurrentProject.Push(commit, datafile,
                     x =>
                     {
-                        ClientUI.SetProgress("Pushing " + diff.Count + " change(s). " + x + "%");
+                        ClientUI.SetProgress("Pushing " + diff.Count + " change(s). " + x);
                     });
                 ClientUI.HideProgress();
                 ClientUI.ShowMessage("Push done!");
