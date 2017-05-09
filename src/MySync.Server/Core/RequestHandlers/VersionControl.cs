@@ -1,6 +1,7 @@
 ﻿// MySync © 2016-2017 Damian 'Erdroy' Korczowski
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -372,29 +373,57 @@ namespace MySync.Server.Core.RequestHandlers
                         return;
                     }
 
+                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(projectName);
+                    var commits = projectCollection.Find(x => x.CommitId >= 0).ToList().OrderBy(x => x.CommitId).ToArray();
+
                     // select files then pack them
                     // and send to the client
-                    var diff = input.Files.Select(file => new Filemap.FileDiff
-                    {
-                        FileName = file.FileName,
-                        DiffType = Filemap.FileDiff.Type.Changed
-                    }).ToArray();
+                    var diff = new List<Filemap.FileDiff>();
 
-                    if (diff.Length == 0)
+                    foreach (var file in input.Files)
                     {
-                        writer.Write("Failed - no files to discard!");
-                        return;
+                        // select commits which contains this file(which is not removed by the commit) then order by commit and select the first commit.
+
+                        var validCommit = commits.Where(x => x.Files.Any(n => n.Name == file.FileName && n.Operation != 2)).OrderByDescending(x => x.CommitId).FirstOrDefault();
+
+                        if (validCommit != null)
+                        {
+                            // select the file
+                            var validFile = validCommit.Files.First(x => x.Name == file.FileName);
+
+                            diff.Add(new Filemap.FileDiff
+                            {
+                                FileName = validFile.Name,
+                                DiffType = Filemap.FileDiff.Type.Changed,
+                                Version = validFile.Version
+                            });
+                        }
+                        else
+                        {
+                            Console.WriteLine("Commit not found for file " + file.FileName);
+                        }
                     }
 
-                    var commit = Commit.FromDiff(diff);
-                    
-                    // TODO: build valid commit with modtime
+                    // create commit
+                    var commit = Commit.FromDiff(diff.ToArray());
+
+                    // write commit in json format
+                    var commitJson = commit.ToJson();
+                    writer.Write(commitJson);
 
                     // build commit diff data file
                     var dir = "data/" + projectName + "/";
                     var tempDataFile = "temp_send_" + input.Authority.Username + ".zip";
-                    commit.Build(dir, tempDataFile);
-                    
+                    commit.Build(dir, tempDataFile, delegate (int progress)
+                    {
+                        var lastSend = DateTime.Now;
+                        if ((DateTime.Now - lastSend).TotalSeconds >= 1.0f)
+                        {
+                            writer.Write(false);
+                            writer.Write(progress);
+                        }
+                    });
+
                     // send commit diff data file
                     using (var file = new FileStream(tempDataFile, FileMode.Open))
                     {
@@ -424,6 +453,7 @@ namespace MySync.Server.Core.RequestHandlers
                 catch (Exception ex)
                 {
                     writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                    Console.WriteLine(ex);
                     ProjectLock.Unlock(projectName);
                 }
             }

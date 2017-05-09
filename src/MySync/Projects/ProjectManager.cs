@@ -100,7 +100,10 @@ namespace MySync.Projects
             try
             {
                 ClientUI.ShowProgress("Pulling changes...");
-                CurrentProject.Pull(ClientUI.SetProgress);
+                CurrentProject.Pull(x =>
+                {
+                    ClientUI.SetProgress("Pulling commit... " + x);
+                });
                 ClientUI.HideProgress();
                 ClientUI.ShowMessage("Pulling done!");
             }
@@ -147,7 +150,7 @@ namespace MySync.Projects
                 var datafile = commit.Build(CurrentProject.RootDir, CurrentProject.RootDir + ".mysync\\commit.zip",
                     x =>
                     {
-                        ClientUI.SetProgress("Building commit... " + x + "%");
+                        ClientUI.SetProgress("Building commit... " + x );
                     });
                 ClientUI.SetProgress("Pushing " + diff.Count + " change(s).");
                 CurrentProject.Push(commit, datafile,
@@ -173,7 +176,26 @@ namespace MySync.Projects
             if (CheckProjects())
                 return;
 
-            ClientUI.ShowMessage("Discard is not implemented, yet!");
+            ClientUI.ShowProgress("Discarding...");
+
+            try
+            {
+                var diffs = CurrentProject.BuildDiff();
+                var diff = diffs.Where(file => files.Any(x => x == file.FileName)).ToList();
+                var commit = Commit.FromDiff(diff.ToArray());
+
+                CurrentProject.Discard(commit.Files,
+                    x =>
+                    {
+                        ClientUI.SetProgress("Discarding " + diff.Count + " change(s). " + x);
+                    });
+            }
+            catch (Exception ex)
+            {
+                ClientUI.ShowMessage("Error when discarding, no changes were discared, message: <br>" + ex.Message, true);
+            }
+
+            ClientUI.HideProgress();
         }
 
         // private

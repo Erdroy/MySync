@@ -57,9 +57,39 @@ namespace MySync.Client.Core
         /// Discard selected files.
         /// </summary>
         /// <param name="files">Files selected for discard.</param>
-        public void Discard(Filemap.FileDiff[] files)
+        /// <param name="onProgress">This is called when there is some progress made.</param>
+        public void Discard(Filemap.FileDiff[] files, Action<string> onProgress)
         {
-            throw new Exception("Discard method is not implemented, yet.");
+            var dataJson = new PullInput
+            {
+                Authority = Authority
+            };
+            var lastCommitId = -1;
+            Request.Send(ServerAddress + "getcommit", dataJson.ToJson(), stream =>
+            {
+                using (var reader = new BinaryReader(stream))
+                {
+                    var message = reader.ReadString();
+
+                    if (message == "Done")
+                    {
+                        lastCommitId = reader.ReadInt32();
+                    }
+                    else
+                    {
+                        throw new Exception("Cannot discard, Error: <br>" + message);
+                    }
+                }
+            });
+
+            // select current commit id
+            var commitInfo = RootDir + ".mysync/commit_info.txt";
+            var currentCommitId = File.Exists(commitInfo) ? int.Parse(File.ReadAllText(commitInfo)) : -1;
+
+            if (lastCommitId > currentCommitId)
+            {
+                throw new Exception("Cannot discard, project is not up-to-date!");
+            }
 
             // select all files that are not 'created'
             var filesToDownload = new List<Filemap.File>();
@@ -87,8 +117,12 @@ namespace MySync.Client.Core
             {
                 if (file.DiffType == Filemap.FileDiff.Type.Created) // delete all 'created' files
                 {
+                    var fileName = RootDir + file.FileName;
+
+                    // delete file
+                    File.Delete(fileName);
+
                     toDelete++;
-                    // TODO: delete file
                 }
             }
             
@@ -103,7 +137,15 @@ namespace MySync.Client.Core
             {
                 using (var reader = new BinaryReader(stream))
                 {
-                    // TODO: read commit
+                    var commitJson = reader.ReadString();
+
+                    while (!reader.ReadBoolean())
+                    {
+                        var progress = reader.ReadInt32();
+
+                        if (progress >= 0)
+                            onProgress(progress + "%");
+                    }
 
                     // download
                     var dataFile = RootDir + ".mysync/commit_recv.zip";
@@ -118,6 +160,8 @@ namespace MySync.Client.Core
                             fs.Write(buffer, 0, read);
                         }
                     }
+
+                    var commit = Commit.FromJson(commitJson);
 
                     // TODO: apply commit
                 }
@@ -284,7 +328,7 @@ namespace MySync.Client.Core
                         var progress = reader.ReadInt32();
 
                         if (progress >= 0)
-                            onProgress("Pulling changes... Building commit - " + progress + "%");
+                            onProgress(progress + "%");
                     }
 
                     var body = reader.ReadString();

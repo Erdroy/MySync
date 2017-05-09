@@ -96,6 +96,7 @@ namespace MySync.Server.Core
         private void LoadHandlers()
         {
             _processor.AddHandler("/pull", RequestHandlers.VersionControl.Pull);
+            _processor.AddHandler("/discard", RequestHandlers.VersionControl.Discard);
             _processor.AddHandler("/getcommit", RequestHandlers.VersionControl.GetCommit);
             _processor.AddHandler("/authorize", RequestHandlers.ProjectManagement.Authorize);
 
