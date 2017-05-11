@@ -252,6 +252,18 @@ body
     font-weight: 400;
 }
 
+.view .view_menu .view_menu_separator {
+    display: inline-block;
+    float: right;
+    height: 20px;
+
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-left: 8px;
+
+    font-weight: 700;
+}
+
 .view_menu_button:hover {
     color: rgb(225, 225, 225);
 }

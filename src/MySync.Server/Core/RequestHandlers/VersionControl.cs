@@ -311,47 +311,6 @@ namespace MySync.Server.Core.RequestHandlers
             ProjectLock.Unlock(projectName);
         }
         
-        public static void GetCommit(string body, HttpListenerResponse response)
-        {
-            using (var writer = new BinaryWriter(response.OutputStream))
-            {
-                try
-                {
-                    var input = JsonConvert.DeserializeObject<PullInput>(body);
-
-                    if (!Authorization.HasAuthority(input.Authority.AccessToken, input.Authority.ProjectName))
-                    {
-                        writer.Write("Failed - project not found!");
-                        return;
-                    }
-
-                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(input.Authority.ProjectName);
-                    var itemCount = projectCollection.Count(FilterDefinition<CommitModel>.Empty);
-
-                    if (itemCount > 0)
-                    {
-                        var lastCommit =
-                            projectCollection.Find(x => true)
-                                .SortByDescending(d => d.CommitId)
-                                .Limit(1)
-                                .FirstOrDefault();
-
-                        writer.Write("Done");
-                        writer.Write(lastCommit.CommitId);
-                    }
-                    else
-                    {
-                        writer.Write("Done");
-                        writer.Write(-1);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
-                }
-            }
-        }
-
         public static void Discard(string body, HttpListenerResponse response)
         {
             var projectName = "";
@@ -451,5 +410,47 @@ namespace MySync.Server.Core.RequestHandlers
             }
             ProjectLock.Unlock(projectName);
         }
+
+        public static void GetCommit(string body, HttpListenerResponse response)
+        {
+            using (var writer = new BinaryWriter(response.OutputStream))
+            {
+                try
+                {
+                    var input = JsonConvert.DeserializeObject<PullInput>(body);
+
+                    if (!Authorization.HasAuthority(input.Authority.AccessToken, input.Authority.ProjectName))
+                    {
+                        writer.Write("Failed - project not found!");
+                        return;
+                    }
+
+                    var projectCollection = ServerCore.Database.GetCollection<CommitModel>(input.Authority.ProjectName);
+                    var itemCount = projectCollection.Count(FilterDefinition<CommitModel>.Empty);
+
+                    if (itemCount > 0)
+                    {
+                        var lastCommit =
+                            projectCollection.Find(x => true)
+                                .SortByDescending(d => d.CommitId)
+                                .Limit(1)
+                                .FirstOrDefault();
+
+                        writer.Write("Done");
+                        writer.Write(lastCommit.CommitId);
+                    }
+                    else
+                    {
+                        writer.Write("Done");
+                        writer.Write(-1);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    writer.Write("Failed - invalid protocol/connection error! Error: " + ex);
+                }
+            }
+        }
+
     }
 }
