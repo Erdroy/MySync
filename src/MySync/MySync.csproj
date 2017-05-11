@@ -140,7 +140,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ui\css\default.css" />
-    <Content Include="ui\css\loading.css" />
     <Content Include="ui\img\delete.png" />
     <Content Include="ui\img\exit.png" />
     <Content Include="ui\img\maximize.png" />

@@ -128,7 +128,13 @@ namespace MySync.Projects
                     ClientUI.SetProgress("Pulling commit... " + x);
                 });
                 ClientUI.HideProgress();
-                ClientUI.ShowMessage("Pulling done!");
+
+                ClientUI.ShowProgress("Pulling done! Loading...");
+                CurrentProject.Refresh(delegate
+                {
+                    UpdateView();
+                    ClientUI.HideProgress();
+                });
             }
             catch (WarningException ex)
             {
@@ -182,7 +188,13 @@ namespace MySync.Projects
                         ClientUI.SetProgress("Pushing " + diff.Count + " change(s). " + x);
                     });
                 ClientUI.HideProgress();
-                ClientUI.ShowMessage("Push done!");
+
+                ClientUI.ShowProgress("Push done! Loading...");
+                CurrentProject.Refresh(delegate 
+                {
+                    UpdateView();
+                    ClientUI.HideProgress();
+                });
             }
             catch (Exception ex)
             {
@@ -219,6 +231,24 @@ namespace MySync.Projects
             }
 
             ClientUI.HideProgress();
+
+            ClientUI.ShowProgress("Discarding done! Loading...");
+            CurrentProject.Refresh(delegate 
+            {
+                UpdateView();
+                ClientUI.HideProgress();
+            });
+        }
+
+        // private
+        private void UpdateView()
+        {
+            Javascript.Run("selectProject('" + CurrentProject.ProjectName + "', false);");
+
+            var diff = CurrentProject.BuildDiff();
+            var filesJs = diff.Aggregate("", (current, file) => current + ("addFileChange('" + file.FileName + "', " + (int)file.DiffType) + ");");
+            Javascript.Run(filesJs);
+            Javascript.Run("setChangeCount('" + CurrentProject.ProjectName + "', " + diff.Length + ");");
         }
 
         // private

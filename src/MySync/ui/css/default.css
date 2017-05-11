@@ -132,7 +132,11 @@ body
     background-color: rgb(230, 230, 235);
     
     padding: 10px;
-    border-radius: 5px;
+    padding-top: 25px;
+    border-radius: 3px;
+    
+    border-bottom: 2px solid;
+    border-bottom-color: rgb(255, 105, 0);
 
     text-align: center;
 
@@ -194,14 +198,17 @@ body
 
     background-color: rgb(230, 230, 235);
 
-    padding: 10px 10px 10px 60px;
-    border-radius: 5px;
+    padding: 10px 10px 10px 10px;
+    border-radius: 3px;
+
+    border-bottom: 2px solid;
+    border-bottom-color: rgb(255, 105, 0);
 
     text-align: center;
 
-    line-height: 60px;
+    line-height: 40px;
     width: 350px;
-    height: 60px;
+    height: 40px;
 }
 
 #progress_overlay_wheel {
