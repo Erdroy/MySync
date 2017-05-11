@@ -8,9 +8,11 @@ using System.Net;
 using System.Text;
 using MongoDB.Driver;
 using MySync.Server.Core.DatabaseModels;
+using MySync.Shared.Core;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
 using Newtonsoft.Json;
+// ReSharper disable AccessToDisposedClosure
 
 namespace MySync.Server.Core.RequestHandlers
 {
@@ -272,6 +274,7 @@ namespace MySync.Server.Core.RequestHandlers
 
                     if (fileNeeded)
                     {
+
                         // send commit diff data file
                         using (var file = new FileStream(tempDataFile, FileMode.Open))
                         {
@@ -383,7 +386,6 @@ namespace MySync.Server.Core.RequestHandlers
                     foreach (var file in input.Files)
                     {
                         // select commits which contains this file(which is not removed by the commit) then order by commit and select the first commit.
-
                         var validCommit = commits.Where(x => x.Files.Any(n => n.Name == file.FileName && n.Operation != 2)).OrderByDescending(x => x.CommitId).FirstOrDefault();
 
                         if (validCommit != null)
@@ -425,29 +427,17 @@ namespace MySync.Server.Core.RequestHandlers
                     });
 
                     // send commit diff data file
-                    using (var file = new FileStream(tempDataFile, FileMode.Open))
+                    using (var nfs = new NetFileStream(tempDataFile, onError: delegate
                     {
-                        // write file size
-                        writer.Write(file.Length);
-
-                        int read;
-                        var buffer = new byte[64 * 1024];
-                        try
-                        {
-                            while ((read = file.Read(buffer, 0, buffer.Length)) > 0)
-                            {
-                                response.OutputStream.Write(buffer, 0, read);
-                            }
-                        }
-                        catch
-                        {
-                            // user lost connection or closed the client 
-                            // before the whole data file is sent
-                            Console.WriteLine("User '" + input.Authority.Username + "' canceled commit download.");
-                            ProjectLock.Unlock(projectName);
-                            return;
-                        }
+                        // user lost connection or closed the client 
+                        // before the whole data file is sent
+                        Console.WriteLine("User '" + input.Authority.Username + "' canceled commit download.");
+                        ProjectLock.Unlock(projectName);
+                    }))
+                    {
+                        nfs.Upload(response.OutputStream);
                     }
+
                     File.Delete(tempDataFile);
                 }
                 catch (Exception ex)

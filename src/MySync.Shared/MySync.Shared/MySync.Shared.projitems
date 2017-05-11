@@ -9,6 +9,7 @@
     <Import_RootNamespace>MySync.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Core\NetFileStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestHeaders\ProjectAuthority.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestHeaders\DiscardInput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestHeaders\PullInput.cs" />
