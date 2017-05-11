@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
+using MySync.Shared.Core;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
 using Newtonsoft.Json.Linq;
@@ -139,8 +140,13 @@ namespace MySync.Client.Core
                 {
                     var commitJson = reader.ReadString();
 
-                    while (!reader.ReadBoolean())
+                    while (true)
                     {
+                        var state = reader.ReadBoolean();
+
+                        if (state)
+                            break;
+
                         var progress = reader.ReadInt32();
 
                         if (progress >= 0)
@@ -149,21 +155,34 @@ namespace MySync.Client.Core
 
                     // download
                     var dataFile = RootDir + ".mysync/commit_recv.zip";
-                    using (var fs = File.Create(dataFile))
-                    {
-                        var fileLength = reader.ReadInt64();
 
-                        int read;
-                        var buffer = new byte[64 * 1024];
-                        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                    // send commit diff data file
+                    using (var nfs = new NetFileStream(dataFile, 
+                        onError: delegate {
+                            // throw error
+                            throw new Exception("Error when downloading commit data file");
+                        }))
+                    {
+                        nfs.Download(stream, delegate(long bytes, long sentBytes)
                         {
-                            fs.Write(buffer, 0, read);
-                        }
+                            // TODO: show progress
+                        });
                     }
 
+                    var projectDir = RootDir.Remove(RootDir.Length-1, 1);
+                    
                     var commit = Commit.FromJson(commitJson);
-
-                    // TODO: apply commit
+                    
+                    try
+                    {
+                        // downloaded
+                        // now apply changes
+                        commit.Apply(projectDir, "temp_recv.zip", true);
+                    }
+                    catch(Exception ex)
+                    {
+                        throw new Exception("Error when applying commit data file");
+                    }
                 }
             });
         }

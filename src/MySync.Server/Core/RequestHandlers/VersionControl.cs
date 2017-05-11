@@ -426,6 +426,8 @@ namespace MySync.Server.Core.RequestHandlers
                         }
                     });
 
+                    writer.Write(true);
+
                     // send commit diff data file
                     using (var nfs = new NetFileStream(tempDataFile, onError: delegate
                     {

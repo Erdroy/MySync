@@ -29,15 +29,20 @@ namespace MySync.Shared.Core
                 _fileStream = new FileStream(_filename, FileMode.Open);
 
                 var filelength = _fileStream.Length;
-                
-                int read;
-                long totalRead = 0u;
-                while ((read = _fileStream.Read(_buffer, 0, _buffer.Length)) > 0)
-                {
-                    output.Write(_buffer, 0, read);
 
-                    totalRead += read;
-                    onProgress?.Invoke(filelength, totalRead);
+                using (var bs = new BinaryWriter(output))
+                {
+                    bs.Write(filelength);
+
+                    int read;
+                    long totalRead = 0u;
+                    while ((read = _fileStream.Read(_buffer, 0, _buffer.Length)) > 0)
+                    {
+                        bs.Write(_buffer, 0, read);
+
+                        totalRead += read;
+                        onProgress?.Invoke(filelength, totalRead);
+                    }
                 }
             }
             catch (Exception ex)
@@ -52,6 +57,20 @@ namespace MySync.Shared.Core
             {
                 _fileStream = new FileStream(_filename, FileMode.Create);
 
+                using (var bs = new BinaryReader(input))
+                {
+                    var filelength = bs.ReadInt64();
+
+                    int read;
+                    long totalRead = 0u;
+                    while ((read = bs.Read(_buffer, 0, _buffer.Length)) > 0)
+                    {
+                        _fileStream.Write(_buffer, 0, read);
+
+                        totalRead += read;
+                        onProgress?.Invoke(filelength, totalRead);
+                    }
+                }
             }
             catch (Exception ex)
             {
