@@ -177,9 +177,9 @@ namespace MySync.Client.Core
                     {
                         // downloaded
                         // now apply changes
-                        commit.Apply(projectDir, "temp_recv.zip", true);
+                        commit.Apply(projectDir, dataFile, true);
                     }
-                    catch(Exception ex)
+                    catch
                     {
                         throw new Exception("Error when applying commit data file");
                     }
