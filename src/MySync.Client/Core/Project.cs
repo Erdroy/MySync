@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using MySync.Shared.Core;
 using MySync.Shared.RequestHeaders;
 using MySync.Shared.VersionControl;
@@ -20,10 +21,7 @@ namespace MySync.Client.Core
         private Filemap _lastFilemap;
         private Filemap _currentFilemap;
 
-        /// <summary>
-        /// Refresh project changes.
-        /// </summary>
-        public void Refresh()
+        private void RefreshInternal()
         {
             // update ignore files
             UpdateIgnores();
@@ -34,6 +32,26 @@ namespace MySync.Client.Core
 
             // build current filemap
             _currentFilemap = Filemap.Build(RootDir, Ignores);
+            
+        }
+
+        /// <summary>
+        /// Refresh project changes.
+        /// </summary>
+        public void Refresh(Action onEnd = null)
+        {
+            if (onEnd != null)
+            {
+                var task = Task.Run(() => RefreshInternal());
+                task.ContinueWith((finishedTask) =>
+                {
+                    onEnd();
+                });
+            }
+            else
+            {
+                RefreshInternal();
+            }
         }
 
         /// <summary>
