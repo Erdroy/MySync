@@ -24,11 +24,13 @@ namespace MySync.Projects
         /// </summary>
         public void LoadAll()
         {
+            ClientUI.ShowProgress("Loading...");
+
             if (File.Exists("client.json"))
             {
-                ClientUI.ShowProgress("Loading projects...");
                 var config = JsonConvert.DeserializeObject<ClientSettings>(File.ReadAllText("client.json"));
 
+                var done = 0;
                 foreach (var project in config.Projects)
                 {
                     var projInst = Project.OpenWorkingCopy(project.Address, project.Name, project.RootDir);
@@ -38,20 +40,29 @@ namespace MySync.Projects
                         Username = project.Username,
                         AccessToken = PasswordHasher.Hash(project.Username, project.Password)
                     };
-                    projInst.Refresh();
-                    var diff = projInst.BuildDiff();
 
                     Javascript.Run("addProject('" + project.Name + "');");
-                    Javascript.Run("setChangeCount('" + project.Name + "', " + diff.Length + ");");
-                    
-                    AllProjects.Add(projInst);
+
+                    projInst.Refresh(delegate
+                    {
+                        var diff = projInst.BuildDiff();
+
+                        Javascript.Run("setChangeCount('" + project.Name + "', " + diff.Length + ");");
+
+                        AllProjects.Add(projInst);
+
+                        done++;
+
+                        if (done == config.Projects.Length)
+                        {
+                            // select
+                            if (!string.IsNullOrEmpty(config.Selected))
+                                Select(config.Selected); // this will also hide the progress
+                            else
+                                ClientUI.HideProgress();
+                        }
+                    });
                 }
-
-                // select
-                if(!string.IsNullOrEmpty(config.Selected))
-                    Select(config.Selected);
-
-                ClientUI.HideProgress();
             }
         }
 
@@ -60,10 +71,13 @@ namespace MySync.Projects
         /// </summary>
         /// <param name="projectName">The project name.</param>
         /// <param name="callback">Is this javascript callback?</param>
-        public void Select(string projectName, bool callback = false)
+        /// <param name="refresh">Refresh the project?</param>
+        public void Select(string projectName, bool callback = false, bool refresh = true)
         {
             try
             {
+                ClientUI.ShowProgress("Loading...");
+
                 // select
                 CurrentProject = AllProjects.FirstOrDefault(project => project.ProjectName == projectName);
 
@@ -76,15 +90,24 @@ namespace MySync.Projects
                 if (!callback)
                     Javascript.Run("selectProject('" + projectName + "', false);");
 
-                CurrentProject.Refresh();
-                var diff = CurrentProject.BuildDiff();
-                var filesJs = diff.Aggregate("", (current, file) => current + ("addFileChange('" + file.FileName + "', " + (int) file.DiffType) + ");");
+                if (refresh)
+                {
+                    CurrentProject.Refresh(delegate
+                    {
+                        var diff = CurrentProject.BuildDiff();
+                        var filesJs = diff.Aggregate("", (current, file) => current + ("addFileChange('" + file.FileName + "', " + (int) file.DiffType) + ");");
 
-                Javascript.Run(filesJs);
-                Javascript.Run("setChangeCount('" + CurrentProject.ProjectName + "', " + diff.Length + ");");
+                        Javascript.Run(filesJs);
+                        Javascript.Run("setChangeCount('" + CurrentProject.ProjectName + "', " + diff.Length + ");");
+                        ClientUI.HideProgress();
+                    });
+                }
             }
             catch
             {
+                if (refresh)
+                    ClientUI.HideProgress();
+                
                 ClientUI.ShowMessage("Failed to select project '" + projectName + "'!", true);
             }
         }
