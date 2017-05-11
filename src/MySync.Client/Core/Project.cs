@@ -150,7 +150,7 @@ namespace MySync.Client.Core
                         var progress = reader.ReadInt32();
 
                         if (progress >= 0)
-                            onProgress(progress + "%");
+                            onProgress("Building commit...");
                     }
 
                     // download
@@ -165,7 +165,9 @@ namespace MySync.Client.Core
                     {
                         nfs.Download(stream, delegate(long bytes, long sentBytes)
                         {
-                            // TODO: show progress
+                            // show progress
+                            var prc = (sentBytes / (float)bytes) * 100;
+                            onProgress?.Invoke(prc + "%");
                         });
                     }
 
