@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Ionic.Zip;
 using Ionic.Zlib;
+using MySync.Shared.Utilities;
 using Newtonsoft.Json;
 
 namespace MySync.Shared.VersionControl
@@ -116,7 +117,10 @@ namespace MySync.Shared.VersionControl
                 {
                     // delete if exists
                     if (File.Exists(projectDir + "/" + file.FileName))
+                    {
                         File.Delete(projectDir + "/" + file.FileName);
+                        DirectoryHelper.DeleteIfEmpty(projectDir + "/" + file.FileName);
+                    }
                 }
             }
             Directory.Delete(backupDir, true);
@@ -149,6 +153,7 @@ namespace MySync.Shared.VersionControl
                     try
                     {
                         File.Delete(fileName);
+                        DirectoryHelper.DeleteIfEmpty(fileName);
                     }
                     catch
                     {

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MySync.Shared.Core;
 using MySync.Shared.RequestHeaders;
+using MySync.Shared.Utilities;
 using MySync.Shared.VersionControl;
 using Newtonsoft.Json.Linq;
 
@@ -140,6 +141,7 @@ namespace MySync.Client.Core
 
                     // delete file
                     File.Delete(fileName);
+                    DirectoryHelper.DeleteIfEmpty(fileName);
 
                     toDelete++;
                 }
@@ -185,7 +187,7 @@ namespace MySync.Client.Core
                         {
                             // show progress
                             var prc = (sentBytes / (float)bytes) * 100;
-                            onProgress?.Invoke(prc + "%");
+                            onProgress?.Invoke(prc.ToString("f1") + "%");
                         });
                     }
 
@@ -289,7 +291,7 @@ namespace MySync.Client.Core
 
                             var prc = (float)readbytes / totalbytes;
                             prc *= 100.0f;
-                            onProgress("Pushing changes... Uploading - " + prc + "%");
+                            onProgress(prc.ToString("f1") + "%");
                         }
                     }
                     
@@ -409,7 +411,7 @@ namespace MySync.Client.Core
                                 prc *= 100.0f;
 
                                 if(prc >= 0)
-                                    onProgress("Pulling changes... Downloading - " + prc + "%");
+                                    onProgress(prc.ToString("f1") + "%");
                             }
                         }
                     }

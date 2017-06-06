@@ -125,7 +125,7 @@ namespace MySync.Projects
                 ClientUI.ShowProgress("Pulling changes...");
                 CurrentProject.Pull(x =>
                 {
-                    ClientUI.SetProgress("Pulling commit... " + x);
+                    ClientUI.SetProgress("Pulling..." + x);
                 });
                 ClientUI.HideProgress();
 
