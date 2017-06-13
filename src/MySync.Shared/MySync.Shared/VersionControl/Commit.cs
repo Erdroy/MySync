@@ -178,14 +178,21 @@ namespace MySync.Shared.VersionControl
 #if !SERVER
                 if (file.DiffType != Filemap.FileDiff.Type.Delete) // apply only for existing files
                 {
-                    var fileName = projectDir + "/" + file.FileName;
+                    var fileName = projectDir + file.FileName;
+                    fileName = fileName.Replace("\\", "/");
+                    var fileInfo = new FileInfo(fileName);
+
+                    // remove readonly flag from file
+                    // (this is some sort of linux-file system issue, but this should fix that)
+                    if (fileInfo.IsReadOnly)
+                        fileInfo.Attributes = FileAttributes.Normal;
 
                     // Apply file modification time,
                     // but only on client.
                     // This is already done by the zip file extraction, 
                     // but there may be some critical issues that will need this. 
                     // Just do it and prevent them all.
-                    File.SetLastWriteTime(fileName, DateTime.FromBinary(file.Version));
+                    fileInfo.LastWriteTime = DateTime.FromBinary(file.Version);
                 }
 #endif
             }
