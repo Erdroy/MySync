@@ -191,17 +191,15 @@ namespace MySync.Client.Core
                         });
                     }
 
-                    var projectDir = RootDir.Remove(RootDir.Length-1, 1);
-                    
                     var commit = Commit.FromJson(commitJson);
                     
                     try
                     {
                         // downloaded
                         // now apply changes
-                        commit.Apply(projectDir, dataFile, true);
+                        commit.Apply(RootDir, dataFile, true);
                     }
-                    catch
+                    catch(Exception ex)
                     {
                         throw new Exception("Error when applying commit data file");
                     }
