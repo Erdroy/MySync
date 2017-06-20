@@ -67,24 +67,24 @@ namespace MySync.Server.Core.RequestHandlers
                                 {
                                     // read data file
                                     using (var fs = File.Create("temp_recv.zip"))
-                                {
-                                    try
                                     {
-                                        int read;
-                                        var buffer = new byte[64*1024];
-                                        while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                                        try
                                         {
-                                            fs.Write(buffer, 0, read);
+                                            int read;
+                                            var buffer = new byte[64 * 1024];
+                                            while ((read = reader.Read(buffer, 0, buffer.Length)) > 0)
+                                            {
+                                                fs.Write(buffer, 0, read);
+                                            }
                                         }
-                                    }
-                                    catch
-                                    {
-                                        // user lost connection or closed the client 
-                                        // before the whole data file arrived
-                                        Console.WriteLine("User '" + authority.Username + "' canceled commit upload.");
-                                        ProjectLock.Unlock(projectName);
-                                        return;
-                                    }
+                                        catch
+                                        {
+                                            // user lost connection or closed the client 
+                                            // before the whole data file arrived
+                                            Console.WriteLine("User '" + authority.Username + "' canceled commit upload.");
+                                            ProjectLock.Unlock(projectName);
+                                            return;
+                                        }
                                     }
                                 }
                                 catch
