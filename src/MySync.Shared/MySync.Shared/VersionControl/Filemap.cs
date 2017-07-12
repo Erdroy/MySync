@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using MySync.Shared.Utilities;
 using Newtonsoft.Json;
 
@@ -80,7 +81,7 @@ namespace MySync.Shared.VersionControl
             var diff = new List<FileDiff>();
 
             // find new files of modified
-            foreach (var file in filemap._files)
+            Parallel.ForEach(filemap._files, (file) =>
             {
                 if (!IsPresent(file.FileName))
                 {
@@ -92,7 +93,7 @@ namespace MySync.Shared.VersionControl
                         DiffType = FileDiff.Type.Created,
                         Version = file.Version
                     });
-                    continue;
+                    return;
                 }
 
                 if (IsChanged(file))
@@ -106,10 +107,10 @@ namespace MySync.Shared.VersionControl
                         Version = file.Version
                     });
                 }
-            }
+            });
 
             // find deleted files
-            foreach (var file in _files)
+            Parallel.ForEach(_files, (file) =>
             {
                 if (!filemap.IsPresent(file.FileName))
                 {
@@ -121,7 +122,7 @@ namespace MySync.Shared.VersionControl
                         DiffType = FileDiff.Type.Delete
                     });
                 }
-            }
+            });
 
             return diff.ToArray();
         }

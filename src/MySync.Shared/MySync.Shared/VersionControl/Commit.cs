@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Ionic.Zip;
 using Ionic.Zlib;
 using MySync.Shared.Utilities;
@@ -48,7 +49,7 @@ namespace MySync.Shared.VersionControl
             files.AddRange(Files);
 
             // iterate all file changes
-            foreach (var file in commit.Files)
+            Parallel.ForEach(commit.Files, (file) =>
             {
                 // try to replace
                 if (files.Any(x => x.FileName == file.FileName))
@@ -57,24 +58,25 @@ namespace MySync.Shared.VersionControl
                     var fidx = files.FindIndex(x => x.FileName == file.FileName);
                     
                     // if file was created and it is not deleted, do not set it as changed
-                    if (files[fidx].DiffType == Filemap.FileDiff.Type.Created && file.DiffType != Filemap.FileDiff.Type.Delete)
-                        continue;
+                    if (files[fidx].DiffType == Filemap.FileDiff.Type.Created &&
+                        file.DiffType != Filemap.FileDiff.Type.Delete)
+                        return;
 
                     // if file was created and now it is deleted, remove this file from commit
                     if (files[fidx].DiffType == Filemap.FileDiff.Type.Created && file.DiffType == Filemap.FileDiff.Type.Delete)
                     {
                         files.RemoveAt(fidx);
-                        continue;
+                        return;
                     }
 
                     // file was created in some previous commits, not in this pulling, change the file to changed or deleted.
                     files[fidx] = file;
-                    continue;
+                        return;
                 }
 
                 // this file does not exists already, add to the list
                 files.Add(file);
-            }
+            });
 
             // set files array to the latest one
             Files = files.ToArray();
@@ -88,14 +90,14 @@ namespace MySync.Shared.VersionControl
         {
             var backupDir = projectDir + "/_backups/";
             Directory.CreateDirectory(backupDir);
-            foreach (var file in Files)
+            Parallel.ForEach(Files, (file) =>
             {
                 if (file.DiffType != Filemap.FileDiff.Type.Created)
                 {
                     // copy
                     File.Copy(projectDir + "/" + file.FileName, backupDir + Path.GetFileName(file.FileName), true);
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -106,7 +108,7 @@ namespace MySync.Shared.VersionControl
         {
             var backupDir = projectDir + "/_backups/";
 
-            foreach (var file in Files)
+            Parallel.ForEach(Files, (file) =>
             {
                 if (file.DiffType != Filemap.FileDiff.Type.Created)
                 {
@@ -122,7 +124,8 @@ namespace MySync.Shared.VersionControl
                         DirectoryHelper.DeleteIfEmpty(projectDir + "/" + file.FileName);
                     }
                 }
-            }
+            });
+
             Directory.Delete(backupDir, true);
         }
 
@@ -145,7 +148,7 @@ namespace MySync.Shared.VersionControl
         public void Apply(string projectDir, string dataFile, bool deflate)
         {
             // delete files
-            foreach (var file in Files)
+            Parallel.ForEach(Files, (file) =>
             {
                 var fileName = projectDir + "/" + file.FileName;
                 if (file.DiffType == Filemap.FileDiff.Type.Delete)
@@ -160,7 +163,7 @@ namespace MySync.Shared.VersionControl
                         // ignore
                     }
                 }
-            }
+            });
 
             // apply data
             if (File.Exists(dataFile) && deflate)
