@@ -3,7 +3,7 @@ MySync - Binary file synchronization software with GIT-like PUSH/PULL.
 Under AGPL-3.0 license.
 
 ## Under Developement.
-Currently at fully-working state, can be used for production.
+**Currently at fully-working state, can be used for production. <br>**
 For current progress - see trello, also you can join to my Discord server, links are below, in the Contact section.
 
 ---
