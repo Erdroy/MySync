@@ -2,9 +2,9 @@
 MySync - Binary file synchronization software with GIT-like PUSH/PULL.
 Under AGPL-3.0 license.
 
-## Under Developement.
-**Currently at fully-working state, can be used for production. <br>**
-For current progress - see trello, also you can join to my Discord server, links are below, in the Contact section.
+## NOT CONTINUED
+
+**Currently at fully-working state, but shouldn't be used for production as it is no more supported. <br>**
 
 ---
 
@@ -23,7 +23,7 @@ Client and Server application should run on every platform that supports .NET 4.
 * Own custom request API based on HTTP-POST,
 * Fancy Metro-like UI.
 
-# Planned features
+# (No more) Planned features
 * Collision detection (this will prevent overriding your changes by commit, this is currently common and requires some attention),
 * Users (partially implemented),
 * Permisions system,
@@ -33,10 +33,9 @@ Client and Server application should run on every platform that supports .NET 4.
 # Tutorials
 1. Server and project setup, see wiki: https://github.com/Erdroy/MySync/wiki/
 
-# Contributing/Contact
-Feel free to contribute, there is a lot of work to do (see https://trello.com/b/NxN9L6Gf/mysync), 
-also you can join my Discord server and suggest some features, talk with me: https://discordapp.com/invite/0kfQL9KtL4XfOK7G
+# Contributing
+Feel free to contribute, there is a lot of work to do (see https://trello.com/b/NxN9L6Gf/mysync)
 
 ---
 
-MySync © 2016-2017 Damian 'Erdroy' Korczowski
+MySync © 2016-2018 Damian 'Erdroy' Korczowski
